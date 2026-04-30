@@ -165,8 +165,8 @@ export default function App() {
     // getUTCHours() on myTime will give the Malaysia local hour
     const hours = myTime.getUTCHours();
 
-    if (hours < 9) {
-      // If before 9 AM, use yesterday
+    if (hours < 7) {
+      // If before 7 AM, use yesterday
       const yesterday = new Date(myTime.getTime() - 24 * 60 * 60 * 1000);
       return yesterday.toISOString().split("T")[0];
     }
