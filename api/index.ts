@@ -28,16 +28,21 @@ function getSupabase() {
   return supabaseClient;
 }
 
-const router = express.Router();
+const app = express();
+
+// Add JSON middleware for standalone Vercel execution
+app.use(express.json());
+
+const apiRouter = express.Router();
 
 // Request logging middleware
-router.use((req, res, next) => {
+apiRouter.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
 
 // API Routes
-router.post("/hantaran", async (req, res) => {
+apiRouter.post("/hantaran", async (req, res) => {
   try {
     const data = req.body;
     
@@ -152,7 +157,7 @@ router.post("/hantaran", async (req, res) => {
   }
 });
 
-router.get("/hantaran", async (req, res) => {
+apiRouter.get("/hantaran", async (req, res) => {
   try {
     const supabase = getSupabase();
     if (supabase) {
@@ -178,7 +183,7 @@ router.get("/hantaran", async (req, res) => {
   }
 });
 
-router.post("/annual-yield", async (req, res) => {
+apiRouter.post("/annual-yield", async (req, res) => {
   try {
     const { year, yield: yieldVal } = req.body;
     if (!year) return res.status(400).json({ error: "Tahun diperlukan." });
@@ -203,7 +208,7 @@ router.post("/annual-yield", async (req, res) => {
   }
 });
 
-router.get("/annual-yield", async (req, res) => {
+apiRouter.get("/annual-yield", async (req, res) => {
   try {
     const supabase = getSupabase();
     if (supabase) {
@@ -226,7 +231,7 @@ router.get("/annual-yield", async (req, res) => {
   }
 });
 
-router.get("/block-annual-yields", async (req, res) => {
+apiRouter.get("/block-annual-yields", async (req, res) => {
   try {
     const supabase = getSupabase();
     if (supabase) {
@@ -249,7 +254,7 @@ router.get("/block-annual-yields", async (req, res) => {
   }
 });
 
-router.post("/seed-historical", async (req, res) => {
+apiRouter.post("/seed-historical", async (req, res) => {
   try {
     const { data } = req.body;
     if (!data || !Array.isArray(data)) {
@@ -282,7 +287,7 @@ router.post("/seed-historical", async (req, res) => {
   }
 });
 
-router.delete("/hantaran/all", async (req, res) => {
+apiRouter.delete("/hantaran/all", async (req, res) => {
   try {
     const supabase = getSupabase();
     if (supabase) {
@@ -302,7 +307,7 @@ router.delete("/hantaran/all", async (req, res) => {
   }
 });
 
-router.delete("/hantaran/:no_resit", async (req, res) => {
+apiRouter.delete("/hantaran/:no_resit", async (req, res) => {
   try {
     const { no_resit } = req.params;
     if (!no_resit) return res.status(400).json({ success: false, error: "No. Resit diperlukan." });
@@ -325,7 +330,7 @@ router.delete("/hantaran/:no_resit", async (req, res) => {
   }
 });
 
-router.get("/config-check", (req, res) => {
+apiRouter.get("/config-check", (req, res) => {
   res.json({
     supabase: !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     googleSheets: false,
@@ -333,7 +338,7 @@ router.get("/config-check", (req, res) => {
   });
 });
 
-router.post("/export/pptx", async (req, res) => {
+apiRouter.post("/export/pptx", async (req, res) => {
   console.log("POST /api/export/pptx hit");
   try {
     const payload = req.body;
@@ -466,7 +471,7 @@ router.post("/export/pptx", async (req, res) => {
 
 // --- FERTILIZER (BAJA) MODULE ROUTES ---
 
-router.get("/fertilizer/master", async (req, res) => {
+apiRouter.get("/fertilizer/master", async (req, res) => {
   try {
     const supabase = getSupabase();
     if (!supabase) return res.status(500).json({ error: "Supabase not configured" });
@@ -483,7 +488,7 @@ router.get("/fertilizer/master", async (req, res) => {
   }
 });
 
-router.post("/fertilizer/master/batch", async (req, res) => {
+apiRouter.post("/fertilizer/master/batch", async (req, res) => {
   try {
     const { data } = req.body;
     const supabase = getSupabase();
@@ -500,7 +505,7 @@ router.post("/fertilizer/master/batch", async (req, res) => {
   }
 });
 
-router.get("/fertilizer/entries", async (req, res) => {
+apiRouter.get("/fertilizer/entries", async (req, res) => {
   try {
     const supabase = getSupabase();
     if (!supabase) return res.status(500).json({ error: "Supabase not configured" });
@@ -517,7 +522,7 @@ router.get("/fertilizer/entries", async (req, res) => {
   }
 });
 
-router.post("/fertilizer/entries", async (req, res) => {
+apiRouter.post("/fertilizer/entries", async (req, res) => {
   try {
     const payload = req.body;
     const supabase = getSupabase();
@@ -583,7 +588,7 @@ router.post("/fertilizer/entries", async (req, res) => {
   }
 });
 
-router.put("/fertilizer/entries/:id", async (req, res) => {
+apiRouter.put("/fertilizer/entries/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const payload = req.body;
@@ -664,7 +669,7 @@ router.put("/fertilizer/entries/:id", async (req, res) => {
   }
 });
 
-router.delete("/fertilizer/entries/:id", async (req, res) => {
+apiRouter.delete("/fertilizer/entries/:id", async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`Attempting to delete fertilizer entry with id: ${id}`);
@@ -731,7 +736,7 @@ router.delete("/fertilizer/entries/:id", async (req, res) => {
   }
 });
 
-router.post("/fertilizer/entries/batch", async (req, res) => {
+apiRouter.post("/fertilizer/entries/batch", async (req, res) => {
   try {
     const { data } = req.body;
     const supabase = getSupabase();
@@ -750,7 +755,7 @@ router.post("/fertilizer/entries/batch", async (req, res) => {
 
 // --- FERTILIZER INVENTORY ROUTES ---
 
-router.get("/fertilizer/inventory", async (req, res) => {
+apiRouter.get("/fertilizer/inventory", async (req, res) => {
   try {
     const supabase = getSupabase();
     if (!supabase) return res.status(500).json({ error: "Supabase not configured" });
@@ -767,7 +772,7 @@ router.get("/fertilizer/inventory", async (req, res) => {
   }
 });
 
-router.post("/fertilizer/inventory", async (req, res) => {
+apiRouter.post("/fertilizer/inventory", async (req, res) => {
   try {
     const payload = req.body;
     const supabase = getSupabase();
@@ -798,7 +803,7 @@ router.post("/fertilizer/inventory", async (req, res) => {
   }
 });
 
-router.get("/fertilizer/inventory/transactions", async (req, res) => {
+apiRouter.get("/fertilizer/inventory/transactions", async (req, res) => {
   try {
     const supabase = getSupabase();
     if (!supabase) return res.status(500).json({ error: "Supabase not configured" });
@@ -816,7 +821,7 @@ router.get("/fertilizer/inventory/transactions", async (req, res) => {
   }
 });
 
-router.post("/fertilizer/inventory/:id/transaction", async (req, res) => {
+apiRouter.post("/fertilizer/inventory/:id/transaction", async (req, res) => {
   try {
     const { id } = req.params;
     const { type, quantity, reference } = req.body;
@@ -862,7 +867,7 @@ router.post("/fertilizer/inventory/:id/transaction", async (req, res) => {
   }
 });
 
-router.delete("/fertilizer/inventory/transactions/:id", async (req, res) => {
+apiRouter.delete("/fertilizer/inventory/transactions/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const supabase = getSupabase();
@@ -905,7 +910,7 @@ router.delete("/fertilizer/inventory/transactions/:id", async (req, res) => {
 
 // --- PRUNING MODULE ROUTES ---
 
-router.get("/pruning", async (req, res) => {
+apiRouter.get("/pruning", async (req, res) => {
   try {
     const supabase = getSupabase();
     if (!supabase) return res.status(500).json({ error: "Supabase not configured" });
@@ -925,7 +930,7 @@ router.get("/pruning", async (req, res) => {
   }
 });
 
-router.post("/pruning/batch", async (req, res) => {
+apiRouter.post("/pruning/batch", async (req, res) => {
   try {
     const { data } = req.body;
     const supabase = getSupabase();
@@ -942,7 +947,7 @@ router.post("/pruning/batch", async (req, res) => {
   }
 });
 
-router.post("/pruning", async (req, res) => {
+apiRouter.post("/pruning", async (req, res) => {
   try {
     const payload = req.body;
     const supabase = getSupabase();
@@ -960,4 +965,13 @@ router.post("/pruning", async (req, res) => {
   }
 });
 
-export default router;
+
+app.use('/', apiRouter);
+app.use('/api', apiRouter);
+
+// Catch-all to prevent timeouts
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found: ' + req.url, path: req.path });
+});
+
+export default app;

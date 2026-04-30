@@ -857,12 +857,19 @@ export default function App() {
         },
       )
       .subscribe((status, err) => {
+        console.log(`Supabase real-time status: ${status}`, err || "");
+        
         if (status === "SUBSCRIBED") {
-          console.log("Supabase real-time connected.");
+          console.log("✅ Supabase real-time connected successfully.");
         }
-        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          console.error("Supabase subscription error:", status, err);
-          showToast("error", "Gagal menyambung ke pangkalan data masa-nyata.");
+        
+        if (status === "CHANNEL_ERROR") {
+          console.error("❌ Supabase subscription error:", err);
+          // Don't show toast immediately to avoid spamming if it retries
+        }
+        
+        if (status === "TIMED_OUT") {
+          console.warn("⚠️ Supabase subscription timed out. Retrying...");
         }
       });
 

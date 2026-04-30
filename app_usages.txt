@@ -1,0 +1,27 @@
+34:app.use(express.json());
+37:app.use((req, res, next) => {
+43:app.post("/hantaran", async (req, res) => {
+158:app.get("/hantaran", async (req, res) => {
+184:app.post("/annual-yield", async (req, res) => {
+209:app.get("/annual-yield", async (req, res) => {
+232:app.get("/block-annual-yields", async (req, res) => {
+255:app.post("/seed-historical", async (req, res) => {
+288:app.delete("/hantaran/all", async (req, res) => {
+308:app.delete("/hantaran/:no_resit", async (req, res) => {
+331:app.get("/config-check", (req, res) => {
+339:app.post("/export/pptx", async (req, res) => {
+472:app.get("/fertilizer/master", async (req, res) => {
+489:app.post("/fertilizer/master/batch", async (req, res) => {
+506:app.get("/fertilizer/entries", async (req, res) => {
+523:app.post("/fertilizer/entries", async (req, res) => {
+589:app.put("/fertilizer/entries/:id", async (req, res) => {
+670:app.delete("/fertilizer/entries/:id", async (req, res) => {
+737:app.post("/fertilizer/entries/batch", async (req, res) => {
+756:app.get("/fertilizer/inventory", async (req, res) => {
+773:app.post("/fertilizer/inventory", async (req, res) => {
+804:app.get("/fertilizer/inventory/transactions", async (req, res) => {
+822:app.post("/fertilizer/inventory/:id/transaction", async (req, res) => {
+868:app.delete("/fertilizer/inventory/transactions/:id", async (req, res) => {
+911:app.get("/pruning", async (req, res) => {
+931:app.post("/pruning/batch", async (req, res) => {
+948:app.post("/pruning", async (req, res) => {
