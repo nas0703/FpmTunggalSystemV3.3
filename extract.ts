@@ -1,0 +1,77 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
+const src = fs.readFileSync('src/App.tsx', 'utf8');
+const lines = src.split('\n');
+
+function extractComponent(startLine: number, endLine: number, targetPath: string, imports: string[]) {
+    // lines are 0 indexed
+    const componentCode = lines.slice(startLine, endLine + 1).join('\n');
+    
+    // Create directory
+    const dir = path.dirname(targetPath);
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    
+    const fileContent = imports.join('\n') + '\n\n' + 'export ' + componentCode + '\n';
+    fs.writeFileSync(targetPath, fileContent);
+    return fileContent;
+}
+
+const importsHasil = [
+  'import React, { useState, useEffect, useMemo, useRef } from "react";',
+  'import { ScanLine, Search, ChevronDown, ChevronRight, TrendingUp, TrendingDown, Target, BarChart3, Loader2, Share2, PieChart as PieChartIcon, X, ZoomIn, ZoomOut, MoveHorizontal, Printer, Download } from "lucide-react";',
+  'import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList, AreaChart, Area, ComposedChart, PieChart, Pie, Legend } from "recharts";',
+  'import { MASTER_DATA, CHART_COLORS, TARGET_ANNUAL_PKT1, TARGET_ANNUAL_PKT2, TARGET_ANNUAL_FELDA } from "../../utils/constants";',
+  'import { Transaction } from "../../App";',
+  'import { AnimatePresence, motion } from "motion/react";'
+];
+
+extractComponent(10147, 11281, 'src/features/dashboard/components/HasilBulananTable.tsx', importsHasil);
+
+const importsReport = [
+  'import React from "react";',
+  'import { Target, TrendingUp, TrendingDown } from "lucide-react";',
+  'import { CHART_COLORS } from "../../utils/constants";'
+];
+
+extractComponent(142, 985, 'src/features/dashboard/components/ReportSummarySection.tsx', importsReport);
+
+const importsFloating = [
+  'import React, { useState, useEffect, useRef } from "react";'
+];
+
+extractComponent(11346, 11377, 'src/components/ui/FloatingInput.tsx', importsFloating);
+
+// Now generating new App.tsx
+// First remove them from bottom to top so indices stay valid
+const newLines = [...lines];
+
+// Remove FloatingInput
+newLines.splice(11346, 11377 - 11346 + 1);
+// Remove HasilBulananTable
+newLines.splice(10147, 11281 - 10147 + 1);
+// Remove ReportSummarySection
+newLines.splice(142, 985 - 142 + 1);
+
+let finalApp = newLines.join('\n');
+
+const newImports = `
+import { HasilBulananTable } from "./features/dashboard/components/HasilBulananTable";
+import { ReportSummarySection } from "./features/dashboard/components/ReportSummarySection";
+import { FloatingInput } from "./components/ui/FloatingInput";
+`;
+
+// Insert new imports after regular imports
+const importMatch = "import { Transaction } from \"./utils/constants\";"
+let importsEndIndex = finalApp.lastIndexOf(importMatch);
+let importsEndLineIndex = finalApp.indexOf("\\n", importsEndIndex);
+if(importsEndLineIndex === -1) {
+    importsEndIndex = finalApp.indexOf("import ");
+}
+
+finalApp = finalApp.replace(importMatch, importMatch + "\\n" + newImports);
+
+fs.writeFileSync('src/App.tsx', finalApp);
+console.log("Extraction complete!");

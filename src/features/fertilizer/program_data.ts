@@ -1,0 +1,25 @@
+
+export const FERTILIZER_PROGRAM_2026 = [
+  { blok: "1", luas: 72.150, dirian: 133, pokok: 9589, pus1: 527, pus2: 384, pus3: 384, pus4: 384 },
+  { blok: "2", luas: 68.370, dirian: 136, pokok: 9278, pus1: 510, pus2: 371, pus3: 371, pus4: 371 },
+  { blok: "3", luas: 76.590, dirian: 139, pokok: 10661, pus1: 586, pus2: 426, pus3: 426, pus4: 426 },
+  { blok: "4", luas: 92.390, dirian: 135, pokok: 12509, pus1: 688, pus2: 500, pus3: 500, pus4: 500 },
+  { blok: "5", luas: 60.190, dirian: 133, pokok: 8008, pus1: 440, pus2: 320, pus3: 320, pus4: 320 },
+  { blok: "6", luas: 80.420, dirian: 138, pokok: 11117, pus1: 611, pus2: 445, pus3: 445, pus4: 445 },
+  { blok: "7", luas: 89.460, dirian: 121, pokok: 10806, pus1: 594, pus2: 432, pus3: 432, pus4: 432 },
+  { blok: "8", luas: 82.030, dirian: 135, pokok: 11089, pus1: 610, pus2: 444, pus3: 444, pus4: 444 },
+  { blok: "9", luas: 83.610, dirian: 132, pokok: 11028, pus1: 607, pus2: 441, pus3: 441, pus4: 441 },
+  { blok: "10", luas: 84.360, dirian: 133, pokok: 11213, pus1: 617, pus2: 449, pus3: 449, pus4: 449 },
+  { blok: "11", luas: 47.850, dirian: 138, pokok: 6625, pus1: 364, pus2: 265, pus3: 265, pus4: 265 },
+  { blok: "12", luas: 76.500, dirian: 135, pokok: 10308, pus1: 567, pus2: 412, pus3: 412, pus4: 412 },
+  { blok: "13", luas: 50.750, dirian: 134, pokok: 6786, pus1: 373, pus2: 271, pus3: 271, pus4: 271 },
+  { blok: "14", luas: 70.450, dirian: 136, pokok: 9595, pus1: 528, pus2: 384, pus3: 384, pus4: 384 },
+  { blok: "15", luas: 68.360, dirian: 132, pokok: 9041, pus1: 497, pus2: 362, pus3: 362, pus4: 362 },
+  { blok: "16", luas: 64.440, dirian: 136, pokok: 8765, pus1: 482, pus2: 351, pus3: 351, pus4: 351 },
+  { blok: "17", luas: 84.080, dirian: 133, pokok: 11209, pus1: 616, pus2: 448, pus3: 448, pus4: 448 },
+  { blok: "18", luas: 76.190, dirian: 142, pokok: 10793, pus1: 648, pus2: 432, pus3: 432, pus4: 540 },
+  { blok: "19", luas: 81.750, dirian: 141, pokok: 11559, pus1: 694, pus2: 462, pus3: 462, pus4: 578 },
+  { blok: "20", luas: 68.620, dirian: 145, pokok: 9980, pus1: 599, pus2: 399, pus3: 399, pus4: 499 },
+  { blok: "21", luas: 24.270, dirian: 144, pokok: 3503, pus1: 210, pus2: 140, pus3: 140, pus4: 175 },
+  { blok: "22", luas: 65.290, dirian: 146, pokok: 9531, pus1: 572, pus2: 381, pus3: 381, pus4: 477 }
+];
