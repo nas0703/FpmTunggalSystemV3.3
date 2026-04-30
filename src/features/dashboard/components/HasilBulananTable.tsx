@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 export const HasilBulananTable = ({
   analytics,
+  dashboardDate = new Date().toISOString().split("T")[0],
   isDarkMode,
   onScreenshot,
   isCapturing,
@@ -18,6 +19,7 @@ export const HasilBulananTable = ({
   onPrint,
 }: {
   analytics: any;
+  dashboardDate?: string;
   isDarkMode: boolean;
   onScreenshot?: () => void;
   isCapturing?: boolean;
@@ -88,7 +90,11 @@ export const HasilBulananTable = ({
   if (!analytics || !analytics.month || !analytics.year || !analytics.day)
     return null;
 
-  const now = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
+  // Use dashboardDate to accurately align with the subset of data being viewed
+  const dashboardFallback = dashboardDate || new Date().toISOString().split("T")[0];
+  const [dbYear, dbMonth, dbDay] = dashboardFallback.split("-");
+  const now = new Date(parseInt(dbYear), parseInt(dbMonth) - 1, parseInt(dbDay));
+  
   const currentMonthIdx = now.getMonth();
   const currentDay = now.getDate();
   const daysInMonth = new Date(
@@ -181,8 +187,11 @@ export const HasilBulananTable = ({
       pencapaianYtd: { mt: actualMtYtd, tHek: actualTHekYtd },
       pctCapaiYtd,
       ytd2025: YIELD_DATA_2025.slice(0, currentMonthIdx + 1).reduce(
-        (acc: number, curr: any) => {
+        (acc: number, curr: any, idx: number) => {
           const val = isLF ? curr.blok["88"] || 0 : curr.blok[blokId] || 0;
+          if (idx === currentMonthIdx) {
+            return acc + (val / daysInMonth) * currentDay;
+          }
           return acc + val;
         },
         0,

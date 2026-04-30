@@ -3225,7 +3225,8 @@ PERATURAN TEKNIKAL:
       const blokStats = Object.keys(MASTER_DATA).map((blok) => {
         const pkt = MASTER_DATA[blok].pkt;
         const targets = MONTHLY_TARGETS_2026[pkt] || [];
-        const now = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
+        const [dbYear, dbMonth, dbDay] = todayStr.split("-");
+        const now = new Date(parseInt(dbYear), parseInt(dbMonth) - 1, parseInt(dbDay));
         const currentMonthIdx = now.getMonth();
         const currentDay = now.getDate();
         const daysInMonth = new Date(
@@ -3414,7 +3415,8 @@ PERATURAN TEKNIKAL:
         pkt2Ytd2025 = 0,
         feldaYtd2025 = 0;
       if (periodType === "year") {
-        const now = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
+        const [dbYear, dbMonth, dbDay] = todayStr.split("-");
+        const now = new Date(parseInt(dbYear), parseInt(dbMonth) - 1, parseInt(dbDay));
         const currentYearMonthIndex = now.getMonth();
         const currentDayOfMonth = now.getDate();
         const daysInCurrentMonth = new Date(
@@ -8920,6 +8922,7 @@ PERATURAN TEKNIKAL:
         <div ref={tableToCaptureRef}>
           <HasilBulananTable
             analytics={analytics}
+            dashboardDate={dashboardDate}
             isDarkMode={isDarkMode}
             onScreenshot={captureTableScreenshot}
             isCapturing={isCapturing}
