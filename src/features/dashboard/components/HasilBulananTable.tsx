@@ -160,7 +160,8 @@ export const HasilBulananTable = ({
 
     // Capai 2025 (Reference)
     const yield2025 = YIELD_DATA_2025[currentMonthIdx];
-    const capai2025 = yield2025?.t_h || 0;
+    const capaiTan2025 = yield2025?.blok?.[blokId as keyof typeof yield2025.blok] || 0;
+    const capai2025 = luas > 0 ? capaiTan2025 / luas : 0;
 
     // Hingga Bulan Ini (YTD)
     const targetHekYtd = yBlok?.targetHek || 0;
@@ -1101,7 +1102,7 @@ export const HasilBulananTable = ({
  </tr>
  <tr style={{ fontSize: `${Math.max(7, 9 * ((zoom / 100) * renderScale))}px` }}>
  <th className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-2 px-1 min-w-[70px] bg-emerald-900/90 dark:bg-emerald-900">
- APRIL 2025 <br />
+ {currentMonthName} 2025 <br />
  T/HEK
  </th>
  <th className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-2 px-1 min-w-[60px] bg-emerald-800 dark:bg-emerald-800">
