@@ -5051,7 +5051,7 @@ PERATURAN TEKNIKAL:
         )}
       </AnimatePresence>
 
-      <main className="p-5 overflow-hidden">
+      <main className="px-2 py-4 sm:p-5 overflow-hidden w-full max-w-7xl mx-auto">
         {/* CONFIG WARNING BANNER */}
         {configStatus && !configStatus.supabase && (
           <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/50 rounded-2xl flex items-start gap-3 animate-in slide-in-from-top duration-500 shadow-sm">

@@ -134,7 +134,7 @@ export const LaporanView: React.FC<LaporanViewProps> = ({
         </div>
       </div>
 
-      <div ref={tableToCaptureRef} className="mt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div ref={tableToCaptureRef} className="mt-4 -mx-2 sm:mx-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <HasilBulananTable
           analytics={analytics}
           dashboardDate={dashboardDate}

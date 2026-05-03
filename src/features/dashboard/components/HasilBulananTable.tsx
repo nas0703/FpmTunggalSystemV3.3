@@ -938,7 +938,7 @@ export const HasilBulananTable = ({
  className={`transition-all duration-300 w-full ${
  isFullscreen
  ? "fixed inset-4 md:inset-8 z-[9999] bg-white dark:bg-[#072d1f] rounded-3xl shadow-2xl p-4 md:p-6 overflow-auto flex flex-col custom-scrollbar"
- : "bg-white dark:bg-[#072d1f] border border-emerald-200 dark:border-slate-800/40 dark:text-emerald-100 shadow-xl shadow-emerald-900/10 overflow-x-auto custom-scrollbar sm:rounded-2xl cursor-pointer hover:border-slate-300 dark:hover:border-emerald-700"
+ : "bg-white dark:bg-[#072d1f] border-y border-x-0 sm:border sm:rounded-2xl border-emerald-200 dark:border-slate-800/40 dark:text-emerald-100 shadow-xl shadow-emerald-900/10 overflow-x-auto custom-scrollbar cursor-pointer hover:border-slate-300 dark:hover:border-emerald-700"
  }`}
  >
  {isFullscreen && (
