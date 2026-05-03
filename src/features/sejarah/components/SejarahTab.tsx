@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { History, X, Download, Trash2 } from "lucide-react";
 import { Transaction } from "../../../App";
 
@@ -113,82 +113,88 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                     </tr>
                   </thead>
                   <tbody className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {filteredData.map((row, i) => (
-                      <tr
-                        key={i}
-                        className="border-b border-emerald-50 dark:border-emerald-900/20 last:border-0 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-colors"
-                      >
-                        <td className="p-3 whitespace-nowrap">
-                          {new Date(row.tarikh).toLocaleDateString("ms-MY", {
-                            day: "2-digit",
-                            month: "short",
-                          })}
-                        </td>
-                        <td className="p-3 font-mono tracking-tighter whitespace-nowrap">
-                          <div className="font-black text-emerald-900 dark:text-white uppercase truncate max-w-[120px]">
-                            {row.no_resit}
-                          </div>
-                          <div className="text-[9px] text-slate-400 dark:text-slate-500 flex flex-col mt-0.5">
-                            {row.no_nota_hantaran &&
-                              row.no_nota_hantaran !== row.no_resit && (
-                                <span className="truncate max-w-[120px]">
-                                  Nota: {row.no_nota_hantaran}
+                    <AnimatePresence>
+                      {filteredData.map((row, i) => (
+                        <motion.tr
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.2, delay: i * 0.05 }}
+                          key={row.no_resit || i}
+                          className="border-b border-emerald-50 dark:border-emerald-900/20 last:border-0 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-colors"
+                        >
+                          <td className="p-3 whitespace-nowrap">
+                            {new Date(row.tarikh).toLocaleDateString("ms-MY", {
+                              day: "2-digit",
+                              month: "short",
+                            })}
+                          </td>
+                          <td className="p-3 font-mono tracking-tighter whitespace-nowrap">
+                            <div className="font-black text-emerald-900 dark:text-white uppercase truncate max-w-[120px]">
+                              {row.no_resit}
+                            </div>
+                            <div className="text-[9px] text-slate-400 dark:text-slate-500 flex flex-col mt-0.5">
+                              {row.no_nota_hantaran &&
+                                row.no_nota_hantaran !== row.no_resit && (
+                                  <span className="truncate max-w-[120px]">
+                                    Nota: {row.no_nota_hantaran}
+                                  </span>
+                                )}
+                              {row.no_akaun_terima && (
+                                <span className="text-emerald-600 dark:text-emerald-400 font-black truncate max-w-[120px]">
+                                  Akaun: {row.no_akaun_terima}
                                 </span>
                               )}
-                            {row.no_akaun_terima && (
-                              <span className="text-emerald-600 dark:text-emerald-400 font-black truncate max-w-[120px]">
-                                Akaun: {row.no_akaun_terima}
+                            </div>
+                          </td>
+                          <td className="p-3 uppercase whitespace-nowrap">
+                            <div className="font-black truncate max-w-[100px]">
+                              {row.no_lori}
+                            </div>
+                            <div className="text-[9px] text-slate-400 dark:text-slate-500 truncate max-w-[100px]">
+                              {row.no_seal || "-"}
+                            </div>
+                          </td>
+                          <td className="p-3 font-black text-rose-500 text-center whitespace-nowrap">
+                            {row.muda}
+                          </td>
+                          <td className="p-3 whitespace-nowrap text-center">
+                            <div className="flex flex-col items-center">
+                              <span className="font-black text-emerald-700 dark:text-emerald-400">
+                                B{row.blok}
                               </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-3 uppercase whitespace-nowrap">
-                          <div className="font-black truncate max-w-[100px]">
-                            {row.no_lori}
-                          </div>
-                          <div className="text-[9px] text-slate-400 dark:text-slate-500 truncate max-w-[100px]">
-                            {row.no_seal || "-"}
-                          </div>
-                        </td>
-                        <td className="p-3 font-black text-rose-500 text-center whitespace-nowrap">
-                          {row.muda}
-                        </td>
-                        <td className="p-3 whitespace-nowrap text-center">
-                          <div className="flex flex-col items-center">
-                            <span className="font-black text-emerald-700 dark:text-emerald-400">
-                              B{row.blok}
-                            </span>
-                            {row.peringkat === "EFB" && (
-                              <span className="text-[8px] bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded-md font-black mt-1 w-fit">
-                                EFB
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td
-                          className={`p-3 font-black text-center whitespace-nowrap ${parseFloat(row.kpg || "0") >= 21 ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg" : "text-slate-400 dark:text-slate-500"}`}
-                        >
-                          {row.kpg || "-"}
-                        </td>
-                        <td className="p-3 text-right font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50/20 dark:bg-emerald-900/10 rounded-lg whitespace-nowrap">
-                          {row.tan.toFixed(2)}
-                        </td>
-                        <td className="p-3 text-right font-black text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
-                          {(row.hasil_rm || 0).toLocaleString("ms-MY", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </td>
-                        <td className="p-3 text-center whitespace-nowrap">
-                          <motion.button
-                            whileTap={{ scale: 0.8 }}
-                            onClick={() => setRecordToDelete(row.no_resit)}
-                            className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors shadow-sm"
+                              {row.peringkat === "EFB" && (
+                                <span className="text-[8px] bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded-md font-black mt-1 w-fit">
+                                  EFB
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td
+                            className={`p-3 font-black text-center whitespace-nowrap ${parseFloat(row.kpg || "0") >= 21 ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg" : "text-slate-400 dark:text-slate-500"}`}
                           >
-                            <Trash2 size={16} />
-                          </motion.button>
-                        </td>
-                      </tr>
-                    ))}
+                            {row.kpg || "-"}
+                          </td>
+                          <td className="p-3 text-right font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50/20 dark:bg-emerald-900/10 rounded-lg whitespace-nowrap">
+                            {row.tan.toFixed(2)}
+                          </td>
+                          <td className="p-3 text-right font-black text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
+                            {(row.hasil_rm || 0).toLocaleString("ms-MY", {
+                              minimumFractionDigits: 2,
+                            })}
+                          </td>
+                          <td className="p-3 text-center whitespace-nowrap">
+                            <motion.button
+                              whileTap={{ scale: 0.8 }}
+                              onClick={() => setRecordToDelete(row.no_resit)}
+                              className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors shadow-sm"
+                            >
+                              <Trash2 size={16} />
+                            </motion.button>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </AnimatePresence>
                   </tbody>
                 </table>
               </div>

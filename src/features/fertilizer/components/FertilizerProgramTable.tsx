@@ -32,7 +32,7 @@ export const FertilizerProgramTable: React.FC = () => {
 
       // Header Row
       const headerRow = ws.addRow([
-        "BLOK", "LUAS (HA)", "POKOK", "PUS 1 (FEB)", "PUS 2 (APR)", "PUS 3 (JUN)", "PUS 4 (AUG)", "JUMLAH"
+        "BLOK", "LUAS (HA)", "POKOK", "PUS 1 (FEB)\nCOMPACT FELDA 12\n(2.75 / 3.00 KG/PKK)", "PUS 2 (APR)\nFELDA ORGANIC\n(2.00 KG/PKK)", "PUS 3 (JUN)\nCOMPACT FELDA 12\n(2.00 KG/PKK)", "PUS 4 (AUG)\nFELDA ORGANIC\n(2.00 / 2.50 KG/PKK)", "JUMLAH"
       ]);
       
       headerRow.eachCell((cell) => {
@@ -145,10 +145,26 @@ export const FertilizerProgramTable: React.FC = () => {
               <th className="p-2 border-b border-slate-100 dark:border-slate-800">Blok</th>
               <th className="p-2 border-b border-slate-100 dark:border-slate-800 text-right">Luas (Ha)</th>
               <th className="p-2 border-b border-slate-100 dark:border-slate-800 text-right">Pokok</th>
-              <th className="p-2 border-b border-slate-100 dark:border-slate-800 text-center bg-purple-500/5 text-purple-600 dark:text-purple-400">PUS 1 (Feb)</th>
-              <th className="p-2 border-b border-slate-100 dark:border-slate-800 text-center bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">PUS 2 (Apr)</th>
-              <th className="p-2 border-b border-slate-100 dark:border-slate-800 text-center bg-blue-500/5 text-blue-600 dark:text-blue-400">PUS 3 (Jun)</th>
-              <th className="p-2 border-b border-slate-100 dark:border-slate-800 text-center bg-amber-500/5 text-amber-600 dark:text-amber-400">PUS 4 (Aug)</th>
+              <th className="p-2 border-b border-slate-100 dark:border-slate-800 text-center bg-purple-500/5 text-purple-600 dark:text-purple-400">
+                <div>PUS 1 (FEB)</div>
+                <div className="text-[7px] font-black uppercase tracking-tighter mt-1 opacity-70">COMPACT FELDA 12</div>
+                <div className="text-[7px] font-bold uppercase tracking-tighter opacity-50">2.75 / 3.00 KG/PKK</div>
+              </th>
+              <th className="p-2 border-b border-slate-100 dark:border-slate-800 text-center bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">
+                <div>PUS 2 (APR)</div>
+                <div className="text-[7px] font-black uppercase tracking-tighter mt-1 opacity-70">FELDA ORGANIC</div>
+                <div className="text-[7px] font-bold uppercase tracking-tighter opacity-50">2.00 KG/PKK</div>
+              </th>
+              <th className="p-2 border-b border-slate-100 dark:border-slate-800 text-center bg-blue-500/5 text-blue-600 dark:text-blue-400">
+                <div>PUS 3 (JUN)</div>
+                <div className="text-[7px] font-black uppercase tracking-tighter mt-1 opacity-70">COMPACT FELDA 12</div>
+                <div className="text-[7px] font-bold uppercase tracking-tighter opacity-50">2.00 KG/PKK</div>
+              </th>
+              <th className="p-2 border-b border-slate-100 dark:border-slate-800 text-center bg-amber-500/5 text-amber-600 dark:text-amber-400">
+                <div>PUS 4 (AUG)</div>
+                <div className="text-[7px] font-black uppercase tracking-tighter mt-1 opacity-70">FELDA ORGANIC</div>
+                <div className="text-[7px] font-bold uppercase tracking-tighter opacity-50">2.00 / 2.50 KG/PKK</div>
+              </th>
               <th className="p-2 border-b border-slate-100 dark:border-slate-800 text-right font-black text-slate-800 dark:text-white">Jumlah</th>
             </tr>
           </thead>

@@ -103,6 +103,9 @@ import {
 import { FertilizerModule } from "./features/fertilizer/FertilizerModule";
 import { FertilizerInput } from "./features/fertilizer/components/FertilizerInput";
 import { PruningModule } from "./features/pruning/PruningModule";
+import { AbwView } from "./features/hasil/components/AbwView";
+import { BbcView } from "./features/hasil/components/BbcView";
+import { LaporanView } from "./features/hasil/components/LaporanView";
 
 import { HasilBulananTable } from "./features/dashboard/components/HasilBulananTable";
 import { ReportSummarySection } from "./features/dashboard/components/ReportSummarySection";
@@ -123,6 +126,7 @@ import {
   MONTHLY_TARGETS_2026,
   MASTER_DATA,
   YIELD_DATA_2025,
+  ABW_DATA,
   EFB_DATA_2026,
 } from "./utils/constants";
 
@@ -271,6 +275,8 @@ export default function App() {
   };
   const [isNavigating, setIsNavigating] = useState(false);
   const [showRCReportModal, setShowRCReportModal] = useState(false);
+  const [activeHasilTab, setActiveHasilTab] = useState<'kpi' | 'laporan' | 'analitik' | 'abw' | 'bbc'>('kpi');
+  
   const [reportType, setReportType] = useState<
     | "hasil"
     | "muda"
@@ -5161,15 +5167,49 @@ PERATURAN TEKNIKAL:
                         </div>
 
                         {/* STATS HERO GRID */}
-                        <div className="relative pt-3">
-                          {/* Overall Section Label Flag Style */}
-                          <div className="absolute -top-1.5 left-1 z-10 p-0 pointer-events-none">
-                            <div className="bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 shadow-md px-1.5 py-0.5 rounded-sm">
-                              <p className="text-[6px] font-black text-white uppercase tracking-[0.1em] leading-none">
-                                KESELURUHAN
-                              </p>
+                        {reportType === "hasil" && (
+                          <div className="flex flex-col gap-2 mb-4 mt-2">
+                            <div className="flex overflow-x-auto pb-2 gap-2 custom-scrollbar">
+                              {[
+                                { id: 'kpi', label: 'KPI Utama', icon: LayoutDashboard },
+                                { id: 'laporan', label: 'Laporan', icon: FileSpreadsheet },
+                                { id: 'analitik', label: 'Analitik', icon: BarChart3 },
+                                { id: 'abw', label: 'ABW', icon: TrendingUp },
+                                { id: 'bbc', label: 'BBC', icon: Package }
+                              ].map((tab) => (
+                                <button
+                                  key={tab.id}
+                                  onClick={() => {
+                                    setActiveHasilTab(tab.id as any);
+                                    if (tab.id === 'laporan') setShowFSA13Report(true);
+                                  }}
+                                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase whitespace-nowrap transition-all active:scale-95 border ${
+                                    activeHasilTab === tab.id 
+                                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-500/20' 
+                                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                  }`}
+                                >
+                                  <tab.icon size={13} />
+                                  {tab.label}
+                                </button>
+                              ))}
                             </div>
                           </div>
+                        )}
+      {reportType === "hasil" && activeHasilTab === 'abw' && <AbwView />}
+      
+      {reportType === "hasil" && activeHasilTab === 'bbc' && <BbcView />}
+      
+                        {(reportType !== "hasil" || activeHasilTab === 'kpi') && (
+                          <div className="relative pt-3">
+                            {/* Overall Section Label Flag Style */}
+                            <div className="absolute -top-1.5 left-1 z-10 p-0 pointer-events-none">
+                              <div className="bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 shadow-md px-1.5 py-0.5 rounded-sm">
+                                <p className="text-[6px] font-black text-white uppercase tracking-[0.1em] leading-none">
+                                  KESELURUHAN
+                                </p>
+                              </div>
+                            </div>
 
                           <div className="absolute right-1 -top-1.5 z-10">
                             <button
@@ -5226,9 +5266,11 @@ PERATURAN TEKNIKAL:
                             )}
                           </AnimatePresence>
                         </div>
+                      )}
 
                         {/* SUBSECTION DETAILS */}
-                        <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-[24px] border border-slate-200 dark:border-slate-800 mb-4 relative mt-6">
+                        {(reportType !== "hasil" || activeHasilTab === 'kpi') && (
+                          <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-[24px] border border-slate-200 dark:border-slate-800 mb-4 relative mt-6">
                           {/* OVERALL TITLE FOR THIS SECTION */}
                           {reportType === "muda" && (
                             <div className="absolute -top-3 left-4 z-10 px-3 py-1 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/50 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm">
@@ -5293,9 +5335,10 @@ PERATURAN TEKNIKAL:
                             </div>
                           </div>
                         </div>
+                        )}
 
-                        {/* RANKING CARDS - ONLY FOR HASIL */}
-                        {reportType === "hasil" && (
+                        {/* RANKING CARDS - ONLY FOR ANALITIK TAB */}
+                        {reportType === "hasil" && activeHasilTab === 'analitik' && (
                           <div className="bg-white dark:bg-slate-900 rounded-[24px] p-4 shadow-md border border-slate-100 dark:border-slate-800 mb-6 relative">
                             <div className="flex justify-between items-center mb-4">
                               <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
@@ -5431,12 +5474,13 @@ PERATURAN TEKNIKAL:
                         )}
 
                         {/* TREND ANALYTICS SECTION - ONLY FOR HASIL */}
-                        <div className="pt-4 space-y-4">
-                          {(reportType === "hasil" ||
-                            reportType === "muda" ||
-                            reportType === "efb" ||
-                            reportType === "kpa_kpg") && (
-                            <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-md border border-slate-100 dark:border-slate-800 relative">
+                        {reportType === "hasil" && activeHasilTab === 'analitik' && (
+                          <div className="pt-4 space-y-4">
+                            {(reportType === "hasil" ||
+                              reportType === "muda" ||
+                              reportType === "efb" ||
+                              reportType === "kpa_kpg") && (
+                              <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-md border border-slate-100 dark:border-slate-800 relative">
                               <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-1.5">
                                   <BarChart3
@@ -5723,118 +5767,32 @@ PERATURAN TEKNIKAL:
                               </AnimatePresence>
                             </div>
                           )}
+                        </div>
+                      )}
 
                           {/* LIVE FSA 13 REPORT PREVIEW */}
-                          {reportType === "hasil" && (
-                            <div className="bg-slate-900 rounded-[24px] p-5 shadow-2xl border border-slate-800 relative overflow-hidden group">
-                              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <FileText size={80} className="text-white" />
-                              </div>
-                              <div className="relative z-10">
-                                <div className="flex justify-between items-start mb-4">
-                                  <div>
-                                    <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">
-                                      Laporan Live FSA 13
-                                    </h3>
-                                    <p className="text-[7px] font-bold text-emerald-400/70 uppercase tracking-widest mt-0.5">
-                                      Format Regional Controller
-                                    </p>
-                                  </div>
-                                  <div className="flex items-center gap-1.5 pt-1">
-                                    <motion.button
-                                      whileTap={{ scale: 0.9 }}
-                                      onClick={() =>
-                                        setShowFSA13Report(!showFSA13Report)
-                                      }
-                                      className="p-1 hover:bg-white/10 rounded-full transition-all"
-                                    >
-                                      <motion.div
-                                        animate={{
-                                          rotate: showFSA13Report ? 180 : 0,
-                                        }}
-                                      >
-                                        <ChevronDown
-                                          size={14}
-                                          className="text-slate-400"
-                                        />
-                                      </motion.div>
-                                    </motion.button>
-                                    <motion.button
-                                      whileTap={{ scale: 0.9 }}
-                                      onClick={handleCopyReport}
-                                      className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full transition-colors"
-                                    >
-                                      <ClipboardCheck
-                                        size={12}
-                                        className="text-emerald-400"
-                                      />
-                                    </motion.button>
-                                    <motion.button
-                                      whileTap={{ scale: 0.9 }}
-                                      onClick={handleWhatsAppShare}
-                                      className="p-1.5 bg-emerald-500 hover:bg-emerald-600 rounded-full transition-colors"
-                                    >
-                                      <Share2
-                                        size={12}
-                                        className="text-white"
-                                      />
-                                    </motion.button>
-                                  </div>
-                                </div>
-
-                                <AnimatePresence>
-                                  {showReportDatePicker && (
-                                    <motion.div
-                                      initial={{ opacity: 0, y: -10 }}
-                                      animate={{ opacity: 1, y: 0 }}
-                                      exit={{ opacity: 0, y: -10 }}
-                                      className="mb-4 p-3 bg-white/5 rounded-2xl border border-white/10 flex flex-col gap-2"
-                                    >
-                                      <label className="text-[9px] font-black text-emerald-400/70 uppercase tracking-widest px-1">
-                                        Pilih Tarikh Laporan
-                                      </label>
-                                      <div className="flex gap-2">
-                                        <input
-                                          type="date"
-                                          value={dashboardDate}
-                                          onChange={(e) =>
-                                            setDashboardDate(e.target.value)
-                                          }
-                                          className="flex-1 bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
-                                        />
-                                        <button
-                                          onClick={executeWhatsAppShare}
-                                          className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black px-4 py-2 rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center gap-2"
-                                        >
-                                          <Share2 size={12} /> Share
-                                        </button>
-                                      </div>
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-
-                                <AnimatePresence>
-                                  {showFSA13Report && (
-                                    <motion.div
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: "auto", opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      transition={{
-                                        duration: 0.3,
-                                        ease: "easeInOut",
-                                      }}
-                                      className="overflow-hidden"
-                                    >
-                                      <div className="bg-black/40 rounded-2xl p-4 font-mono text-[9px] leading-relaxed text-emerald-400/90 whitespace-pre shadow-inner h-[250px] overflow-y-auto custom-scrollbar border border-white/5">
-                                        {generateRCReport()}
-                                      </div>
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </div>
-                            </div>
+                          {reportType === "hasil" && activeHasilTab === 'laporan' && (
+                            <LaporanView
+                              showFSA13Report={showFSA13Report}
+                              setShowFSA13Report={setShowFSA13Report}
+                              handleCopyReport={handleCopyReport}
+                              handleWhatsAppShare={handleWhatsAppShare}
+                              showReportDatePicker={showReportDatePicker}
+                              dashboardDate={dashboardDate}
+                              setDashboardDate={setDashboardDate}
+                              executeWhatsAppShare={executeWhatsAppShare}
+                              generateRCReport={generateRCReport}
+                              tableToCaptureRef={tableToCaptureRef}
+                              analytics={analytics}
+                              isDarkMode={isDarkMode}
+                              captureTableScreenshot={captureTableScreenshot}
+                              isCapturing={isCapturing}
+                              setShowExportModal={setShowExportModal}
+                              handleDownloadPdf={handleDownloadPdf}
+                              isDownloadingPdf={isDownloadingPdf}
+                              handlePrint={handlePrint}
+                            />
                           )}
-                        </div>
 
                         {/* HARGA BTS DAILY REPORT LIST */}
                         {reportType === "harga" && (
@@ -6342,9 +6300,8 @@ PERATURAN TEKNIKAL:
                         )}
 
                         {/* CHART SECTION: PRESTASI ANALITIK */}
-                        {reportType !== "harga" &&
-                          reportType !== "baja" &&
-                          reportType !== "pruning" && (
+                        {((reportType === "hasil" && activeHasilTab === 'analitik') || 
+                          (reportType !== 'hasil' && reportType !== "harga" && reportType !== "baja" && reportType !== "pruning")) && (
                             <div
                               ref={thekChartRef}
                               className="bg-slate-50 dark:bg-[#0f172a] rounded-2xl p-3 shadow-md border border-slate-200 dark:border-slate-800/50 animate-in fade-in slide-in-from-bottom-4 duration-500"
@@ -7208,9 +7165,8 @@ PERATURAN TEKNIKAL:
                           )}
 
                         {/* Togol Ranking */}
-                        {reportType !== "harga" &&
-                          reportType !== "efb" &&
-                          reportType !== "pruning" && (
+                        {((reportType === "hasil" && activeHasilTab === 'analitik') || 
+                          (reportType !== "hasil" && reportType !== "harga" && reportType !== "efb" && reportType !== "pruning")) && (
                             <>
                               <div className="flex flex-col gap-1 px-1 mt-2">
                                 <div className="flex justify-between items-center">
@@ -8918,21 +8874,6 @@ PERATURAN TEKNIKAL:
         )}
       </AnimatePresence>
 
-      {activeTab === "dashboard" && reportType === "hasil" && (
-        <div ref={tableToCaptureRef}>
-          <HasilBulananTable
-            analytics={analytics}
-            dashboardDate={dashboardDate}
-            isDarkMode={isDarkMode}
-            onScreenshot={captureTableScreenshot}
-            isCapturing={isCapturing}
-            onExcel={() => setShowExportModal(true)}
-            onDownloadPdf={handleDownloadPdf}
-            isDownloadingPdf={isDownloadingPdf}
-            onPrint={handlePrint}
-          />
-        </div>
-      )}
     </div>
   );
 }

@@ -179,7 +179,7 @@ export const FertilizerInventory: React.FC = () => {
           <p className="text-[8px] font-black uppercase opacity-60 tracking-widest">Total Stok Semasa</p>
           <div className="flex items-baseline gap-2 mt-1">
             <p className="text-2xl font-black">{inventory.reduce((acc, curr) => acc + curr.quantity, 0).toLocaleString()}</p>
-            <span className="text-[10px] font-bold opacity-70 uppercase tracking-widest">BEG</span>
+            <span className="text-[10px] font-bold opacity-70 uppercase tracking-widest">KG</span>
           </div>
         </div>
 
@@ -223,12 +223,12 @@ export const FertilizerInventory: React.FC = () => {
               <h3 className="text-[9px] font-black text-white uppercase tracking-widest">Senarai Inventori</h3>
             </div>
             <div className="text-[8px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-950/30 px-2 py-1 rounded">
-              {inventory.length} Produk
+              {inventory.filter(item => item.quantity > 0).length} Produk
             </div>
           </div>
           
           <div className="p-2 space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar">
-            {inventory.map((item) => (
+            {inventory.filter(item => item.quantity > 0).map((item) => (
               <div key={item.id} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-emerald-300 transition-all">
                 <div className="flex items-center justify-between">
                   <div>
@@ -257,7 +257,7 @@ export const FertilizerInventory: React.FC = () => {
                 </div>
               </div>
             ))}
-            {inventory.length === 0 && (
+            {inventory.filter(item => item.quantity > 0).length === 0 && (
               <div className="text-center py-12 text-slate-400">
                 <p className="text-[10px] font-black uppercase tracking-widest">Tiada rekod inventori</p>
               </div>
@@ -677,7 +677,7 @@ const BinKadTable: React.FC<{
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="py-20 text-center">
+                <td colSpan={7} className="py-20 text-center">
                   <Package className="mx-auto text-slate-200 dark:text-slate-800 mb-2 opacity-20" size={40} />
                   <p className="text-[10px] font-black text-slate-300 dark:text-slate-700 uppercase tracking-widest">Tiada Rekod Dijumpai</p>
                   <p className="text-[7px] font-bold text-slate-400 dark:text-slate-600 uppercase mt-1">Data akan dikemaskini kemudian</p>
@@ -685,30 +685,21 @@ const BinKadTable: React.FC<{
               </tr>
             )}
           </tbody>
+          {currentData.length > 0 && (
+            <tfoot className="bg-slate-50 dark:bg-slate-800/80 sticky bottom-0 z-10 border-t border-slate-200 dark:border-slate-700 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+              <tr>
+                <td className="px-2 py-2 text-[7px] font-black text-slate-500 dark:text-slate-400 uppercase">AKHIR:</td>
+                <td className="px-2 py-2 text-[9px] font-black text-emerald-600 text-right">{currentData.reduce((acc, r) => acc + (r.terima || 0), 0).toLocaleString()}</td>
+                <td className="px-2 py-2 text-[9px] font-black text-rose-500 text-right">{currentData.reduce((acc, r) => acc + (r.keluar || 0), 0).toLocaleString()}</td>
+                <td className="px-2 py-2 text-[10px] font-black text-slate-900 dark:text-white text-right">{currentData[currentData.length - 1].baki.toLocaleString()}</td>
+                <td colSpan={3} className="px-2 py-2 text-[6px] font-bold text-slate-400 uppercase opacity-50 text-right pr-4">
+                  UPDATED {currentData[currentData.length - 1].tarikh}
+                </td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
-      
-      {currentData.length > 0 && (
-        <div className="bg-slate-50 dark:bg-slate-800/20 px-3 py-1.5 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="flex gap-1.5 items-baseline">
-              <p className="text-[6px] font-black text-slate-400 uppercase">AKHIR:</p>
-              <p className="text-[10px] font-black text-slate-900 dark:text-white">{currentData[currentData.length - 1].baki.toLocaleString()}</p>
-            </div>
-            <div className="flex gap-1.5 items-baseline border-l border-slate-200 dark:border-slate-700 pl-3">
-              <p className="text-[6px] font-black text-slate-400 uppercase">T:</p>
-              <p className="text-[9px] font-black text-emerald-600">{currentData.reduce((acc, r) => acc + (r.terima || 0), 0).toLocaleString()}</p>
-            </div>
-            <div className="flex gap-1.5 items-baseline border-l border-slate-200 dark:border-slate-700 pl-3">
-              <p className="text-[6px] font-black text-slate-400 uppercase">K:</p>
-              <p className="text-[9px] font-black text-rose-500">{currentData.reduce((acc, r) => acc + (r.keluar || 0), 0).toLocaleString()}</p>
-            </div>
-          </div>
-          <div className="text-[6px] font-bold text-slate-400 uppercase opacity-30">
-            UPDATED {currentData.length > 0 ? currentData[currentData.length - 1].tarikh : '---'}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
