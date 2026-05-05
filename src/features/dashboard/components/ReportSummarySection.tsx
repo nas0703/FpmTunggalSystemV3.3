@@ -217,7 +217,8 @@ export const ReportSummarySection = ({
                     </p>
                     <p className="text-[10px] font-black text-white leading-none mt-0.5">
                       {totalTan.toLocaleString(undefined, {
-                        maximumFractionDigits: 1,
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
                       })}
                     </p>
                   </div>
@@ -390,7 +391,8 @@ export const ReportSummarySection = ({
                             <div className="flex items-baseline gap-0.5 opacity-70">
                               <p className="text-[9px] font-black text-slate-700 dark:text-slate-300 leading-none">
                                 {c.tan.toLocaleString(undefined, {
-                                  maximumFractionDigits: 0,
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
                                 })}
                               </p>
                               <p className="text-[5.5px] font-bold text-slate-500 dark:text-slate-400 uppercase opacity-60">
