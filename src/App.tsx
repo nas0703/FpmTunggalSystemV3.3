@@ -69,6 +69,7 @@ import {
   Printer,
   PieChart as PieChartIcon,
   Share2,
+  CloudRain,
   Clipboard,
   ClipboardCheck,
   Scissors,
@@ -106,12 +107,24 @@ import { PruningModule } from "./features/pruning/PruningModule";
 import { AbwView } from "./features/hasil/components/AbwView";
 import { BbcView } from "./features/hasil/components/BbcView";
 import { LaporanView } from "./features/hasil/components/LaporanView";
+import { Header } from "./layout/Header";
+import { BottomNav } from "./layout/BottomNav";
+import { LoginScreen } from "./features/auth/components/LoginScreen";
+import { SettingsModal } from "./components/common/modals/SettingsModal";
+import { NewFeaturesModal } from "./components/common/modals/NewFeaturesModal";
+import { DeleteRecordModal } from "./components/common/modals/DeleteRecordModal";
+import { ExportModal } from "./components/common/modals/ExportModal";
+import { ShareModal } from "./components/common/modals/ShareModal";
+
+import { useAuth } from "./features/auth/hooks/useAuth";
+import { useAppUIState } from "./hooks/useAppUIState";
 
 import { HasilBulananTable } from "./features/dashboard/components/HasilBulananTable";
 import { ReportSummarySection } from "./features/dashboard/components/ReportSummarySection";
 import { FloatingInput } from "./components/ui/FloatingInput";
 
 import { DigitalClock } from "./components/common/DigitalClock";
+import { LaporanHujanView } from "./features/hasil/components/LaporanHujanView";
 import { SejarahTab } from "./features/sejarah/components/SejarahTab";
 import { InputTab } from "./features/input/components/InputTab";
 import { ReportTab } from "./components/common/ReportTab";
@@ -153,14 +166,123 @@ export interface Transaction {
   is_efb?: boolean;
 }
 
+const initialHujanData = [
+  { bulan: 'JAN', '2021': 901.00, '2022': 123.00, '2023': 504.50, '2024': 836.00, '2025': 447.50, '2026': 29.50 },
+  { bulan: 'FEB', '2021': 0.00, '2022': 181.00, '2023': 269.00, '2024': 72.50, '2025': 168.50, '2026': 67.00 },
+  { bulan: 'MAC', '2021': 100.00, '2022': 127.50, '2023': 284.00, '2024': 75.00, '2025': 576.50, '2026': 41.00 },
+  { bulan: 'APR', '2021': 257.00, '2022': 245.50, '2023': 98.50, '2024': 223.00, '2025': 278.00, '2026': null },
+  { bulan: 'MEI', '2021': 192.50, '2022': 251.00, '2023': 94.50, '2024': 250.50, '2025': 240.00, '2026': null },
+  { bulan: 'JUN', '2021': 135.00, '2022': 184.50, '2023': 202.00, '2024': 211.00, '2025': 133.50, '2026': null },
+  { bulan: 'JUL', '2021': 235.00, '2022': 186.50, '2023': 184.00, '2024': 92.00, '2025': 140.50, '2026': null },
+  { bulan: 'OGOS', '2021': 326.00, '2022': 261.00, '2023': 226.00, '2024': 133.50, '2025': 186.00, '2026': null },
+  { bulan: 'SEPT', '2021': 152.00, '2022': 194.00, '2023': 231.00, '2024': 277.00, '2025': 261.50, '2026': null },
+  { bulan: 'OKT', '2021': 179.50, '2022': 271.00, '2023': 170.00, '2024': 331.00, '2025': 98.00, '2026': null },
+  { bulan: 'NOV', '2021': 452.50, '2022': 301.00, '2023': 243.00, '2024': 243.00, '2025': 199.50, '2026': null },
+  { bulan: 'DIS', '2021': 181.00, '2022': 228.00, '2023': 378.00, '2024': 164.00, '2025': 234.00, '2026': null },
+  { bulan: 'JUMLAH', '2021': 3111.50, '2022': 2554.00, '2023': 2884.50, '2024': 2908.50, '2025': 2963.50, '2026': 137.50 },
+];
+
 // --- SUB-COMPONENTS ---
 
 export default function App() {
-  const [authRole, setAuthRole] = useState<
-    "staff" | "fc" | "afc" | "fs" | null
-  >(null);
-  const [pin, setPin] = useState("");
-  const [loginError, setLoginError] = useState(false);
+  const [hujanData, setHujanData] = useState<any[]>(() => {
+    const saved = localStorage.getItem('hujanData');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return initialHujanData;
+      }
+    }
+    return initialHujanData;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('hujanData', JSON.stringify(hujanData));
+  }, [hujanData]);
+
+  useEffect(() => {
+    const fetchHujanFromSupabase = async () => {
+      try {
+        const { data, error } = await supabase.from('hujan_rekod').select('*');
+        if (error) {
+           console.log("No hujan_rekod table found or error fetching:", error.message);
+           return;
+        }
+        
+        if (data && data.length > 0) {
+          setHujanData(prev => {
+            // Kita mulakan dari prev (yang mungkin ada local storage data)
+            let newData = [...prev];
+            
+            // Masukkan setiap rekod dari supabase ke dalam newData
+            data.forEach((rekod: any) => {
+              newData = newData.map(item => {
+                if (item.bulan.toUpperCase() === rekod.bulan.toUpperCase()) {
+                  // Tolong cast tahun sebagai string untuk elak ralat jika Supabase return integer
+                  const tahunKey = String(rekod.tahun);
+                  return { ...item, [tahunKey]: rekod.jumlah };
+                }
+                return item;
+              });
+            });
+
+            // Recalculate JUMLAH supaya data konsisten
+            const yearsList = ['2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028'];
+            newData = newData.map(item => {
+              if (item.bulan === 'JUMLAH') {
+                const newJumlahRow = { ...item };
+                yearsList.forEach(y => {
+                  let yTotal = 0;
+                  let hasDataForYear = false;
+                  newData.forEach(dataItem => {
+                    if (dataItem.bulan !== 'JUMLAH' && dataItem[y] != null) {
+                      yTotal += dataItem[y];
+                      hasDataForYear = true;
+                    }
+                  });
+                  newJumlahRow[y] = hasDataForYear ? yTotal : null;
+                });
+                return newJumlahRow;
+              }
+              return item;
+            });
+
+            return newData;
+          });
+        }
+      } catch (err) {
+        console.error("Error connecting to supabase for hujan:", err);
+      }
+    };
+
+    fetchHujanFromSupabase();
+  }, []);
+
+  const {
+    activeTab,
+    setActiveTab,
+    direction,
+    setDirection,
+    handleTabChange,
+    handleMainTabSwipe,
+  } = useAppUIState();
+
+  const {
+    authRole,
+    pin,
+    loginError,
+    handlePinPress,
+    handleDeletePress,
+    handleLogout
+  } = useAuth({
+    onLoginSuccess: (role) => {
+      setActiveTab(role === "staff" ? "scan" : "dashboard");
+    },
+    onLogout: () => {
+      setActiveTab("scan");
+    }
+  });
 
   const [dashboardDate, setDashboardDate] = useState(() => {
     const now = new Date();
@@ -180,9 +302,6 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<"scan" | "dashboard" | "sejarah">(
-    "scan",
-  );
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
   const [historyFilterDate, setHistoryFilterDate] = useState<string>("");
@@ -242,40 +361,9 @@ export default function App() {
       ],
     },
   ];
-  const [direction, setDirection] = useState(0);
-
-  const handleTabChange = (newTab: "scan" | "dashboard" | "sejarah") => {
-    const tabs: ("scan" | "dashboard" | "sejarah")[] = [
-      "scan",
-      "dashboard",
-      "sejarah",
-    ];
-    const currentIndex = tabs.indexOf(activeTab as any);
-    const nextIndex = tabs.indexOf(newTab);
-    setDirection(nextIndex > currentIndex ? 1 : -1);
-    setActiveTab(newTab);
-  };
-
-  const handleMainTabSwipe = (swipeDir: "left" | "right") => {
-    const tabs: ("scan" | "dashboard" | "sejarah")[] = [
-      "scan",
-      "dashboard",
-      "sejarah",
-    ];
-    const currentIndex = tabs.indexOf(activeTab);
-    if (swipeDir === "left") {
-      if (currentIndex < tabs.length - 1) {
-        handleTabChange(tabs[currentIndex + 1]);
-      }
-    } else {
-      if (currentIndex > 0) {
-        handleTabChange(tabs[currentIndex - 1]);
-      }
-    }
-  };
   const [isNavigating, setIsNavigating] = useState(false);
   const [showRCReportModal, setShowRCReportModal] = useState(false);
-  const [activeHasilTab, setActiveHasilTab] = useState<'kpi' | 'laporan' | 'analitik' | 'abw' | 'bbc'>('kpi');
+  const [activeHasilTab, setActiveHasilTab] = useState<'kpi' | 'laporan' | 'analitik' | 'abw' | 'bbc' | 'hujan'>('kpi');
   
   const [reportType, setReportType] = useState<
     | "hasil"
@@ -388,6 +476,7 @@ export default function App() {
     is_efb: false,
     is_baja: false,
     is_pruning: false,
+    is_hujan: false,
   });
   const [rawData, setRawData] = useState<Transaction[]>([]);
   const [blockAnnualData, setBlockAnnualData] = useState<any[]>([]);
@@ -558,11 +647,6 @@ export default function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
-
-  const STAFF_PIN = "123456";
-  const FC_PIN = "888888";
-  const AFC_PIN = "777777";
-  const FS_PIN = "555555";
 
   const safeFetch = async (
     url: string,
@@ -902,42 +986,6 @@ export default function App() {
     setTimeout(() => setToast(null), 4000);
   };
 
-  const handlePinPress = (digit: string) => {
-    if (pin.length < 6) {
-      const newPin = pin + digit;
-      setPin(newPin);
-      setLoginError(false);
-
-      if (newPin.length === 6) {
-        setTimeout(() => {
-          if (newPin === STAFF_PIN) {
-            setAuthRole("staff");
-            setActiveTab("scan");
-          } else if (newPin === FC_PIN) {
-            setAuthRole("fc");
-            setActiveTab("dashboard");
-          } else if (newPin === AFC_PIN) {
-            setAuthRole("afc");
-            setActiveTab("dashboard");
-          } else if (newPin === FS_PIN) {
-            setAuthRole("fs");
-            setActiveTab("dashboard");
-          } else {
-            setLoginError(true);
-            setPin("");
-          }
-        }, 300);
-      }
-    }
-  };
-
-  const handleDeletePress = () => setPin(pin.slice(0, -1));
-  const handleLogout = () => {
-    setAuthRole(null);
-    setPin("");
-    setActiveTab("scan");
-  };
-
   // Generate Regional Controller Report (WhatsApp Format)
   const generateRCReport = () => {
     if (!analytics || !analytics.day || !analytics.month || !analytics.year)
@@ -1136,6 +1184,13 @@ export default function App() {
         const originalPosition = node.style.position;
         const originalWidthNode = node.style.width;
 
+        const parentWithTransform = node.parentElement;
+        let originalTransform = "";
+        if (parentWithTransform && parentWithTransform.style.transform) {
+          originalTransform = parentWithTransform.style.transform;
+          parentWithTransform.style.transform = "none";
+        }
+
         if (tableContainer) {
           tableContainer.style.setProperty("overflow", "visible", "important");
           tableContainer.style.setProperty("width", "auto", "important");
@@ -1156,7 +1211,6 @@ export default function App() {
             transform: "scale(1)",
             transformOrigin: "top left",
             margin: "0",
-            padding: "24px",
             width: `${node.scrollWidth}px`, // Force width consistency
           },
         });
@@ -1168,6 +1222,9 @@ export default function App() {
         }
         node.style.position = originalPosition;
         node.style.width = originalWidthNode;
+        if (parentWithTransform && originalTransform) {
+          parentWithTransform.style.transform = originalTransform;
+        }
       } finally {
         elementsToHide.forEach((el) => {
           const origDisplay = originalDisplays.get(el);
@@ -1331,6 +1388,40 @@ export default function App() {
     const report = encodeURIComponent(generateRCReport());
     window.open(`https://wa.me/?text=${report}`, "_blank");
     setShowReportDatePicker(false);
+  };
+
+  const handleAddHujan = (bulan: string, tahun: string, jumlah: number) => {
+    setHujanData(prev => {
+      let newData = prev.map(item => {
+        if (item.bulan.toUpperCase() === bulan.toUpperCase()) {
+          return { ...item, [tahun]: jumlah };
+        }
+        return item;
+      });
+
+      // Update JUMLAH
+      const yearsList = ['2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028'];
+      newData = newData.map(item => {
+        if (item.bulan === 'JUMLAH') {
+          const newJumlahRow = { ...item };
+          yearsList.forEach(y => {
+            let yTotal = 0;
+            let hasDataForYear = false;
+            newData.forEach(dataItem => {
+              if (dataItem.bulan !== 'JUMLAH' && dataItem[y] != null) {
+                yTotal += dataItem[y];
+                hasDataForYear = true;
+              }
+            });
+            newJumlahRow[y] = hasDataForYear ? yTotal : null;
+          });
+          return newJumlahRow;
+        }
+        return item;
+      });
+
+      return newData;
+    });
   };
 
   const submitTransaction = async (e: React.FormEvent) => {
@@ -4038,83 +4129,13 @@ PERATURAN TEKNIKAL:
   // ==========================================
   if (!authRole) {
     return (
-      <div
-        className={`max-w-md mx-auto min-h-screen ${isDarkMode ? "bg-slate-950" : "bg-slate-50"} flex flex-col justify-center items-center p-6 relative overflow-hidden transition-colors duration-500`}
-      >
-        <div
-          className={`absolute top-[-10%] left-[-20%] w-96 h-96 ${isDarkMode ? "bg-emerald-600/10" : "bg-emerald-600/5"} rounded-full blur-3xl`}
-        />
-
-        <div className="relative z-10 w-full max-w-xs flex flex-col items-center">
-          <div className="mb-8 relative">
-            <div
-              className={`w-20 h-20 ${isDarkMode ? "bg-emerald-500/10 border-emerald-500/30" : "bg-emerald-500/5 border-emerald-500/20"} rounded-3xl border flex items-center justify-center rotate-12 shadow-lg`}
-            >
-              <div
-                className={`w-16 h-16 ${isDarkMode ? "bg-emerald-500/20 border-emerald-500/40" : "bg-emerald-500/10 border-emerald-500/30"} rounded-2xl border flex items-center justify-center -rotate-12`}
-              >
-                <Leaf className="text-emerald-500" size={32} />
-              </div>
-            </div>
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-          </div>
-          <h1 className="text-center uppercase mb-10">
-            <span
-              className={`block text-xl font-display font-black ${isDarkMode ? "text-white" : "text-slate-800"} tracking-widest mb-2`}
-            >
-              FPMSB TUNGGAL
-            </span>
-            <span className="block text-[11px] text-emerald-500 font-sans font-black uppercase tracking-[0.3em] opacity-80 mb-1">
-              Integrated Plantation Data System
-            </span>
-            <span
-              className={`block text-[10px] font-sans font-medium ${isDarkMode ? "text-emerald-400" : "text-emerald-600"} tracking-[0.2em]`}
-            >
-              Sistem Maklumat Ladang
-            </span>
-          </h1>
-
-          <div className="flex gap-4 mb-10 h-4">
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ${pin.length > i ? "bg-emerald-400 scale-110 shadow-[0_0_10px_rgba(52,211,153,0.8)]" : isDarkMode ? "bg-slate-800" : "bg-slate-200"}`}
-              />
-            ))}
-          </div>
-
-          {loginError && (
-            <p className="text-rose-500 text-xs font-bold uppercase tracking-widest mb-4 animate-pulse">
-              PIN Tidak Sah
-            </p>
-          )}
-
-          <div className="grid grid-cols-3 gap-x-8 gap-y-6 w-full px-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-              <button
-                key={num}
-                onClick={() => handlePinPress(num.toString())}
-                className={`text-2xl font-black p-4 rounded-full transition-all active:scale-90 ${isDarkMode ? "text-white hover:bg-white/5" : "text-slate-800 hover:bg-slate-100"}`}
-              >
-                {num}
-              </button>
-            ))}
-            <div />
-            <button
-              onClick={() => handlePinPress("0")}
-              className={`text-2xl font-black p-4 rounded-full transition-all active:scale-90 ${isDarkMode ? "text-white hover:bg-white/5" : "text-slate-800 hover:bg-slate-100"}`}
-            >
-              0
-            </button>
-            <button
-              onClick={handleDeletePress}
-              className={`flex justify-center items-center p-4 rounded-full transition-all active:scale-90 ${isDarkMode ? "text-slate-500 hover:bg-white/5" : "text-slate-400 hover:bg-slate-100"}`}
-            >
-              <Delete size={28} />
-            </button>
-          </div>
-        </div>
-      </div>
+      <LoginScreen
+        pin={pin}
+        loginError={loginError}
+        isDarkMode={isDarkMode}
+        handlePinPress={handlePinPress}
+        handleDeletePress={handleDeletePress}
+      />
     );
   }
 
@@ -4136,772 +4157,82 @@ PERATURAN TEKNIKAL:
         </div>
       )}
 
-      {/* EXPORT MODAL */}
-      {sharePreviewData && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
-            <div className="flex justify-between items-center mb-4 shrink-0">
-              <h3 className="font-black text-slate-800 dark:text-white text-lg flex items-center gap-2">
-                <Share size={20} className="text-emerald-500" />
-                Kongsi Imej HD
-              </h3>
-              <button
-                onClick={() => setSharePreviewData(null)}
-                className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 p-2 rounded-full transition-colors"
-                title="Tutup"
-              >
-                <X size={16} />
-              </button>
-            </div>
+      <ShareModal
+        isOpen={!!sharePreviewData}
+        onClose={() => setSharePreviewData(null)}
+        sharePreviewData={sharePreviewData}
+        setSharePreviewData={setSharePreviewData}
+        showToast={showToast}
+      />
 
-            <div className="flex-1 overflow-auto rounded-xl bg-slate-100 dark:bg-slate-800 mb-4 border border-slate-200 dark:border-slate-700 min-h-0">
-              <img
-                src={sharePreviewData.url}
-                alt="Screenshot Preview"
-                className="w-full object-contain"
-              />
-            </div>
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        reportType={reportType}
+        setReportType={setReportType}
+        exportFilter={exportFilter}
+        setExportFilter={setExportFilter}
+        exportMonth={exportMonth}
+        setExportMonth={setExportMonth}
+        exportDate={exportDate}
+        setExportDate={setExportDate}
+        exportColumns={exportColumns}
+        setExportColumns={setExportColumns}
+        isExporting={isExporting}
+        exportToExcel={exportToExcel}
+      />
 
-            <div className="flex flex-col gap-2 shrink-0">
-              <button
-                onClick={async () => {
-                  try {
-                    if (
-                      navigator.canShare &&
-                      navigator.canShare({ files: [sharePreviewData.file] })
-                    ) {
-                      await navigator.share({
-                        files: [sharePreviewData.file],
-                        title: "Laporan FPMSB Tunggal",
-                        text: "Laporan Imej HD dari FPMSB Tunggal",
-                      });
-                      setSharePreviewData(null);
-                    } else {
-                      showToast(
-                        "error",
-                        "Sistem operasi tidak menyokong fungsi Share (Kongsi)",
-                      );
-                    }
-                  } catch (e) {
-                    console.error("Share failed", e);
-                    // It can be a simple cancel by the user; just quietly handle it unless it's not AbortError
-                    if (e instanceof Error && e.name !== "AbortError") {
-                      showToast("error", "Gagal berkongsi.");
-                    }
-                  }
-                }}
-                className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1DA851] text-white py-3.5 rounded-2xl font-black text-sm transition-all active:scale-[0.98] shadow-lg shadow-[#25D366]/30 uppercase tracking-widest"
-              >
-                <MessageCircle size={18} />
-                Kongsi ke WhatsApp
-              </button>
+      <DeleteRecordModal
+        isOpen={!!recordToDelete}
+        onClose={() => setRecordToDelete(null)}
+        recordId={recordToDelete}
+        onDelete={handleDeleteRecord}
+        isProcessing={isProcessing}
+        type="single"
+      />
 
-              <button
-                onClick={() => {
-                  const link = document.createElement("a");
-                  link.href = sharePreviewData.url;
-                  link.download = sharePreviewData.name;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                  if (typeof window !== "undefined" && "vibrate" in navigator)
-                    navigator.vibrate([100, 50, 100]);
-                  showToast("success", "Imej berjaya dimuat turun format PNG.");
-                  setSharePreviewData(null);
-                }}
-                className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-white py-3.5 rounded-2xl font-bold text-sm transition-all"
-              >
-                <Download size={18} />
-                Muat Turun (Simpan)
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <NewFeaturesModal
+        isOpen={showNewFeaturesModal}
+        onClose={() => setShowNewFeaturesModal(false)}
+        recentUpdates={recentUpdates}
+      />
 
-      {showExportModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-800">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="font-black text-slate-800 dark:text-white text-lg flex items-center gap-2">
-                <Download size={20} className="text-emerald-500" />
-                Muat Turun Excel
-              </h3>
-              <button
-                onClick={() => setShowExportModal(false)}
-                className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 p-2 rounded-full transition-colors"
-              >
-                <X size={16} />
-              </button>
-            </div>
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        isDarkMode={isDarkMode}
+        setIsDarkMode={setIsDarkMode}
+      />
 
-            <div className="space-y-4">
-              <div>
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-2 block ml-1">
-                  Jenis Laporan
-                </label>
-                <div className="grid grid-cols-3 gap-2 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-2xl border border-slate-200 dark:border-slate-700">
-                  {(
-                    [
-                      { id: "hasil", label: "CAPAI" },
-                      { id: "muda", label: "Muda" },
-                      { id: "kpa_kpg", label: "Kpg=Kpa" },
-                      { id: "efb", label: "EFB" },
-                      { id: "efc_format", label: "Efc Format" },
-                    ] as const
-                  ).map((r) => (
-                    <button
-                      key={r.id}
-                      onClick={() => setReportType(r.id)}
-                      className={`py-2 px-1 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest ${reportType === r.id ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm" : "text-slate-400 dark:text-slate-500 hover:text-slate-600"}`}
-                    >
-                      {r.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+      <DeleteRecordModal
+        isOpen={showDeleteAllModal}
+        onClose={() => setShowDeleteAllModal(false)}
+        recordId={null}
+        onDelete={handleDeleteAllRecords}
+        isProcessing={isProcessing}
+        type="all"
+      />
 
-              <div>
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-2 block ml-1">
-                  Pilihan Muat Turun
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => setExportFilter("all")}
-                    className={`py-2 px-3 text-xs font-bold rounded-xl border transition-all ${exportFilter === "all" ? "bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 text-emerald-700 dark:text-emerald-400 shadow-sm" : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"}`}
-                  >
-                    Semua
-                  </button>
-                  <button
-                    onClick={() => setExportFilter("month")}
-                    className={`py-2 px-3 text-xs font-bold rounded-xl border transition-all ${exportFilter === "month" ? "bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 text-emerald-700 dark:text-emerald-400 shadow-sm" : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"}`}
-                  >
-                    Bulan
-                  </button>
-                  <button
-                    onClick={() => setExportFilter("date")}
-                    className={`py-2 px-3 text-xs font-bold rounded-xl border transition-all ${exportFilter === "date" ? "bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 text-emerald-700 dark:text-emerald-400 shadow-sm" : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"}`}
-                  >
-                    Tarikh
-                  </button>
-                </div>
-              </div>
-
-              {exportFilter === "month" && (
-                <div className="animate-in slide-in-from-top-2 duration-200">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 block">
-                    Pilih Bulan
-                  </label>
-                  <input
-                    type="month"
-                    value={exportMonth}
-                    onChange={(e) => setExportMonth(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                  />
-                </div>
-              )}
-
-              {exportFilter === "date" && (
-                <div className="animate-in slide-in-from-top-2 duration-200">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 block">
-                    Pilih Tarikh
-                  </label>
-                  <input
-                    type="date"
-                    value={exportDate}
-                    onChange={(e) => setExportDate(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-2 block ml-1">
-                  Pilihan Kolum
-                </label>
-                <div className="flex flex-wrap gap-1.5 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-100 dark:border-slate-800">
-                  {[
-                    { id: "tarikh", label: "Tarikh" },
-                    { id: "no_resit", label: "Resit" },
-                    { id: "no_lori", label: "Lori" },
-                    { id: "no_seal", label: "Seal" },
-                    { id: "no_nota", label: "Nota" },
-                    { id: "kpg", label: "KPG" },
-                    { id: "blok", label: "Blok" },
-                    { id: "peringkat", label: "Pkt" },
-                    { id: "tan", label: "Tan" },
-                    { id: "muda", label: "Muda" },
-                    { id: "thek", label: "T/H" },
-                    { id: "masa", label: "Masa" },
-                    { id: "created", label: "Cipta" },
-                  ].map((col) => (
-                    <button
-                      key={col.id}
-                      onClick={() => {
-                        if (exportColumns.includes(col.id)) {
-                          if (exportColumns.length > 1)
-                            setExportColumns(
-                              exportColumns.filter((c) => c !== col.id),
-                            );
-                        } else {
-                          setExportColumns([...exportColumns, col.id]);
-                        }
-                      }}
-                      className={`px-2 py-1 text-[8px] font-black rounded-lg border transition-all uppercase tracking-tighter ${exportColumns.includes(col.id) ? "bg-emerald-500 border-emerald-500 text-white shadow-sm" : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500"}`}
-                    >
-                      {col.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-2 mt-2">
-                <button
-                  onClick={exportToExcel}
-                  disabled={isExporting}
-                  className={`w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${isExporting ? "opacity-70 cursor-not-allowed" : ""}`}
-                >
-                  {isExporting ? (
-                    <Loader2 className="animate-spin" size={16} />
-                  ) : (
-                    <Download size={16} />
-                  )}
-                  <span className="text-xs">
-                    {isExporting
-                      ? "Menjana Fail..."
-                      : "Muat Turun Excel (.xlsx)"}
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* DELETE CONFIRMATION MODAL */}
-      <AnimatePresence>
-        {recordToDelete && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setRecordToDelete(null)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden border border-white/10 p-6"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center mb-4">
-                  <Trash2 size={32} />
-                </div>
-                <h3 className="text-lg font-display font-black text-slate-800 dark:text-white uppercase tracking-widest mb-2">
-                  Padam Rekod?
-                </h3>
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-6">
-                  Adakah anda pasti ingin memadam rekod resit{" "}
-                  <span className="text-rose-500 font-black">
-                    {recordToDelete}
-                  </span>
-                  ? Tindakan ini tidak boleh dibatalkan.
-                </p>
-
-                <div className="grid grid-cols-2 gap-3 w-full">
-                  <button
-                    onClick={() => setRecordToDelete(null)}
-                    className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-black py-4 rounded-2xl active:scale-95 transition-all"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    onClick={() => handleDeleteRecord(recordToDelete)}
-                    disabled={isProcessing}
-                    className="bg-rose-600 text-white font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-all flex justify-center items-center gap-2"
-                  >
-                    {isProcessing ? (
-                      <Loader2 className="animate-spin" size={20} />
-                    ) : (
-                      "Ya, Padam"
-                    )}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* NEW FEATURES MODAL */}
-      <AnimatePresence>
-        {showNewFeaturesModal && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowNewFeaturesModal(false)}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-white dark:bg-[#0f172a] rounded-[40px] p-8 w-full max-w-sm shadow-2xl border border-slate-200 dark:border-white/5 overflow-hidden flex flex-col"
-            >
-              <div className="flex justify-between items-start mb-8">
-                <div>
-                  <h2 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight">
-                    Ciri Baharu
-                  </h2>
-                  <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-1">
-                    Kemas Kini April 2026
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowNewFeaturesModal(false)}
-                  className="bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 p-2 rounded-full transition-all"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="space-y-4 mb-8 custom-scrollbar overflow-y-auto max-h-[500px] pr-2">
-                {recentUpdates[0].items.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex gap-4 p-4 rounded-[24px] bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all hover:scale-[1.02]"
-                  >
-                    <div
-                      className={`w-12 h-12 ${item.iconBg} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner`}
-                    >
-                      {item.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight">
-                        {item.title}
-                      </h3>
-                      <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                        {item.desc}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={() => setShowNewFeaturesModal(false)}
-                className="w-full py-4 bg-slate-900 dark:bg-emerald-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-emerald-500/10 active:scale-95 transition-all text-[11px]"
-              >
-                Faham & Teruskan
-              </button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* SETTINGS MODAL (Including What's New Feature) */}
-      <AnimatePresence>
-        {showSettingsModal && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowSettingsModal(false)}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-white dark:bg-[#0f172a] rounded-[32px] p-0 w-full max-w-sm shadow-2xl border border-slate-200 dark:border-white/5 overflow-hidden flex flex-col max-h-[80vh]"
-            >
-              {/* Header */}
-              <div className="p-6 pb-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.02]">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-500/10 rounded-xl">
-                    <Settings size={20} className="text-emerald-500" />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-slate-800 dark:text-white text-lg leading-tight">
-                      Tetapan
-                    </h3>
-                    <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">
-                      App Configuration
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowSettingsModal(false)}
-                  className="bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 p-2 rounded-full transition-all"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* Scrollable Content */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
-                {/* Visual Preference Section */}
-                <section>
-                  <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 ml-1">
-                    Paparan Visual
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => setIsDarkMode(false)}
-                      className={`flex flex-col items-center gap-3 p-4 rounded-2xl border transition-all ${!isDarkMode ? "bg-emerald-500/5 border-emerald-500/30 text-emerald-600" : "bg-slate-50 dark:bg-white/5 border-transparent text-slate-400"}`}
-                    >
-                      <Sun size={24} />
-                      <span className="text-[10px] font-black uppercase tracking-widest">
-                        Cahaya
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => setIsDarkMode(true)}
-                      className={`flex flex-col items-center gap-3 p-4 rounded-2xl border transition-all ${isDarkMode ? "bg-emerald-500/5 border-emerald-500/30 text-emerald-400" : "bg-slate-50 dark:bg-white/5 border-transparent text-slate-400"}`}
-                    >
-                      <Moon size={24} />
-                      <span className="text-[10px] font-black uppercase tracking-widest">
-                        Gelap
-                      </span>
-                    </button>
-                  </div>
-                </section>
-
-                <div className="pt-2 text-center pb-6">
-                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em]">
-                    FPMSB TUNGGAL v3.3 • 2026
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* DELETE ALL CONFIRMATION MODAL */}
-      <AnimatePresence>
-        {showDeleteAllModal && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowDeleteAllModal(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden border border-white/10 p-6"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center mb-4">
-                  <AlertTriangle size={32} />
-                </div>
-                <h3 className="text-lg font-display font-black text-slate-800 dark:text-white uppercase tracking-widest mb-2 text-rose-600">
-                  Padam Semua Data?
-                </h3>
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-6">
-                  Adakah anda pasti ingin memadam{" "}
-                  <span className="text-rose-500 font-black">SEMUA</span> rekod
-                  dalam pangkalan data? Tindakan ini adalah kekal dan tidak
-                  boleh dibatalkan.
-                </p>
-
-                <div className="grid grid-cols-2 gap-3 w-full">
-                  <button
-                    onClick={() => setShowDeleteAllModal(false)}
-                    className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-black py-4 rounded-2xl active:scale-95 transition-all"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    onClick={handleDeleteAllRecords}
-                    disabled={isProcessing}
-                    className="bg-rose-600 text-white font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-all flex justify-center items-center gap-2"
-                  >
-                    {isProcessing ? (
-                      <Loader2 className="animate-spin" size={20} />
-                    ) : (
-                      "Ya, Padam Semua"
-                    )}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Header Korporat */}
-      <header className="bg-gradient-to-br from-emerald-900 via-slate-900 to-emerald-950 pt-12 pb-8 px-5 rounded-b-[48px] shadow-2xl relative z-40 border-b border-white/5">
-        {/* Modern decorative elements */}
-        <div className="absolute inset-0 rounded-b-[48px] overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -mr-32 -mt-32" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-400/5 rounded-full blur-[80px] -ml-24 -mb-24" />
-        </div>
-
-        <div className="relative z-50 flex justify-between items-start mb-4">
-          <div className="flex items-center gap-5 flex-1 min-w-0">
-            <div className="w-14 h-14 bg-white/5 backdrop-blur-xl rounded-[22px] border border-white/10 flex items-center justify-center shadow-2xl shrink-0 group transition-all duration-500 hover:bg-emerald-500/20 hover:border-emerald-500/30">
-              <Leaf
-                className="text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)] transition-transform duration-500 group-hover:rotate-12"
-                size={28}
-              />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-display font-black text-white tracking-widest leading-none uppercase drop-shadow-lg">
-                FPMSB TUNGGAL
-                <div className="flex items-center gap-2 mt-2.5">
-                  <span className="inline-block px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/30 rounded text-[9px] sm:text-[10px] font-sans font-black text-emerald-300 tracking-widest uppercase">
-                    Version 3.3
-                  </span>
-                  <div className="h-px bg-white/10 flex-grow max-w-[40px]" />
-                </div>
-                <span className="block text-[10px] sm:text-[11px] font-sans font-black text-emerald-400/90 tracking-[0.25em] mt-1.5 uppercase opacity-90">
-                  Integrated Plantation Data System
-                </span>
-                <span className="block text-[8px] sm:text-[9px] font-sans font-medium text-emerald-200/50 tracking-[0.3em] mt-1 uppercase">
-                  Sistem Maklumat Ladang Bersepadu
-                </span>
-              </h1>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0 ml-2">
-            <div className="relative" ref={userMenuRef}>
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 p-1.5 pr-3 bg-white/10 hover:bg-white/20 rounded-full border border-white/20 transition-all shadow-lg active:scale-[0.97] z-50 group"
-                aria-label="User Menu"
-              >
-                <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-inner ring-2 ring-white/10 group-hover:ring-emerald-400 transition-all">
-                  {authRole === "fc"
-                    ? "FC"
-                    : authRole === "afc"
-                      ? "AFC"
-                      : authRole === "fs"
-                        ? "FS"
-                        : "O"}
-                </div>
-                <div className="hidden sm:flex flex-col items-start mr-1">
-                  <span className="text-[10px] font-black text-white uppercase leading-none">
-                    {authRole === "fc"
-                      ? "Field Controller (FC)"
-                      : authRole === "afc"
-                        ? "Asst. Field Controller (AFC)"
-                        : authRole === "fs"
-                          ? "Field Supervisor (FS)"
-                          : "Operator"}
-                  </span>
-                  <span className="text-[8px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5">
-                    Online
-                  </span>
-                </div>
-                <ChevronDown
-                  size={14}
-                  className={`text-white/50 transition-transform duration-300 ${showUserMenu ? "rotate-180" : ""}`}
-                />
-              </button>
-
-              <AnimatePresence>
-                {showUserMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute top-14 right-0 w-56 bg-slate-900/98 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] overflow-hidden"
-                  >
-                    {/* User Profile Header */}
-                    <div className="p-4 border-b border-white/10 bg-white/5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-black shadow-lg ring-2 ring-emerald-500/20">
-                          {authRole === "fc"
-                            ? "FC"
-                            : authRole === "afc"
-                              ? "AFC"
-                              : authRole === "fs"
-                                ? "FS"
-                                : "O"}
-                        </div>
-                        <div className="overflow-hidden">
-                          <p className="text-[11px] font-black text-white uppercase truncate">
-                            {authRole === "fc"
-                              ? "Field Controller (FC)"
-                              : authRole === "afc"
-                                ? "Asst. Field Controller (AFC)"
-                                : authRole === "fs"
-                                  ? "Field Supervisor (FS)"
-                                  : "Operator"}
-                          </p>
-                          <p className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">
-                            {authRole === "fc" || authRole === "afc"
-                              ? "Akses Penuh"
-                              : "Akses Terhad"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Menu Items */}
-                    <div className="p-2 space-y-0.5">
-                      {/* DARK MODE TOGGLE */}
-                      <div className="w-full flex items-center justify-between px-2.5 py-1 text-white/70 bg-white/5 rounded-xl border border-white/5 mb-1.5 mt-1">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-                            <Moon size={16} className="text-slate-400" />
-                          </div>
-                          <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
-                            Mod Gelap
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => setIsDarkMode(!isDarkMode)}
-                          className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors focus:outline-none ${isDarkMode ? "bg-emerald-500" : "bg-slate-700"}`}
-                        >
-                          <span
-                            className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${isDarkMode ? "translate-x-5.5" : "translate-x-1"}`}
-                          />
-                        </button>
-                      </div>
-
-                      {/* SYSTEM STATUS */}
-                      <div className="w-full flex items-center justify-between px-2.5 py-1 text-white/70 bg-white/5 rounded-xl border border-white/5 mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-                            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                          </div>
-                          <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
-                            Sistem
-                          </span>
-                        </div>
-                        <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-500 px-2.5 py-0.5 rounded-md uppercase tracking-tighter">
-                          Online
-                        </span>
-                      </div>
-
-                      {/* MENU ITEMS */}
-                      <div className="space-y-1">
-                        <button
-                          onClick={() => {
-                            setShowNewFeaturesModal(true);
-                            setShowUserMenu(false);
-                          }}
-                          className="w-full flex items-center justify-between px-2.5 py-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all group"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-cyan-500/20 transition-all">
-                              <Info size={16} className="text-cyan-400" />
-                            </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider">
-                              Ciri Baharu
-                            </span>
-                          </div>
-                          <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setShowExportModal(true);
-                            setShowUserMenu(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-2.5 py-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all group"
-                        >
-                          <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-blue-500/20 transition-all">
-                            <Download size={16} className="text-blue-400" />
-                          </div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            Muat Turun Excel
-                          </span>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setShowSettingsModal(true);
-                            setShowUserMenu(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-2.5 py-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all group"
-                        >
-                          <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-slate-500/20 transition-all">
-                            <Settings size={16} className="text-slate-400" />
-                          </div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            Tetapan
-                          </span>
-                        </button>
-
-                        <a
-                          href="https://wa.me/601138404285?text=Salam%2C%20saya%20memerlukan%20bantuan%20berkenaan%20aplikasi%20FPMSB%20Tunggal."
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full flex items-center gap-3 px-2.5 py-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all group"
-                        >
-                          <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-indigo-500/20 transition-all">
-                            <HelpCircle size={16} className="text-indigo-400" />
-                          </div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            Bantuan
-                          </span>
-                        </a>
-                      </div>
-
-                      <div className="h-px bg-white/5 my-2 mx-1" />
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleLogout();
-                        }}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-all group"
-                      >
-                        <div className="w-8 h-8 bg-rose-500/10 rounded-lg flex items-center justify-center">
-                          <LogOut size={16} />
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest">
-                          Log Keluar
-                        </span>
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-        </div>
-
-        {/* Toggle Laporan (Dashboard) */}
-        {(authRole === "fc" || authRole === "afc" || authRole === "fs") &&
-          activeTab === "dashboard" && (
-            <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-500">
-              {/* Level 1: Jenis Laporan (Pill Style) - Scrollable */}
-              <Reorder.Group
-                axis="x"
-                values={reportTabs}
-                onReorder={setReportTabs}
-                className="flex w-full overflow-x-auto scrollbar-hide bg-black/30 p-1.5 rounded-full border border-white/10 backdrop-blur-md shadow-inner gap-1"
-                style={{ WebkitOverflowScrolling: "touch" }}
-              >
-                {reportTabs.map((r) => (
-                  <ReportTab
-                    key={r.id}
-                    r={r}
-                    reportType={reportType}
-                    setReportType={setReportType}
-                    isReordering={isReordering}
-                    setIsReordering={setIsReordering}
-                    longPressTimer={longPressTimer}
-                  />
-                ))}
-              </Reorder.Group>
-            </div>
-          )}
-      </header>
+      <Header
+        authRole={authRole}
+        showUserMenu={showUserMenu}
+        setShowUserMenu={setShowUserMenu}
+        isDarkMode={isDarkMode}
+        setIsDarkMode={setIsDarkMode}
+        setShowNewFeaturesModal={setShowNewFeaturesModal}
+        setShowExportModal={setShowExportModal}
+        setShowSettingsModal={setShowSettingsModal}
+        handleLogout={handleLogout}
+        userMenuRef={userMenuRef}
+        activeTab={activeTab}
+        reportTabs={reportTabs}
+        setReportTabs={setReportTabs}
+        reportType={reportType}
+        setReportType={setReportType}
+        isReordering={isReordering}
+        setIsReordering={setIsReordering}
+        longPressTimer={longPressTimer}
+      />
 
       {/* MODAL CIRI BAHARU */}
       <AnimatePresence>
@@ -5103,6 +4434,7 @@ PERATURAN TEKNIKAL:
                 handleOcrScan={handleOcrScan}
                 submitTransaction={submitTransaction}
                 isProcessing={isProcessing}
+                onAddHujan={handleAddHujan}
               />
             )}
 
@@ -5175,7 +4507,8 @@ PERATURAN TEKNIKAL:
                                 { id: 'laporan', label: 'Laporan', icon: FileSpreadsheet },
                                 { id: 'analitik', label: 'Analitik', icon: BarChart3 },
                                 { id: 'abw', label: 'ABW', icon: TrendingUp },
-                                { id: 'bbc', label: 'BBC', icon: Package }
+                                { id: 'bbc', label: 'BBC', icon: Package },
+                                { id: 'hujan', label: 'Laporan Hujan', icon: CloudRain }
                               ].map((tab) => (
                                 <button
                                   key={tab.id}
@@ -5199,6 +4532,8 @@ PERATURAN TEKNIKAL:
       {reportType === "hasil" && activeHasilTab === 'abw' && <AbwView />}
       
       {reportType === "hasil" && activeHasilTab === 'bbc' && <BbcView />}
+
+      {reportType === "hasil" && activeHasilTab === 'hujan' && <LaporanHujanView data={hujanData} />}
       
                         {(reportType !== "hasil" || activeHasilTab === 'kpi') && (
                           <div className="relative pt-3">
@@ -5269,7 +4604,7 @@ PERATURAN TEKNIKAL:
                       )}
 
                         {/* SUBSECTION DETAILS */}
-                        {(reportType !== "hasil" || activeHasilTab === 'kpi') && (
+                        {(reportType !== "hasil" || activeHasilTab === 'kpi') && reportType !== "efb" && (
                           <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-[24px] border border-slate-200 dark:border-slate-800 mb-4 relative mt-6">
                           {/* OVERALL TITLE FOR THIS SECTION */}
                           {reportType === "muda" && (
@@ -5278,38 +4613,6 @@ PERATURAN TEKNIKAL:
                             </div>
                           )}
                           <div className="overflow-hidden">
-                            <div className="grid grid-cols-3 gap-x-2 mb-1.5 px-0.5">
-                              {/* HARI INI HEADER */}
-                              <div className="flex items-center justify-center py-1 bg-white/80 dark:bg-slate-800/80 rounded-full border border-slate-100 dark:border-slate-700/50 shadow-sm backdrop-blur-sm">
-                                <Calendar
-                                  size={10}
-                                  className="text-emerald-500 mr-1.5"
-                                />
-                                <h3 className="text-[7.5px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest leading-none pt-[1px]">
-                                  HARI INI
-                                </h3>
-                              </div>
-                              {/* BULAN INI HEADER */}
-                              <div className="flex items-center justify-center py-1 bg-white/80 dark:bg-slate-800/80 rounded-full border border-slate-100 dark:border-slate-700/50 shadow-sm backdrop-blur-sm">
-                                <Calendar
-                                  size={10}
-                                  className="text-emerald-500 mr-1.5"
-                                />
-                                <h3 className="text-[7.5px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest leading-none pt-[1px]">
-                                  BULAN INI
-                                </h3>
-                              </div>
-                              {/* TAHUN INI HEADER */}
-                              <div className="flex items-center justify-center py-1 bg-white/80 dark:bg-slate-800/80 rounded-full border border-slate-100 dark:border-slate-700/50 shadow-sm backdrop-blur-sm">
-                                <Calendar
-                                  size={10}
-                                  className="text-emerald-500 mr-1.5"
-                                />
-                                <h3 className="text-[7.5px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest leading-none pt-[1px]">
-                                  TAHUN INI
-                                </h3>
-                              </div>
-                            </div>
                             <div className="grid grid-cols-3 gap-x-2">
                               <ReportSummarySection
                                 type={reportType}
@@ -5339,9 +4642,9 @@ PERATURAN TEKNIKAL:
 
                         {/* RANKING CARDS - ONLY FOR ANALITIK TAB */}
                         {reportType === "hasil" && activeHasilTab === 'analitik' && (
-                          <div className="bg-white dark:bg-slate-900 rounded-[24px] p-4 shadow-md border border-slate-100 dark:border-slate-800 mb-6 relative">
-                            <div className="flex justify-between items-center mb-4">
-                              <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
+                          <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 shadow-md border border-slate-100 dark:border-slate-800 mb-4 relative">
+                            <div className={`flex justify-between items-center ${showRankingCollapsed ? "mb-0" : "mb-4"}`}>
+                              <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 pl-1">
                                 <TrendingUp size={12} />
                                 Blok Performance
                               </h3>
@@ -5473,16 +4776,11 @@ PERATURAN TEKNIKAL:
                           </div>
                         )}
 
-                        {/* TREND ANALYTICS SECTION - ONLY FOR HASIL */}
-                        {reportType === "hasil" && activeHasilTab === 'analitik' && (
-                          <div className="pt-4 space-y-4">
-                            {(reportType === "hasil" ||
-                              reportType === "muda" ||
-                              reportType === "efb" ||
-                              reportType === "kpa_kpg") && (
-                              <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-md border border-slate-100 dark:border-slate-800 relative">
-                              <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-1.5">
+                        {/* TREND ANALYTICS SECTION */}
+                        {((reportType === "hasil" && activeHasilTab === 'analitik') || reportType === "muda" || reportType === "efb" || reportType === "kpa_kpg") && (
+                              <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 shadow-md border border-slate-100 dark:border-slate-800 relative mb-4">
+                              <div className={`flex justify-between items-center ${showTrendCollapsed ? "mb-0" : "mb-4"}`}>
+                                <h3 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-1.5 pl-1">
                                   <BarChart3
                                     size={10}
                                     className="text-emerald-500"
@@ -5600,6 +4898,7 @@ PERATURAN TEKNIKAL:
                                           return (
                                             <ComposedChart
                                               data={analytics.monthlyTrend}
+                                              margin={{ top: 30, right: 0, left: 0, bottom: 0 }}
                                             >
                                               <CartesianGrid
                                                 strokeDasharray="3 3"
@@ -5737,23 +5036,27 @@ PERATURAN TEKNIKAL:
                                                 content={({ payload }) => (
                                                   <div className="flex justify-center flex-wrap gap-x-4 mt-2">
                                                     <div className="flex items-center gap-1">
-                                                      <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+                                                      <div className={`w-2.5 h-2.5 rounded-sm ${reportType === "hasil" ? "bg-emerald-500" : reportType === "muda" ? "bg-rose-500" : "bg-sky-500"}`} />
                                                       <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">
-                                                        CAPAI 2026
+                                                        {reportType === "hasil" ? "CAPAI 2026" : label.toUpperCase()}
                                                       </span>
                                                     </div>
-                                                    <div className="flex items-center gap-1">
-                                                      <div className="w-4 h-[1px] bg-slate-400 border-t border-dashed border-slate-400" />
-                                                      <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">
-                                                        CAPAI 2025
-                                                      </span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                      <div className="w-4 h-[1px] bg-rose-500 border-t border-dashed border-rose-500" />
-                                                      <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">
-                                                        TARGET 2026
-                                                      </span>
-                                                    </div>
+                                                    {reportType === "hasil" && (
+                                                      <>
+                                                        <div className="flex items-center gap-1">
+                                                          <div className="w-4 h-[1px] bg-slate-400 border-t border-dashed border-slate-400" />
+                                                          <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                                                            CAPAI 2025
+                                                          </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                          <div className="w-4 h-[1px] bg-rose-500 border-t border-dashed border-rose-500" />
+                                                          <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                                                            TARGET 2026
+                                                          </span>
+                                                        </div>
+                                                      </>
+                                                    )}
                                                   </div>
                                                 )}
                                               />
@@ -5766,8 +5069,6 @@ PERATURAN TEKNIKAL:
                                 )}
                               </AnimatePresence>
                             </div>
-                          )}
-                        </div>
                       )}
 
                           {/* LIVE FSA 13 REPORT PREVIEW */}
@@ -6304,11 +5605,10 @@ PERATURAN TEKNIKAL:
                           (reportType !== 'hasil' && reportType !== "harga" && reportType !== "baja" && reportType !== "pruning")) && (
                             <div
                               ref={thekChartRef}
-                              className="bg-slate-50 dark:bg-[#0f172a] rounded-2xl p-3 shadow-md border border-slate-200 dark:border-slate-800/50 animate-in fade-in slide-in-from-bottom-4 duration-500"
+                              className="bg-white dark:bg-slate-900 rounded-2xl p-3 shadow-md border border-slate-100 dark:border-slate-800 relative mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
                             >
-                              <div className="flex flex-col items-center justify-center mb-1 relative">
-                                <div className="flex items-center justify-center gap-2">
-                                  <h3 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-1.5">
+                              <div className={`flex justify-between items-center ${showThekChart ? "mb-4" : "mb-0"}`}>
+                                  <h3 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-1.5 pl-1">
                                     <BarChart3
                                       size={10}
                                       className="text-emerald-500"
@@ -6325,12 +5625,11 @@ PERATURAN TEKNIKAL:
                                           ? "EFB"
                                           : "KPG=KPA"}
                                   </h3>
-                                </div>
                                 <motion.button
                                   onClick={() =>
                                     setShowThekChart(!showThekChart)
                                   }
-                                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all absolute right-0 top-0"
+                                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
                                 >
                                   <motion.div
                                     animate={{
@@ -6688,7 +5987,7 @@ PERATURAN TEKNIKAL:
                                                   <ComposedChart
                                                     data={chartData}
                                                     margin={{
-                                                      top: 30,
+                                                      top: 35,
                                                       right: 10,
                                                       left: -25,
                                                       bottom: 0,
@@ -7883,33 +7182,11 @@ PERATURAN TEKNIKAL:
         </div>
       )}
 
-      <nav className="fixed bottom-4 landscape:bottom-2 left-6 right-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 shadow-[0_10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)] rounded-full p-1.5 flex justify-between z-50">
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleTabChange("scan")}
-          className={`flex-1 flex justify-center items-center gap-2 py-3 landscape:py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "scan" ? "bg-emerald-900 dark:bg-emerald-600 text-white shadow-md" : "text-slate-400 dark:text-slate-500 hover:text-emerald-700 dark:hover:text-emerald-400"}`}
-        >
-          <ScanLine size={16} /> Input
-        </motion.button>
-
-        {(authRole === "fc" || authRole === "afc" || authRole === "fs") && (
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => handleTabChange("dashboard")}
-            className={`flex-1 flex justify-center items-center gap-2 py-3 landscape:py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "dashboard" ? "bg-emerald-900 dark:bg-emerald-600 text-white shadow-md" : "text-slate-400 dark:text-slate-500 hover:text-emerald-700 dark:hover:text-emerald-400"}`}
-          >
-            <LayoutDashboard size={14} /> Dashboard
-          </motion.button>
-        )}
-
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleTabChange("sejarah")}
-          className={`flex-1 flex justify-center items-center gap-2 py-3 landscape:py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "sejarah" ? "bg-emerald-900 dark:bg-emerald-600 text-white shadow-md" : "text-slate-400 dark:text-slate-500 hover:text-emerald-700 dark:hover:text-emerald-400"}`}
-        >
-          <Calendar size={16} /> Sejarah
-        </motion.button>
-      </nav>
+      <BottomNav 
+        activeTab={activeTab} 
+        handleTabChange={handleTabChange} 
+        authRole={authRole} 
+      />
 
       {/* --- MODAL: CARTA TREND DIPERBESARKAN --- */}
       <AnimatePresence>
@@ -8021,7 +7298,7 @@ PERATURAN TEKNIKAL:
                       return (
                         <BarChart
                           data={analytics.monthlyTrend}
-                          margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
+                          margin={{ top: 30, right: 10, left: -20, bottom: 0 }}
                         >
                           <CartesianGrid
                             strokeDasharray="3 3"
@@ -8150,9 +7427,10 @@ PERATURAN TEKNIKAL:
 
                 <div className="mt-6 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                   <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Analisis trend bulanan menunjukkan prestasi hasil
-                    (Tan/Hektar) bagi tahun {new Date().getFullYear()}. Garis
-                    jingga putus-putus mewakili sasaran bulanan (2.33 T/H).
+                    Analisis trend bulanan menunjukkan prestasi{" "}
+                    {reportType === "hasil" ? "hasil (Tan/Hektar)" : reportType === "muda" ? "BTS Muda (Bts)" : reportType === "efb" ? "EFB (Tan)" : "KPA/KPG (Resit)"}{" "}
+                    bagi tahun {new Date().getFullYear()}.
+                    {reportType === "hasil" && " Garis jingga putus-putus mewakili sasaran bulanan (2.33 T/H)."}
                   </p>
                 </div>
               </div>

@@ -211,172 +211,172 @@ export const HasilBulananTable = ({
  data.ytd2025 > 0
  ? ((data.pencapaianYtd.mt - data.ytd2025) / data.ytd2025) * 100
  : 0;
- const yoyColor = yoyVal >= 0 ? (isGrandTotal ? "text-emerald-200 dark:text-emerald-800" : "text-emerald-600") : (isGrandTotal ? "text-rose-300 dark:text-rose-800" : "text-rose-600");
+  const yoyColor = yoyVal >= 0 ? (isGrandTotal ? "text-emerald-200 dark:text-emerald-800" : "text-emerald-600") : (isGrandTotal ? "text-rose-300 dark:text-rose-800" : "text-rose-600");
 	const targetColor = isGrandTotal ? "text-emerald-200 dark:text-emerald-800" : "text-emerald-600 dark:text-emerald-400/70";
 	const capaiColor = isGrandTotal ? "text-rose-300 dark:text-rose-800" : (isDarkMode ? "text-rose-400" : "text-rose-600");
 	const tPenColor = isGrandTotal ? "text-emerald-200 dark:text-emerald-800" : "dark:text-emerald-100";
 
- let rowClass = "bg-white dark:bg-[#072d1f] text-emerald-900 dark:text-emerald-100 border-b border-emerald-100 dark:border-emerald-900/50";
- let isRankedColor = false;
+  let rowClass = "bg-white dark:bg-[#072d1f] text-emerald-900 dark:text-emerald-100 border-b border-emerald-100 dark:border-emerald-900/50";
+  let monthRankTextColor = "";
+  let ytdRankTextColor = "";
 
- if (isGrandTotal) {
- rowClass = "bg-emerald-800 text-white dark:bg-emerald-400 dark:text-emerald-950 font-black shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-20 relative";
- } else if (isSubtotal) {
- rowClass = "bg-emerald-50 dark:bg-emerald-900/60 font-bold text-emerald-900 dark:text-emerald-100 border-b-2 border-emerald-200 dark:border-emerald-800";
- } else if (data.blok !== "LF" && (sortBy === "month" || sortBy === "ytd")) {
- const pct = sortBy === "month" ? data.pctCapaiMonth : data.pctCapaiYtd;
- if (pct >= 100) {
- rowClass = "bg-emerald-100/60 dark:bg-emerald-900/40 text-emerald-900 dark:text-emerald-100 font-medium border-b border-emerald-100 dark:border-emerald-900/50";
- isRankedColor = true;
- } else if (pct >= 90) {
- rowClass = "bg-teal-50/80 dark:bg-teal-900/40 text-teal-900 dark:text-teal-100 font-medium border-b border-emerald-100 dark:border-emerald-900/50";
- isRankedColor = true;
- } else if (pct >= 70) {
- rowClass = "bg-amber-50/80 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100 font-medium border-b border-emerald-100 dark:border-emerald-900/50";
- isRankedColor = true;
- } else {
- rowClass = "bg-rose-50/80 dark:bg-rose-900/40 text-rose-900 dark:text-rose-100 font-medium border-b border-emerald-100 dark:border-emerald-900/50";
- isRankedColor = true;
- }
- }
+  if (isGrandTotal) {
+    rowClass = "bg-emerald-800 text-white dark:bg-emerald-400 dark:text-emerald-950 font-black shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-20 relative";
+  } else if (isSubtotal) {
+    rowClass = "bg-emerald-50 dark:bg-emerald-900/60 font-bold text-emerald-900 dark:text-emerald-100 border-b-2 border-emerald-200 dark:border-emerald-800";
+  } else if (data.blok !== "LF" && (sortBy === "month" || sortBy === "ytd")) {
+    const calculateRankTextColor = (pct: number) => {
+      if (pct >= 100) return "text-emerald-600 dark:text-emerald-400";
+      if (pct >= 90) return "text-teal-600 dark:text-teal-400";
+      if (pct >= 70) return "text-amber-500 dark:text-amber-400";
+      return "text-rose-600 dark:text-rose-400";
+    };
 
- const zoomStyles = {
- padding: `${Math.max(2, 6 * ((zoom / 100) * renderScale))}px ${Math.max(3, 8 * ((zoom / 100) * renderScale))}px`,
- fontSize: `${Math.max(9, 13.2 * ((zoom / 100) * renderScale))}px`,
- };
+    if (sortBy === "month") {
+       monthRankTextColor = calculateRankTextColor(data.pctCapaiMonth);
+    } else if (sortBy === "ytd") {
+       ytdRankTextColor = calculateRankTextColor(data.pctCapaiYtd);
+    }
+  }
 
- return (
- <tr
- key={data.blok}
- className={`${rowClass} transition-colors cursor-pointer ${!isRankedColor && !isGrandTotal && !isSubtotal ? "hover:bg-emerald-50 dark:hover:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
- >
- <td
- style={zoomStyles}
- className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center uppercase"
- >
- {data.pkt}
- </td>
- <td
- style={zoomStyles}
- className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center uppercase"
- >
- {data.tahunTuai}
- </td>
- <td
- style={zoomStyles}
- className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${isRankedColor ? "opacity-80" : targetColor}`}
- >
- {data.targetTahun}
- </td>
- <td
- style={zoomStyles}
- className={`sticky left-0 border-r-2 border-emerald-400 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 text-center font-black shadow-[2px_0_5px_rgba(0,0,0,0.1)] z-10 ${rowClass}`}
- >
- {data.blok}
- </td>
- <td
- style={zoomStyles}
- className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 font-medium"
- >
- {data.luas.toFixed(2)}
- </td>
- <td
- style={zoomStyles}
- className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-bold dark:text-emerald-100 ${isGrandTotal ? "text-emerald-200 dark:text-emerald-800" : ""}`}
- >
- {data.peneroka > 0 ? data.peneroka : "-"}
- </td>
- <td
- style={zoomStyles}
- className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-bold ${isRankedColor ? "opacity-80" : capaiColor}`}
- >
- {data.capai2025.toFixed(2)}
- </td>
+  const zoomStyles = {
+    padding: `${Math.max(2, 6 * ((zoom / 100) * renderScale))}px ${Math.max(3, 8 * ((zoom / 100) * renderScale))}px`,
+    fontSize: `${Math.max(12, 16.5 * ((zoom / 100) * renderScale))}px`,
+    fontWeight: "bold",
+  };
 
- {/* BULAN INI ANGGARAN */}
- <td
- style={zoomStyles}
- className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 ${!isRankedColor && !isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
- >
- {data.anggaranMonth.mt.toFixed(2)}
- </td>
- <td
- style={zoomStyles}
- className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${!isRankedColor && !isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
- >
- {data.anggaranMonth.tHek.toFixed(2)}
- </td>
+  return (
+    <tr
+      key={data.blok}
+      className={`${rowClass} transition-colors cursor-pointer ${!isGrandTotal && !isSubtotal ? "hover:bg-emerald-50 dark:hover:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
+    >
+      <td
+        style={zoomStyles}
+        className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center uppercase"
+      >
+        {data.pkt}
+      </td>
+      <td
+        style={zoomStyles}
+        className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center uppercase"
+      >
+        {data.tahunTuai}
+      </td>
+      <td
+        style={zoomStyles}
+        className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${targetColor}`}
+      >
+        {data.targetTahun}
+      </td>
+      <td
+        style={zoomStyles}
+        className={`sticky left-0 border-r-2 border-emerald-400 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 text-center font-black shadow-[2px_0_5px_rgba(0,0,0,0.1)] z-10 ${rowClass}`}
+      >
+        {data.blok}
+      </td>
+      <td
+        style={zoomStyles}
+        className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 font-medium"
+      >
+        {data.luas.toFixed(2)}
+      </td>
+      <td
+        style={zoomStyles}
+        className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-bold dark:text-emerald-100 ${isGrandTotal ? "text-emerald-200 dark:text-emerald-800" : ""}`}
+      >
+        {data.peneroka > 0 ? data.peneroka : "-"}
+      </td>
+      <td
+        style={zoomStyles}
+        className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-bold ${capaiColor}`}
+      >
+        {data.capai2025.toFixed(2)}
+      </td>
 
- {/* BULAN INI PENCAPAIAN */}
- <td
- style={zoomStyles}
- className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 font-black"
- >
- {data.pencapaianMonth.hiMt.toFixed(2)}
- </td>
- <td
- style={zoomStyles}
- className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 font-black"
- >
- {data.pencapaianMonth.hhiMt.toFixed(2)}
- </td>
- <td
- style={zoomStyles}
- className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-black"
- >
- {data.pencapaianMonth.tHek.toFixed(2)}
- </td>
- <td
- style={zoomStyles}
- className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-black ${isRankedColor ? "" : tPenColor}`}
- >
- {data.pencapaianMonth.tPen.toFixed(2)}
- </td>
+      {/* BULAN INI ANGGARAN */}
+      <td
+        style={zoomStyles}
+        className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
+      >
+        {data.anggaranMonth.mt.toFixed(2)}
+      </td>
+      <td
+        style={zoomStyles}
+        className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
+      >
+        {data.anggaranMonth.tHek.toFixed(2)}
+      </td>
 
- <td
- style={zoomStyles}
- className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-black"
- >
- {data.pctCapaiMonth.toFixed(2)}
- </td>
+      {/* BULAN INI PENCAPAIAN */}
+      <td
+        style={zoomStyles}
+        className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 font-black"
+      >
+        {data.pencapaianMonth.hiMt.toFixed(2)}
+      </td>
+      <td
+        style={zoomStyles}
+        className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 font-black"
+      >
+        {data.pencapaianMonth.hhiMt.toFixed(2)}
+      </td>
+      <td
+        style={zoomStyles}
+        className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-black"
+      >
+        {data.pencapaianMonth.tHek.toFixed(2)}
+      </td>
+      <td
+        style={zoomStyles}
+        className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-black ${tPenColor}`}
+      >
+        {data.pencapaianMonth.tPen.toFixed(2)}
+      </td>
 
- {/* HINGGA BULAN INI ANGGARAN */}
- <td
- style={zoomStyles}
- className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 ${!isRankedColor && !isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
- >
- {data.anggaranYtd.mt.toFixed(2)}
- </td>
- <td
- style={zoomStyles}
- className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${!isRankedColor && !isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
- >
- {data.anggaranYtd.tHek.toFixed(2)}
- </td>
+      <td
+        style={zoomStyles}
+        className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-black`}
+      >
+        <span className={monthRankTextColor}>{data.pctCapaiMonth.toFixed(2)}</span>
+      </td>
 
- {/* HINGGA BULAN INI PENCAPAIAN */}
- <td
- style={zoomStyles}
- className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 font-black"
- >
- {data.pencapaianYtd.mt.toFixed(2)}
- </td>
- <td
- style={zoomStyles}
- className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-black"
- >
- {data.pencapaianYtd.tHek.toFixed(2)}
- </td>
+      {/* HINGGA BULAN INI ANGGARAN */}
+      <td
+        style={zoomStyles}
+        className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
+      >
+        {data.anggaranYtd.mt.toFixed(2)}
+      </td>
+      <td
+        style={zoomStyles}
+        className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
+      >
+        {data.anggaranYtd.tHek.toFixed(2)}
+      </td>
 
- <td
- style={zoomStyles}
- className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-black"
- >
- {data.pctCapaiYtd.toFixed(2)}
- </td>
- <td
- style={zoomStyles}
- className={`text-center font-black ${isRankedColor ? (yoyVal < 0 ? "opacity-80" : "") : yoyColor}`}
+      {/* HINGGA BULAN INI PENCAPAIAN */}
+      <td
+        style={zoomStyles}
+        className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 font-black"
+      >
+        {data.pencapaianYtd.mt.toFixed(2)}
+      </td>
+      <td
+        style={zoomStyles}
+        className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-black"
+      >
+        {data.pencapaianYtd.tHek.toFixed(2)}
+      </td>
+
+      <td
+        style={zoomStyles}
+        className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-black`}
+      >
+        <span className={ytdRankTextColor}>{data.pctCapaiYtd.toFixed(2)}</span>
+      </td>
+      <td
+        style={zoomStyles}
+        className={`text-center font-black ${yoyColor}`}
  >
  {yoyVal.toFixed(1)}%
  </td>
@@ -525,7 +525,7 @@ export const HasilBulananTable = ({
 
  ws.mergeCells("A2:S2");
  const title2 = ws.getCell("A2");
- title2.value = "LAPORAN HASIL BULANAN MENGIKUT BLOK 2026";
+ title2.value = "LAPORAN HASIL BULANAN MENGIKUT BLOK ${dbYear}";
  title2.font = { bold: true, size: 12 };
  title2.alignment = { horizontal: "center" };
 
@@ -778,7 +778,7 @@ export const HasilBulananTable = ({
  FELDA PLANTATION MANAGEMENT SDN BHD
  </h2>
  <h3 className="text-[9px] md:text-sm font-bold dark:text-emerald-100 mt-0.5 uppercase tracking-wide">
- LAPORAN HASIL BULANAN MENGIKUT BLOK 2026
+ LAPORAN HASIL BULANAN MENGIKUT BLOK ${dbYear}
  </h3>
  <p className="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tighter">
  BULAN {currentMonthName} SEHINGGA : {dateStr}
@@ -938,7 +938,7 @@ export const HasilBulananTable = ({
  className={`transition-all duration-300 w-full ${
  isFullscreen
  ? "fixed inset-4 md:inset-8 z-[9999] bg-white dark:bg-[#072d1f] rounded-3xl shadow-2xl p-4 md:p-6 overflow-auto flex flex-col custom-scrollbar"
- : "bg-white dark:bg-[#072d1f] border-y border-x-0 sm:border sm:rounded-2xl border-emerald-200 dark:border-slate-800/40 dark:text-emerald-100 shadow-xl shadow-emerald-900/10 overflow-x-auto custom-scrollbar cursor-pointer hover:border-slate-300 dark:hover:border-emerald-700"
+ : "bg-white dark:bg-[#072d1f] border-y border-x-0 sm:border sm:rounded-2xl border-emerald-200 dark:border-slate-800/40 dark:text-emerald-100 shadow-xl shadow-emerald-900/10 overflow-x-auto custom-scrollbar cursor-pointer hover:border-slate-300 dark:hover:border-emerald-700 snap-x snap-mandatory [-webkit-overflow-scrolling:touch]"
  }`}
  >
  {isFullscreen && (
@@ -988,75 +988,75 @@ export const HasilBulananTable = ({
  <table
  ref={tableRef}
  className="w-full border-collapse bg-white dark:bg-emerald-950"
- style={{ minWidth: `${Math.max(1200, 1200 * ((zoom / 100) * renderScale))}px` }}
+ style={{ minWidth: `${Math.max(2000, 2000 * ((zoom / 100) * renderScale))}px` }}
  >
  <thead className="sticky top-0 bg-emerald-900 text-[10px] uppercase font-black tracking-wider text-white z-30 shadow-md border-b-2 border-emerald-700">
  <tr>
  <th
  rowSpan={3}
- style={{ fontSize: `${Math.max(8, 10 * ((zoom / 100) * renderScale))}px` }}
+ style={{ fontSize: `${Math.max(10, 14 * ((zoom / 100) * renderScale))}px` }}
  className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-3 px-2 w-[4%] bg-emerald-900/90 dark:bg-emerald-900"
  >
  PKT
  </th>
  <th
  rowSpan={3}
- style={{ fontSize: `${Math.max(8, 10 * ((zoom / 100) * renderScale))}px` }}
+ style={{ fontSize: `${Math.max(10, 14 * ((zoom / 100) * renderScale))}px` }}
  className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-3 px-2 w-[8%] bg-emerald-900/90 dark:bg-emerald-900"
  >
  THN TUAI
  </th>
  <th
  rowSpan={3}
- style={{ fontSize: `${Math.max(8, 10 * ((zoom / 100) * renderScale))}px` }}
+ style={{ fontSize: `${Math.max(10, 14 * ((zoom / 100) * renderScale))}px` }}
  className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-3 px-2 w-[5%] bg-emerald-900/90 dark:bg-emerald-900"
  >
  TAR/MT
  </th>
  <th
  rowSpan={3}
- style={{ fontSize: `${Math.max(10, 12 * ((zoom / 100) * renderScale))}px` }}
+ style={{ fontSize: `${Math.max(12, 16 * ((zoom / 100) * renderScale))}px` }}
  className="sticky left-0 border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-3 px-2 w-[5%] bg-emerald-900/95 dark:bg-emerald-950/95 z-40 shadow-md"
  >
  BLOK
  </th>
  <th
  rowSpan={3}
- style={{ fontSize: `${Math.max(8, 10 * ((zoom / 100) * renderScale))}px` }}
+ style={{ fontSize: `${Math.max(10, 14 * ((zoom / 100) * renderScale))}px` }}
  className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-3 px-2 w-[6%] bg-emerald-900/90 dark:bg-emerald-900"
  >
  LUAS
  </th>
  <th
  rowSpan={3}
- style={{ fontSize: `${Math.max(8, 10 * ((zoom / 100) * renderScale))}px` }}
+ style={{ fontSize: `${Math.max(10, 14 * ((zoom / 100) * renderScale))}px` }}
  className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-3 px-2 w-[4%] bg-emerald-900/90 dark:bg-emerald-900"
  >
  JUM PEN.
  </th>
  <th
  rowSpan={2}
- style={{ fontSize: `${Math.max(8, 10 * ((zoom / 100) * renderScale))}px` }}
+ style={{ fontSize: `${Math.max(10, 14 * ((zoom / 100) * renderScale))}px` }}
  className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-3 px-2 bg-emerald-900/90 dark:bg-emerald-900"
  >
  CAPAI
  </th>
  <th
  colSpan={7}
- style={{ fontSize: `${Math.max(9, 11 * ((zoom / 100) * renderScale))}px` }}
+ style={{ fontSize: `${Math.max(11, 15 * ((zoom / 100) * renderScale))}px` }}
  className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-3 px-2 bg-emerald-800 dark:bg-emerald-800"
  >
  BULAN INI
  </th>
  <th
  colSpan={6}
- style={{ fontSize: `${Math.max(9, 11 * ((zoom / 100) * renderScale))}px` }}
+ style={{ fontSize: `${Math.max(11, 15 * ((zoom / 100) * renderScale))}px` }}
  className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-3 px-2 bg-emerald-800 dark:bg-emerald-800"
  >
  HINGGA BULAN INI
  </th>
  </tr>
- <tr style={{ fontSize: `${Math.max(8, 10 * ((zoom / 100) * renderScale))}px` }}>
+ <tr style={{ fontSize: `${Math.max(10, 14 * ((zoom / 100) * renderScale))}px` }}>
  <th
  colSpan={2}
  className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-50 py-2 px-1 font-semibold bg-emerald-800/80"
@@ -1100,7 +1100,7 @@ export const HasilBulananTable = ({
  YOY
  </th>
  </tr>
- <tr style={{ fontSize: `${Math.max(7, 9 * ((zoom / 100) * renderScale))}px` }}>
+ <tr style={{ fontSize: `${Math.max(9, 12 * ((zoom / 100) * renderScale))}px` }}>
  <th className=" border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-2 px-1 min-w-[70px] bg-emerald-900/90 dark:bg-emerald-900">
  {currentMonthName} 2025 <br />
  T/HEK

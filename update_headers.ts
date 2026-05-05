@@ -1,0 +1,10 @@
+import fs from 'fs';
+const file = 'src/features/dashboard/components/HasilBulananTable.tsx';
+let content = fs.readFileSync(file, 'utf8');
+content = content.replace(/Math\.max\(8, 10/g, 'Math.max(10, 14');
+content = content.replace(/Math\.max\(10, 12/g, 'Math.max(12, 16');
+content = content.replace(/Math\.max\(9, 11/g, 'Math.max(11, 15');
+content = content.replace(/Math\.max\(8, 10/g, 'Math.max(10, 14');
+content = content.replace(/Math\.max\(7, 9/g, 'Math.max(9, 12');
+fs.writeFileSync(file, content);
+console.log("Updated headers");

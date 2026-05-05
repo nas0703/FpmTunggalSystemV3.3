@@ -1,9 +1,10 @@
 import React, { RefObject, Dispatch, SetStateAction } from "react";
 import { motion } from "motion/react";
-import { FileText, Factory, Droplets, Scissors, Save, AlertCircle, RefreshCw, Loader2, Send, Container } from "lucide-react";
+import { FileText, Factory, Droplets, Scissors, Save, AlertCircle, RefreshCw, Loader2, Send, Container, CloudRain } from "lucide-react";
 import { FloatingInput } from "../../../components/ui/FloatingInput";
 import { FertilizerInput } from "../../fertilizer/components/FertilizerInput";
 import { PruningInput } from "../../pruning/components/PruningInput";
+import { HujanInput } from "../../hujan/components/HujanInput";
 
 export interface InputTabProps {
   formData: any;
@@ -13,6 +14,7 @@ export interface InputTabProps {
   handleOcrScan: (e: any) => void;
   submitTransaction: (e: any) => void;
   isProcessing: boolean;
+  onAddHujan?: (bulan: string, tahun: string, jumlah: number) => void;
 }
 
 export const InputTab: React.FC<InputTabProps> = ({
@@ -23,6 +25,7 @@ export const InputTab: React.FC<InputTabProps> = ({
   handleOcrScan,
   submitTransaction,
   isProcessing,
+  onAddHujan,
 }) => {
   const isBlokValid =
     formData.blok === "" ||
@@ -60,7 +63,7 @@ export const InputTab: React.FC<InputTabProps> = ({
               <div className="flex items-center gap-3">
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                    !formData.is_efb && !formData.is_baja && !formData.is_pruning
+                    !formData.is_efb && !formData.is_baja && !formData.is_pruning && !formData.is_hujan
                       ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
                       : "bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300"
                   }`}
@@ -84,10 +87,11 @@ export const InputTab: React.FC<InputTabProps> = ({
                     is_efb: false,
                     is_baja: false,
                     is_pruning: false,
+                    is_hujan: false,
                   });
                 }}
                 className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 overflow-hidden ${
-                  !formData.is_efb && !formData.is_baja && !formData.is_pruning
+                  !formData.is_efb && !formData.is_baja && !formData.is_pruning && !formData.is_hujan
                     ? "bg-blue-500 shadow-inner"
                     : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 shadow-inner"
                 }`}
@@ -97,7 +101,7 @@ export const InputTab: React.FC<InputTabProps> = ({
                 >
                   <div
                     className={`absolute top-1/2 -translate-y-1/2 w-[20px] h-[20px] bg-white rounded-full shadow-md transition-transform duration-300 ${
-                      !formData.is_efb && !formData.is_baja && !formData.is_pruning
+                      !formData.is_efb && !formData.is_baja && !formData.is_pruning && !formData.is_hujan
                         ? "translate-x-[20px]"
                         : "translate-x-0"
                     }`}
@@ -137,6 +141,7 @@ export const InputTab: React.FC<InputTabProps> = ({
                       is_efb: true,
                       is_baja: false,
                       is_pruning: false,
+                      is_hujan: false,
                       kpg: "",
                       muda: "0",
                       reject: "0.00",
@@ -194,6 +199,7 @@ export const InputTab: React.FC<InputTabProps> = ({
                       is_baja: true,
                       is_efb: false,
                       is_pruning: false,
+                      is_hujan: false,
                     });
                   }
                 }}
@@ -245,6 +251,7 @@ export const InputTab: React.FC<InputTabProps> = ({
                       is_pruning: true,
                       is_baja: false,
                       is_efb: false,
+                      is_hujan: false,
                     });
                   }
                 }}
@@ -265,12 +272,71 @@ export const InputTab: React.FC<InputTabProps> = ({
                 </div>
               </button>
             </div>
+
+            {/* HUJAN Toggle */}
+            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                    formData.is_hujan
+                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+                      : "bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300"
+                  }`}
+                >
+                  <CloudRain size={20} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase">
+                    Laporan Hujan
+                  </p>
+                  <p className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                    Rekod Hujan Bulanan
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!formData.is_hujan) {
+                    setFormData({
+                      ...formData,
+                      is_hujan: true,
+                      is_pruning: false,
+                      is_baja: false,
+                      is_efb: false,
+                    });
+                  }
+                }}
+                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 overflow-hidden ${
+                  formData.is_hujan
+                    ? "bg-blue-500 shadow-inner"
+                    : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 shadow-inner"
+                }`}
+              >
+                <div
+                  className={`w-full h-full rounded-full transition-transform duration-300 relative`}
+                >
+                  <div
+                    className={`absolute top-1/2 -translate-y-1/2 w-[20px] h-[20px] bg-white rounded-full shadow-md transition-transform duration-300 ${
+                      formData.is_hujan ? "translate-x-[20px]" : "translate-x-0"
+                    }`}
+                  />
+                </div>
+              </button>
+            </div>
           </div>
 
           <div className="w-full h-px bg-slate-200 dark:bg-slate-800 my-4" />
 
           {/* DYNAMIC FORMS */}
-          {formData.is_baja ? (
+          {formData.is_hujan ? (
+            <HujanInput 
+              onSuccess={() => {
+                setFormData({ ...formData, is_hujan: false });
+              }}
+              onAddHujan={onAddHujan!}
+            />
+          ) : formData.is_baja ? (
             <FertilizerInput
               onSuccess={() => {
                 setFormData({ ...formData, is_baja: false });

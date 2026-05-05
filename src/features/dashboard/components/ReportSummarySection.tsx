@@ -832,6 +832,16 @@ export const ReportSummarySection = ({
           {showHero && (
             <div className="bg-slate-900 p-2 rounded-xl shadow-lg border border-white/5 relative overflow-hidden h-full">
               <div className="relative z-10">
+                <div className="flex items-center gap-1 mb-1.5 opacity-90">
+                  <Calendar size={8} className="text-emerald-500" />
+                  <h3 className="text-[7px] font-black text-emerald-500 uppercase tracking-widest leading-none">
+                    {period === "day"
+                      ? "HARI INI"
+                      : period === "month"
+                        ? "BULAN INI"
+                        : "TAHUN INI"}
+                  </h3>
+                </div>
                 <div className="flex items-baseline gap-1">
                   <p className="text-[13px] font-display font-black text-white">
                     {data.efb_tan.toFixed(2)}
@@ -846,23 +856,9 @@ export const ReportSummarySection = ({
                   </p>
                   <p className="text-[10px] font-black text-white">
                     {data.efb_resit}{" "}
-                    <span className="text-[7px] opacity-60">KPA</span>
+                    <span className="text-[7px] opacity-60">RESIT</span>
                   </p>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {showDetails && (
-            <div className="bg-white dark:bg-slate-900 p-2 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 h-full flex flex-col justify-center">
-              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 text-center">
-                Status Penghantaran EFB
-              </p>
-              <div className="flex justify-center items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <p className="text-[10px] font-bold text-slate-600 dark:text-slate-300">
-                  Berjalan Lancar
-                </p>
               </div>
             </div>
           )}
