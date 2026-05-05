@@ -12,13 +12,13 @@ export const CHART_COLORS = {
 };
 
 // --- DATA MASTER FPMSB TUNGGAL ---
-export const TARGET_ANNUAL_PKT1 = 27.8;
-export const TARGET_ANNUAL_PKT2 = 26.8;
+export const TARGET_ANNUAL_PKT1 = 28.0;
+export const TARGET_ANNUAL_PKT2 = 28.0;
 export const TARGET_ANNUAL_FELDA = 11.99; // Target for Lot Felda
 
 export let MONTHLY_TARGETS_2026: Record<string, number[]> = {
-  "001": [1.9, 1.8, 1.9, 1.9, 2.0, 2.2, 2.45, 2.7, 2.85, 2.95, 2.75, 2.4],
-  "002": [1.6, 1.3, 1.8, 1.7, 2.1, 2.2, 2.6, 2.4, 2.6, 2.8, 3.0, 2.7],
+  "001": [1.90, 1.80, 2.10, 1.90, 2.00, 2.20, 2.50, 2.70, 2.90, 2.95, 2.75, 2.40],
+  "002": [1.60, 1.50, 1.80, 2.00, 2.30, 2.30, 2.70, 2.60, 2.70, 2.80, 3.00, 2.70],
   "003": [
     0.80, 0.65, 0.80, 0.83, 0.91, 0.98, 1.01, 1.24, 1.50, 1.60, 1.32, 1.35,
   ],
@@ -45,11 +45,11 @@ export const MASTER_DATA: Record<
   "15": { luas: 68.357, target_mt: 129.88, target_hek: 1.9, pkt: "001", peneroka: 17 },
   "16": { luas: 64.4435, target_mt: 122.44, target_hek: 1.9, pkt: "001", peneroka: 16 },
   "17": { luas: 84.077, target_mt: 159.75, target_hek: 1.9, pkt: "001", peneroka: 21 },
-  "18": { luas: 76.197, target_mt: 129.53, target_hek: 1.7, pkt: "002", peneroka: 19 },
-  "19": { luas: 81.75, target_mt: 138.98, target_hek: 1.7, pkt: "002", peneroka: 21 },
-  "20": { luas: 68.621, target_mt: 116.66, target_hek: 1.7, pkt: "002", peneroka: 17 },
-  "21": { luas: 24.264, target_mt: 41.25, target_hek: 1.7, pkt: "002", peneroka: 6 },
-  "22": { luas: 65.29, target_mt: 110.99, target_hek: 1.7, pkt: "002", peneroka: 16 },
+  "18": { luas: 76.197, target_mt: 121.92, target_hek: 1.6, pkt: "002", peneroka: 19 },
+  "19": { luas: 81.75, target_mt: 130.80, target_hek: 1.6, pkt: "002", peneroka: 21 },
+  "20": { luas: 68.621, target_mt: 109.79, target_hek: 1.6, pkt: "002", peneroka: 17 },
+  "21": { luas: 24.264, target_mt: 38.82, target_hek: 1.6, pkt: "002", peneroka: 6 },
+  "22": { luas: 65.29, target_mt: 104.46, target_hek: 1.6, pkt: "002", peneroka: 16 },
   "88": { luas: 98.51, target_mt: 86.69, target_hek: 0.88, pkt: "003", peneroka: 0 },
 };
 

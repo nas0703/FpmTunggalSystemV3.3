@@ -131,7 +131,7 @@ export const HasilBulananTable = ({
 
   const getTahunTuai = (pkt: string) => {
     if (pkt === "001") return { tahun: "THN 15", target: "28.00" };
-    if (pkt === "002") return { tahun: "THN 9", target: "26.80" };
+    if (pkt === "002") return { tahun: "THN 9", target: "28.00" };
     return pkt === "003"
       ? { tahun: "LF", target: "13.82" }
       : { tahun: "-", target: "-" };

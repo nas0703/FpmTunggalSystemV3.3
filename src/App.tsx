@@ -1016,7 +1016,7 @@ export default function App() {
         pkt: "001",
         area: luasPkt1,
         blocks: Array.from({ length: 17 }, (_, i) => String(i + 1)),
-        ttnYield: 27.8,
+        ttnYield: TARGET_ANNUAL_PKT1,
         ttn2025Yield: 27.0,
         category: "Lot Peneroka\nMatang Utama\n(Tahun 15)",
       },
@@ -1025,7 +1025,7 @@ export default function App() {
         pkt: "002",
         area: luasPkt2,
         blocks: ["18", "19", "20", "21", "22"],
-        ttnYield: 26.8,
+        ttnYield: TARGET_ANNUAL_PKT2,
         ttn2025Yield: 26.8,
         category: "Lot peneroka\nMatang Utama\n(Tahun 9)",
       },
@@ -1111,8 +1111,8 @@ export default function App() {
     const yOYield = totalLuas > 0 ? yOTan / totalLuas : 0;
     const yOTargetYield = totalLuas > 0 ? yOTarget / totalLuas : 0;
     const yOPct = yOTarget > 0 ? (yOTan / yOTarget) * 100 : 0;
-    const ttnOTan = 27.8 * luasPkt1 + 26.8 * luasPkt2;
-    const ttnOYield = totalLuas > 0 ? ttnOTan / totalLuas : 27.0;
+    const ttnOTan = TARGET_ANNUAL_PKT1 * luasPkt1 + TARGET_ANNUAL_PKT2 * luasPkt2;
+    const ttnOYield = totalLuas > 0 ? ttnOTan / totalLuas : 28.0;
 
     report += `Hasil Keseluruhan FPMSB Tunggal\nLuas: (${totalLuas.toFixed(2)} Hek)\n\n`;
     report += `H.I\nT-\t${dOTarget.toFixed(2)}\tM/t @\t${dOTargetYield.toFixed(2)}\tT/Ha\t\t\nC-\t${dOTan.toFixed(2)}\tM/t @\t${dOYield.toFixed(3)}\tT/Ha (\t${dOPct.toFixed(2)}%\t)\n\n`;
