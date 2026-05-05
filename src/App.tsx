@@ -4613,6 +4613,26 @@ PERATURAN TEKNIKAL:
                             </div>
                           )}
                           <div className="overflow-hidden">
+                            <div className="grid grid-cols-3 gap-x-2 mb-2 px-1">
+                              <div className="flex items-center gap-1 justify-center opacity-90 pb-1 border-b border-emerald-500/20">
+                                <Calendar size={8} className="text-emerald-500" />
+                                <h3 className="text-[7px] font-black text-emerald-500 uppercase tracking-widest leading-none">
+                                  HARI INI
+                                </h3>
+                              </div>
+                              <div className="flex items-center gap-1 justify-center opacity-90 pb-1 border-b border-emerald-500/20">
+                                <Calendar size={8} className="text-emerald-500" />
+                                <h3 className="text-[7px] font-black text-emerald-500 uppercase tracking-widest leading-none">
+                                  BULAN INI
+                                </h3>
+                              </div>
+                              <div className="flex items-center gap-1 justify-center opacity-90 pb-1 border-b border-emerald-500/20">
+                                <Calendar size={8} className="text-emerald-500" />
+                                <h3 className="text-[7px] font-black text-emerald-500 uppercase tracking-widest leading-none">
+                                  TAHUN INI (YTD)
+                                </h3>
+                              </div>
+                            </div>
                             <div className="grid grid-cols-3 gap-x-2">
                               <ReportSummarySection
                                 type={reportType}

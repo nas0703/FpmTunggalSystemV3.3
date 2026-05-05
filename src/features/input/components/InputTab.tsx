@@ -461,16 +461,32 @@ export const InputTab: React.FC<InputTabProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 {!formData.is_efb && (
-                  <FloatingInput
-                    label="No Seal (Pilihan)"
-                    value={formData.no_seal}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        no_seal: e.target.value,
-                      })
-                    }
-                  />
+                  <>
+                    <FloatingInput
+                      label="No Seal (Pilihan)"
+                      value={formData.no_seal}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          no_seal: e.target.value,
+                        })
+                      }
+                    />
+                    <FloatingInput
+                      label="Harga Semasa (RM/MT)"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.rm_mt}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          rm_mt: e.target.value,
+                        })
+                      }
+                      className="font-mono text-indigo-600 dark:text-indigo-400 focus:border-indigo-500"
+                    />
+                  </>
                 )}
                 {formData.is_efb && (
                   <FloatingInput

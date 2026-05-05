@@ -18,6 +18,8 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
   rawData,
   setRecordToDelete,
 }) => {
+  const [activeTab, setActiveTab] = React.useState<"bts" | "efb">("bts");
+
   return (
     <div className="w-full">
       <div className="animate-in slide-in-from-right-8 duration-300">
@@ -25,6 +27,23 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
           <h2 className="text-xs font-display font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
             <History size={14} /> Sejarah Harian
           </h2>
+
+          <div className="flex justify-center w-full px-4 mb-2">
+            <div className="bg-slate-100 dark:bg-slate-800 p-1 flex justify-center rounded-2xl w-full max-w-sm shrink-0">
+              <button
+                onClick={() => setActiveTab("bts")}
+                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === "bts" ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm" : "text-slate-500 hover:text-emerald-600"}`}
+              >
+                BTS
+              </button>
+              <button
+                onClick={() => setActiveTab("efb")}
+                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === "efb" ? "bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm" : "text-slate-500 hover:text-purple-600"}`}
+              >
+                EFB
+              </button>
+            </div>
+          </div>
 
           <div className="flex justify-center gap-2 w-full px-4">
             <div className="relative flex-1 max-w-[200px]">
@@ -55,7 +74,10 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
           {(() => {
-            let filteredData = rawData || [];
+            let filteredData = (rawData || []).filter((row: any) => 
+              activeTab === "efb" ? row.peringkat === "EFB" : row.peringkat !== "EFB"
+            );
+
             if (historyFilterDate) {
               filteredData = filteredData.filter(
                 (row) => row.tarikh === historyFilterDate,

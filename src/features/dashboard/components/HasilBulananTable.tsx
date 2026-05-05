@@ -133,7 +133,7 @@ export const HasilBulananTable = ({
     if (pkt === "001") return { tahun: "THN 15", target: "28.00" };
     if (pkt === "002") return { tahun: "THN 9", target: "28.00" };
     return pkt === "003"
-      ? { tahun: "LF", target: "13.82" }
+      ? { tahun: "LF", target: "13.76" }
       : { tahun: "-", target: "-" };
   };
 
