@@ -201,9 +201,11 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                             {row.tan.toFixed(2)}
                           </td>
                           <td className="p-3 text-right font-black text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
-                            {(row.hasil_rm || 0).toLocaleString("ms-MY", {
-                              minimumFractionDigits: 2,
-                            })}
+                            {row.hasil_rm > 0
+                              ? row.hasil_rm.toLocaleString("ms-MY", {
+                                  minimumFractionDigits: 2,
+                                })
+                              : "-"}
                           </td>
                           <td className="p-3 text-center whitespace-nowrap">
                             <motion.button

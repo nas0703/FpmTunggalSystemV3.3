@@ -37,8 +37,9 @@ export const AbwView: React.FC = () => {
         let pkt2Sum = 0, pkt2Count = 0;
         for (let i = 1; i <= 22; i++) {
              const vals = abwHistory[m][i] || [];
-             if (vals.length > 0) {
-                 const avg = vals.reduce((a:number,b:number)=>a+b,0) / vals.length;
+             const nonZeroVals = vals.filter((v: number) => typeof v === 'number' && v > 0);
+             if (nonZeroVals.length > 0) {
+                 const avg = nonZeroVals.reduce((a:number,b:number)=>a+b,0) / nonZeroVals.length;
                  record[i] = avg;
                  if (i <= 17) {
                      pkt1Sum += avg;
@@ -51,8 +52,8 @@ export const AbwView: React.FC = () => {
                  record[i] = 0;
              }
         }
-        record.avg1 = pkt1Count > 0 ? pkt1Sum / pkt1Count : 0;
-        record.avg2 = pkt2Count > 0 ? pkt2Sum / pkt2Count : 0;
+        record.avg1 = pkt1Count > 0 ? pkt1Sum / pkt1Count : null;
+        record.avg2 = pkt2Count > 0 ? pkt2Sum / pkt2Count : null;
         result.push(record);
     }
     
@@ -256,7 +257,7 @@ export const AbwView: React.FC = () => {
               <tr className="bg-emerald-500 text-white dark:bg-emerald-600 shadow-sm relative z-10">
                 <td colSpan={2} className="px-4 py-3 font-black text-right border-r border-emerald-400 dark:border-emerald-500 uppercase flex-1 whitespace-nowrap">Purata PKT 001</td>
                 {abwDataState.map(d => (
-                  <td key={`avg1-${d.month}`} className="px-4 py-3 text-center font-black">{d.avg1.toFixed(2)}</td>
+                  <td key={`avg1-${d.month}`} className="px-4 py-3 text-center font-black">{d.avg1 !== null ? d.avg1.toFixed(2) : "-"}</td>
                 ))}
               </tr>
               
@@ -273,7 +274,7 @@ export const AbwView: React.FC = () => {
               <tr className="bg-emerald-500 text-white dark:bg-emerald-600 shadow-sm relative z-10">
                 <td colSpan={2} className="px-4 py-3 font-black text-right border-r border-emerald-400 dark:border-emerald-500 uppercase whitespace-nowrap">Purata PKT 002</td>
                 {abwDataState.map(d => (
-                  <td key={`avg2-${d.month}`} className="px-4 py-3 text-center font-black">{d.avg2.toFixed(2)}</td>
+                  <td key={`avg2-${d.month}`} className="px-4 py-3 text-center font-black">{d.avg2 !== null ? d.avg2.toFixed(2) : "-"}</td>
                 ))}
               </tr>
             </tbody>
