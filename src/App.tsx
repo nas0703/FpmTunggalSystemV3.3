@@ -706,6 +706,7 @@ export default function App() {
 
           // Normalize date to YYYY-MM-DD
           let normalizedDate = "";
+          const currentYearVal = new Date().getFullYear().toString();
           if (item.tarikh) {
             const datePart = item.tarikh.split(/T| /)[0];
             const separator = datePart.includes("-")
@@ -718,9 +719,11 @@ export default function App() {
               if (parts.length === 3) {
                 if (parts[0].length === 4) {
                   // YYYY-MM-DD or YYYY/MM/DD
+                  if (parts[0] !== currentYearVal) parts[0] = currentYearVal; // Auto-correct OCR year
                   normalizedDate = `${parts[0]}-${parts[1].padStart(2, "0")}-${parts[2].padStart(2, "0")}`;
                 } else if (parts[2].length === 4) {
                   // DD-MM-YYYY or DD/MM/YYYY
+                  if (parts[2] !== currentYearVal) parts[2] = currentYearVal; // Auto-correct OCR year
                   normalizedDate = `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
                 }
               }
@@ -729,11 +732,16 @@ export default function App() {
 
           // Fallback to created_at if tarikh is missing or invalid
           if (!normalizedDate && item.created_at) {
-            normalizedDate = new Date(
+            const myT = new Date(
               new Date(item.created_at).getTime() + 8 * 60 * 60 * 1000,
-            )
-              .toISOString()
-              .split("T")[0];
+            );
+            normalizedDate = myT.toISOString().split("T")[0];
+            if (myT.getUTCHours() < 8) {
+              const [y, m, d] = normalizedDate.split("-");
+              const p = new Date(Date.UTC(parseInt(y), parseInt(m) - 1, parseInt(d)));
+              p.setUTCDate(p.getUTCDate() - 1);
+              normalizedDate = p.toISOString().split("T")[0];
+            }
           }
 
           const rawKpg = String(item.kpg || "")

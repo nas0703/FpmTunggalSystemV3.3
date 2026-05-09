@@ -1,13 +1,34 @@
 import express from "express";
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-
-// Remove static import to prevent potential startup issues in serverless environments
-// import PptxGenJS from "pptxgenjs";
+import fs from 'fs';
+import path from 'path';
 
 console.log("Loading API routes from api/index.ts...");
 
 dotenv.config();
+
+// Local JSON Database Fallback
+const DATA_DIR = path.join(process.cwd(), '.data');
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+const HANTARAN_DB_FILE = path.join(DATA_DIR, 'hantaran.json');
+
+function getLocalHantaran() {
+  if (fs.existsSync(HANTARAN_DB_FILE)) {
+    try {
+      return JSON.parse(fs.readFileSync(HANTARAN_DB_FILE, 'utf-8'));
+    } catch (e) {
+      return [];
+    }
+  }
+  return [];
+}
+
+function saveLocalHantaran(data: any[]) {
+  fs.writeFileSync(HANTARAN_DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+}
 
 // Initialize Supabase client lazily to pick up runtime environment variables
 let supabaseClient: any = null;
@@ -73,6 +94,10 @@ apiRouter.post("/hantaran", async (req, res) => {
     
     const now = new Date();
     
+    // Waktu tempatan Malaysia
+    const myTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+    const calendarToday = myTime.toISOString().split('T')[0];
+
     // Handle date from request or generate current date
     let dateStr = data.tarikh;
     if (dateStr) {
@@ -89,11 +114,42 @@ apiRouter.post("/hantaran", async (req, res) => {
           dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
         }
       }
+      
+      // Auto-correct wrong year from OCR (e.g. 2024 to 2026)
+      const currentYearStr = String(myTime.getUTCFullYear());
+      let parsedParts = dateStr.split('-');
+      if (parsedParts.length === 3) {
+         if (parsedParts[0].length === 4 && parsedParts[0] !== currentYearStr) {
+           parsedParts[0] = currentYearStr;
+           dateStr = parsedParts.join('-');
+         }
+      }
     }
     
     if (!dateStr || !dateStr.includes('-')) {
       // Gunakan waktu tempatan (Malaysia) untuk ketepatan Hari Ini (UTC+8)
-      dateStr = new Date(now.getTime() + (8 * 60 * 60 * 1000)).toISOString().split('T')[0];
+      dateStr = calendarToday;
+    }
+
+    // ==========================================
+    // LOGIK SHIFT DATE SEBELUM 8 PAGI
+    // ==========================================
+    let receiptHour = 24; // Default to something that prevents shift if no explicit time
+    const masaMasuk = data.masa_masuk || "";
+    if (masaMasuk.trim()) {
+       const timeParts = masaMasuk.split(':');
+       if (timeParts.length >= 2) {
+         receiptHour = parseInt(timeParts[0], 10);
+       }
+    }
+
+    // Hanya ubah jika dateStr sama dengan calendarToday (bermaksud ia mungkin menggunakan calendar date)
+    // dan masa masuk TERTULIS DI RESIT adalah sebelum 8 pagi. Ini mengelakkan shift dua kali jika weighbridge sudah menggunakan tarikh bekerja.
+    if (dateStr === calendarToday && !isNaN(receiptHour) && receiptHour < 8) {
+       const [y, m, d] = dateStr.split('-');
+       const dObj = new Date(Date.UTC(parseInt(y), parseInt(m)-1, parseInt(d)));
+       dObj.setUTCDate(dObj.getUTCDate() - 1);
+       dateStr = dObj.toISOString().split('T')[0];
     }
 
     const tanValue = parseFloat(data.tan) || 0;
@@ -143,7 +199,14 @@ apiRouter.post("/hantaran", async (req, res) => {
         return res.status(500).json({ success: false, error: sbErr.message });
       }
     } else {
-      console.warn("Supabase not configured. Skipping database insert.");
+      console.warn("Supabase not configured. Using local JSON fallback.");
+      const localData = getLocalHantaran();
+      if (localData.some((r: any) => r.no_resit === payload.no_resit)) {
+        return res.status(409).json({ success: false, error: `No. Resit ${payload.no_resit} sudah wujud dalam sistem.` });
+      }
+      localData.unshift(payload); // Add to beginning
+      saveLocalHantaran(localData);
+      dbSuccess = true;
     }
 
     res.json({ 
@@ -174,8 +237,8 @@ apiRouter.get("/hantaran", async (req, res) => {
       console.log(`Fetched ${records?.length || 0} records from hantaran_hasil`);
       res.json(records);
     } else {
-      console.log("Supabase not configured, returning empty array");
-      res.json([]);
+      console.log("Supabase not configured, returning from local JSON");
+      res.json(getLocalHantaran());
     }
   } catch (err: any) { 
     console.error("Fetch error:", err);
@@ -299,7 +362,8 @@ apiRouter.delete("/hantaran/all", async (req, res) => {
       if (error) throw error;
       res.json({ success: true });
     } else {
-      res.status(500).json({ success: false, error: "Supabase tidak dikonfigurasi." });
+      saveLocalHantaran([]);
+      res.json({ success: true });
     }
   } catch (err: any) {
     console.error("Delete all error:", err.message || err);
@@ -322,7 +386,10 @@ apiRouter.delete("/hantaran/:no_resit", async (req, res) => {
       if (error) throw error;
       res.json({ success: true });
     } else {
-      res.status(500).json({ success: false, error: "Supabase tidak dikonfigurasi." });
+      const localData = getLocalHantaran();
+      const updatedData = localData.filter((r: any) => r.no_resit !== no_resit.toUpperCase());
+      saveLocalHantaran(updatedData);
+      res.json({ success: true });
     }
   } catch (err: any) {
     console.error("Delete error:", err.message || err);
@@ -968,6 +1035,24 @@ apiRouter.post("/pruning", async (req, res) => {
 
 app.use('/', apiRouter);
 app.use('/api', apiRouter);
+
+apiRouter.get("/debug-db", async (req, res) => {
+  try {
+    const supabase = getSupabase();
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('hantaran_hasil')
+        .select('id, no_resit, tarikh, masa_masuk, created_at')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      res.json({ data, error });
+    } else {
+      res.json({ error: "No Supabase" });
+    }
+  } catch (err: any) {
+    res.json({ error: err.message });
+  }
+});
 
 // Catch-all to prevent timeouts
 app.use((req, res) => {

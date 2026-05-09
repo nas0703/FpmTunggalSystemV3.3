@@ -35,35 +35,138 @@ const mockGanttData = [
 
 const GanttBar = (props: any) => {
   const { x, y, width, height, payload } = props;
-  const progressWidth = (width * payload.progress) / 100;
+  
+  // payload.planned is [plannedStart, plannedEnd] in milliseconds
+  // We can calculate pixels per millisecond based on the 'planned' bar width
+  const plannedStart = payload.planned[0];
+  const plannedEnd = payload.planned[1];
+  const pxPerMs = width / (plannedEnd - plannedStart);
+
   const barHeight = 24;
   const barY = y + (height - barHeight) / 2;
+  
+  // Calculate coordinates for the actual timeframe
+  let actualX = 0;
+  let actualWidth = 0;
+  let isOverdue = false;
+  let overdueX = 0;
+  let overdueWidth = 0;
+  
+  if (payload.actual && payload.actual.length === 2) {
+      actualX = x + (payload.actual[0] - plannedStart) * pxPerMs;
+      actualWidth = Math.max((payload.actual[1] - payload.actual[0]) * pxPerMs, 10); // Minimum 10px width for visibility
+      
+      if (payload.actual[1] > plannedEnd) {
+          isOverdue = true;
+          const overStart = Math.max(payload.actual[0], plannedEnd);
+          overdueX = x + (overStart - plannedStart) * pxPerMs;
+          overdueWidth = Math.max((payload.actual[1] - overStart) * pxPerMs, 10);
+      }
+  }
   
   return (
     <g>
       {/* Background (Planned timeframe) */}
       <rect x={x} y={barY} width={width} height={barHeight} fill={payload.color} opacity={0.2} rx={6} />
-      {/* Foreground (Actual progress) */}
-      {progressWidth > 0 && (
-         <rect x={x} y={barY} width={progressWidth} height={barHeight} fill={payload.color} rx={6} />
+      
+      {/* Foreground (Actual timeframe) */}
+      {payload.actual && (
+         <>
+           <rect x={actualX} y={barY} width={actualWidth} height={barHeight} fill={payload.color} rx={6} />
+           {isOverdue && (
+             <rect x={overdueX} y={barY} width={overdueWidth} height={barHeight} fill="#ef4444" rx={6} />
+           )}
+         </>
       )}
+      
       {/* Percentage text */}
-      <text x={x + progressWidth + 8} y={barY + barHeight / 2 + 4} fill={payload.progress > 0 ? payload.color : '#94a3b8'} fontSize={10} fontWeight="900">
-        {payload.progress}%
-      </text>
+      {payload.actual && (
+         <text x={actualX + actualWidth + 8} y={barY + barHeight / 2 + 4} fill={isOverdue ? '#ef4444' : (payload.progress > 0 ? payload.color : '#94a3b8')} fontSize={10} fontWeight="900">
+           {payload.progress}%
+         </text>
+      )}
+      {!payload.actual && (
+         <text x={x + width + 8} y={barY + barHeight / 2 + 4} fill="#94a3b8" fontSize={10} fontWeight="900">
+           {payload.progress}%
+         </text>
+      )}
     </g>
   );
 };
 
 export const FertilizerProductivity: React.FC = () => {
   const [entries, setEntries] = useState<any[]>([]);
+  const [master, setMaster] = useState<any[]>([]);
+  const [ganttData, setGanttData] = useState<any[]>(mockGanttData);
 
   useEffect(() => {
-    fetch('/api/fertilizer/entries')
-      .then(res => res.json())
-      .then(data => setEntries(Array.isArray(data) ? data : []))
+    Promise.all([
+      fetch('/api/fertilizer/entries').then(res => res.json()),
+      fetch('/api/fertilizer/master').then(res => res.json())
+    ])
+      .then(([entriesData, masterData]) => {
+        const parsedEntries = Array.isArray(entriesData) ? entriesData : [];
+        const parsedMaster = Array.isArray(masterData) ? masterData : [];
+        
+        setEntries(parsedEntries);
+        setMaster(parsedMaster);
+
+        // Calculate dynamic Gantt data
+        const pusTargets = {
+          1: parsedMaster.reduce((acc, curr) => acc + (curr.pus1_beg || 0), 0),
+          2: parsedMaster.reduce((acc, curr) => acc + (curr.pus2_beg || 0), 0),
+          3: parsedMaster.reduce((acc, curr) => acc + (curr.pus3_beg || 0), 0),
+          4: parsedMaster.reduce((acc, curr) => acc + (curr.pus4_beg || 0), 0),
+        };
+
+        const generateRow = (pusNum: number, name: string, plannedStart: Date, plannedEnd: Date, color: string) => {
+          const pusEntries = parsedEntries.filter(e => e.pus === pusNum);
+          const actualTotal = pusEntries.reduce((acc, curr) => acc + curr.total_beg_completed, 0);
+          const progress = pusTargets[pusNum as keyof typeof pusTargets] > 0 
+            ? Math.round((actualTotal / pusTargets[pusNum as keyof typeof pusTargets]) * 100) 
+            : 0;
+            
+          let actualStart = null;
+          let actualEnd = null;
+          
+          if (pusEntries.length > 0) {
+             const timestamps = pusEntries.map(e => new Date(e.entry_date).getTime());
+             actualStart = Math.min(...timestamps);
+             actualEnd = Math.max(...timestamps);
+             
+             // If not completed and end date is before today, stretch it to today because it's ongoing
+             if (progress < 100 && progress > 0) {
+                 const today = new Date().getTime();
+                 if (actualEnd < today) {
+                     actualEnd = today;
+                 }
+             }
+             // Ensure it spans at least one day
+             if (actualStart === actualEnd) {
+                 actualEnd += 24 * 60 * 60 * 1000;
+             }
+          }
+          
+          return {
+            name,
+            planned: [plannedStart.getTime(), plannedEnd.getTime()],
+            actual: actualStart ? [actualStart, actualEnd] : null,
+            progress: Math.min(progress, 100),
+            color
+          };
+        };
+
+        const updatedGanttData = [
+          generateRow(1, 'PUS 1 (Felda 12)', new Date(2026, 1, 1), new Date(2026, 2, 31), '#a855f7'),
+          generateRow(2, 'PUS 2 (Organic)', new Date(2026, 3, 1), new Date(2026, 4, 31), '#10b981'),
+          generateRow(3, 'PUS 3 (Felda 12)', new Date(2026, 5, 1), new Date(2026, 6, 31), '#a855f7'),
+          generateRow(4, 'PUS 4 (Organic)', new Date(2026, 7, 1), new Date(2026, 8, 30), '#10b981')
+        ];
+
+        setGanttData(updatedGanttData);
+      })
       .catch(err => {
-        console.error('Failed to fetch entries', err);
+        console.error('Failed to fetch data', err);
         setEntries([]);
       });
   }, []);
@@ -108,7 +211,7 @@ export const FertilizerProductivity: React.FC = () => {
         </div>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart layout="vertical" data={mockGanttData} margin={{ top: 0, right: 40, left: -20, bottom: 0 }}>
+            <BarChart layout="vertical" data={ganttData} margin={{ top: 0, right: 40, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
               <XAxis 
                 type="number" 
