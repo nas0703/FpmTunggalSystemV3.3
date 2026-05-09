@@ -9,11 +9,18 @@ console.log("Loading API routes from api/index.ts...");
 dotenv.config();
 
 // Local JSON Database Fallback
-const DATA_DIR = path.join(process.cwd(), '.data');
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+let DATA_DIR = path.join(process.cwd(), '.data');
+let HANTARAN_DB_FILE = path.join(DATA_DIR, 'hantaran.json');
+
+try {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+} catch (err) {
+  console.warn("Could not create .data directory, falling back to /tmp");
+  DATA_DIR = '/tmp';
+  HANTARAN_DB_FILE = path.join(DATA_DIR, 'hantaran.json');
 }
-const HANTARAN_DB_FILE = path.join(DATA_DIR, 'hantaran.json');
 
 function getLocalHantaran() {
   if (fs.existsSync(HANTARAN_DB_FILE)) {
@@ -27,7 +34,11 @@ function getLocalHantaran() {
 }
 
 function saveLocalHantaran(data: any[]) {
-  fs.writeFileSync(HANTARAN_DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  try {
+    fs.writeFileSync(HANTARAN_DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    console.error("Failed to write local JSON DB:", err);
+  }
 }
 
 // Initialize Supabase client lazily to pick up runtime environment variables
