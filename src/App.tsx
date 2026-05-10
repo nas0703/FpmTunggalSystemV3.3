@@ -3650,7 +3650,7 @@ PERATURAN TEKNIKAL:
     };
 
     const isToday = (item: Transaction) => {
-      if (item.tarikh === todayStr) return true;
+      if (item.tarikh) return item.tarikh === todayStr;
       // Fallback to created_at only for April 2026 onwards
       if (todayStr < "2026-04-01") return false;
       if (!item.created_at) return false;
@@ -3663,7 +3663,7 @@ PERATURAN TEKNIKAL:
     };
 
     const isThisMonth = (item: Transaction) => {
-      if (item.tarikh && item.tarikh.startsWith(currentMonth)) return true;
+      if (item.tarikh) return item.tarikh.startsWith(currentMonth);
       // Fallback to created_at only for April 2026 onwards
       if (currentMonth < "2026-04") return false;
       if (!item.created_at) return false;
@@ -3676,7 +3676,7 @@ PERATURAN TEKNIKAL:
     };
 
     const isThisYear = (item: Transaction) => {
-      if (item.tarikh && item.tarikh.startsWith(currentYear)) return true;
+      if (item.tarikh) return item.tarikh.startsWith(currentYear);
       // Fallback to created_at only for 2026 onwards
       if (currentYear < "2026") return false;
       if (!item.created_at) return false;
@@ -3693,10 +3693,10 @@ PERATURAN TEKNIKAL:
     const dataYear = combinedData.filter(isThisYear);
 
     // Calculate daily price stats for 'harga' report
-    const dailyPriceStats = combinedData
+    const dailyPriceStats = dataYear
       .reduce((acc: any[], curr) => {
         const date = curr.tarikh;
-        if (!date) return acc;
+        if (!date || date > todayStr) return acc;
         let existing = acc.find((d) => d.date === date);
 
         const kpgVal = parseFloat(curr.kpg || "0");
@@ -3743,7 +3743,7 @@ PERATURAN TEKNIKAL:
 
       const monthDataForTrend = combinedData.filter((item) => {
         // Use resit date (tarikh) primarily
-        if (item.tarikh && item.tarikh.startsWith(monthStr)) return true;
+        if (item.tarikh) return item.tarikh.startsWith(monthStr);
 
         // For March (Mac) and earlier, strictly follow tarikh (don't use entry date fallback)
         if (monthStr < "2026-04") return false;
