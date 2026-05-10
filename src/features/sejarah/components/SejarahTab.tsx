@@ -83,22 +83,20 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                 (row) => row.tarikh === historyFilterDate,
               );
             } else {
-              const now = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
-              const threeMonthsAgo = new Date(now);
-              threeMonthsAgo.setMonth(now.getMonth() - 3);
-              const thresholdDate = threeMonthsAgo.toISOString().split("T")[0];
-              filteredData = filteredData.filter(
-                (row) => row.tarikh >= thresholdDate,
-              );
+              // Jika tiada date spesifik, tunjuk 500 rekod terkini sahaja (elak lag)
+              // Daripada limit 3 bulan, kita allow semua tapi slice.
+              filteredData = filteredData.slice(0, 500);
             }
 
             if (filteredData.length === 0) {
               return (
                 <p className="text-center p-6 text-xs font-bold text-slate-400">
-                  Tiada rekod hantaran dalam 3 bulan terakhir.
+                  Tiada rekod hantaran untuk dipaparkan.
                 </p>
               );
             }
+
+            const isEfb = activeTab === "efb";
 
             return (
               <div className="overflow-x-auto w-full custom-scrollbar">
@@ -114,21 +112,27 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                       <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap">
                         Lori / Seal
                       </th>
-                      <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">
-                        Muda
-                      </th>
+                      {!isEfb && (
+                        <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">
+                          Muda
+                        </th>
+                      )}
                       <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">
                         Blok
                       </th>
-                      <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">
-                        KPG
-                      </th>
+                      {!isEfb && (
+                        <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">
+                          KPG
+                        </th>
+                      )}
                       <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 text-right whitespace-nowrap">
                         Tan
                       </th>
-                      <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 text-right whitespace-nowrap">
-                        CAPAI (RM)
-                      </th>
+                      {!isEfb && (
+                        <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 text-right whitespace-nowrap">
+                          CAPAI (RM)
+                        </th>
+                      )}
                       <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 text-center whitespace-nowrap">
                         Tindakan
                       </th>
@@ -177,9 +181,11 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                               {row.no_seal || "-"}
                             </div>
                           </td>
-                          <td className="p-3 font-black text-rose-500 text-center whitespace-nowrap">
-                            {row.muda}
-                          </td>
+                          {!isEfb && (
+                            <td className="p-3 font-black text-rose-500 text-center whitespace-nowrap">
+                              {row.muda}
+                            </td>
+                          )}
                           <td className="p-3 whitespace-nowrap text-center">
                             <div className="flex flex-col items-center">
                               <span className="font-black text-emerald-700 dark:text-emerald-400">
@@ -192,21 +198,25 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                               )}
                             </div>
                           </td>
-                          <td
-                            className={`p-3 font-black text-center whitespace-nowrap ${parseFloat(row.kpg || "0") >= 21 ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg" : "text-slate-400 dark:text-slate-500"}`}
-                          >
-                            {row.kpg || "-"}
-                          </td>
+                          {!isEfb && (
+                            <td
+                              className={`p-3 font-black text-center whitespace-nowrap \${parseFloat(row.kpg || "0") >= 21 ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg" : "text-slate-400 dark:text-slate-500"}`}
+                            >
+                              {row.kpg || "-"}
+                            </td>
+                          )}
                           <td className="p-3 text-right font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50/20 dark:bg-emerald-900/10 rounded-lg whitespace-nowrap">
                             {row.tan.toFixed(2)}
                           </td>
-                          <td className="p-3 text-right font-black text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
-                            {row.hasil_rm > 0
-                              ? row.hasil_rm.toLocaleString("ms-MY", {
-                                  minimumFractionDigits: 2,
-                                })
-                              : "-"}
-                          </td>
+                          {!isEfb && (
+                            <td className="p-3 text-right font-black text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
+                              {row.hasil_rm > 0
+                                ? row.hasil_rm.toLocaleString("ms-MY", {
+                                    minimumFractionDigits: 2,
+                                  })
+                                : "-"}
+                            </td>
+                          )}
                           <td className="p-3 text-center whitespace-nowrap">
                             <motion.button
                               whileTap={{ scale: 0.8 }}

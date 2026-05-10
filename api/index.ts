@@ -163,6 +163,15 @@ apiRouter.post("/hantaran", async (req, res) => {
        dateStr = dObj.toISOString().split('T')[0];
     }
 
+    // ==========================================
+    // CLAMP FUTURE DATES (OCR SAFETY)
+    // ==========================================
+    // Jika tarikh dari OCR (contoh: 2026-12-10) melebihi tarikh sebenar hari ini (contoh: 2026-05-10),
+    // kita setkan ke tarikh hari ini sebagai fallback untuk mengelakkan ralat data yang di-OCR salah sebagai bulan hadapan.
+    if (dateStr > calendarToday) {
+      dateStr = calendarToday;
+    }
+
     const tanValue = parseFloat(data.tan) || 0;
     const rm_mt = parseFloat(data.rm_mt) || 0;
     const hasil_rm = parseFloat((tanValue * rm_mt).toFixed(2));

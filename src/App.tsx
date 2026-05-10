@@ -1681,8 +1681,16 @@ export default function App() {
       setIsExporting(true);
       let filteredData = rawData;
 
+      // STRICT SEPARATION: Filter by BTS or EFB based on report type
+      if (reportType === "efb") {
+        filteredData = rawData.filter((item) => item.peringkat === "EFB");
+      } else {
+        // All other reports (hasil, muda, kpa_kpg, efc_format) are BTS reports
+        filteredData = rawData.filter((item) => item.peringkat !== "EFB");
+      }
+
       if (exportFilter === "date") {
-        filteredData = rawData.filter((item) => {
+        filteredData = filteredData.filter((item) => {
           if (item.tarikh === exportDate) return true;
           if (item.created_at) {
             const createdDate = new Date(
@@ -1695,7 +1703,7 @@ export default function App() {
           return false;
         });
       } else if (exportFilter === "month") {
-        filteredData = rawData.filter((item) => {
+        filteredData = filteredData.filter((item) => {
           if (item.tarikh && item.tarikh.startsWith(exportMonth)) return true;
           if (item.created_at) {
             const createdDate = new Date(
@@ -2570,18 +2578,21 @@ export default function App() {
           exportMonth || new Date().toISOString().slice(0, 7);
         // CRITICAL: Use rawData instead of filteredData to ensure we get ALL records for the month,
         // even if the user has a specific date filter active in the UI.
-        const monthData = rawData.filter((item) => {
-          if (item.tarikh && item.tarikh.startsWith(selectedMonth)) return true;
-          if (item.created_at) {
-            const createdDate = new Date(
-              new Date(item.created_at).getTime() + 8 * 60 * 60 * 1000,
-            )
-              .toISOString()
-              .split("T")[0];
-            return createdDate.startsWith(selectedMonth);
-          }
-          return false;
-        });
+        // STRICT SEPARATION: Only BTS for MUDA report
+        const monthData = rawData
+          .filter((item) => item.peringkat !== "EFB")
+          .filter((item) => {
+            if (item.tarikh && item.tarikh.startsWith(selectedMonth)) return true;
+            if (item.created_at) {
+              const createdDate = new Date(
+                new Date(item.created_at).getTime() + 8 * 60 * 60 * 1000,
+              )
+                .toISOString()
+                .split("T")[0];
+              return createdDate.startsWith(selectedMonth);
+            }
+            return false;
+          });
         const uniqueDates = Array.from(
           new Set(monthData.map((d) => d.tarikh)),
         ).sort() as string[];
@@ -2684,18 +2695,21 @@ export default function App() {
 
         // Get unique months for the current year
         const currentYear = new Date().getFullYear().toString();
-        const yearData = rawData.filter((item) => {
-          if (item.tarikh && item.tarikh.startsWith(currentYear)) return true;
-          if (item.created_at) {
-            const createdDate = new Date(
-              new Date(item.created_at).getTime() + 8 * 60 * 60 * 1000,
-            )
-              .toISOString()
-              .split("T")[0];
-            return createdDate.startsWith(currentYear);
-          }
-          return false;
-        });
+        // STRICT SEPARATION: Only BTS for MUDA report
+        const yearData = rawData
+          .filter((item) => item.peringkat !== "EFB")
+          .filter((item) => {
+            if (item.tarikh && item.tarikh.startsWith(currentYear)) return true;
+            if (item.created_at) {
+              const createdDate = new Date(
+                new Date(item.created_at).getTime() + 8 * 60 * 60 * 1000,
+              )
+                .toISOString()
+                .split("T")[0];
+              return createdDate.startsWith(currentYear);
+            }
+            return false;
+          });
 
         // Helper to get month string from item
         const getMonthStr = (item: Transaction) => {
@@ -2811,15 +2825,15 @@ export default function App() {
           s.getColumn(1).width = 12;
         });
 
-        // --- NEW SHEET: SENARAI MUDA >= 5 ---
-        const alertMudaSheet = workbook.addWorksheet("Alert Muda >= 5", {
+        // --- NEW SHEET: SENARAI MUDA >= 6 ---
+        const alertMudaSheet = workbook.addWorksheet("Alert Muda >= 6", {
           views: [{ state: "frozen", ySplit: 3 }],
         });
 
         // Title
         alertMudaSheet.mergeCells("A1:G1");
         const tAlert = alertMudaSheet.getCell("A1");
-        tAlert.value = "SENARAI RESIT / LORI (BTS MUDA >= 5)";
+        tAlert.value = "SENARAI RESIT / LORI (BTS MUDA >= 6)";
         tAlert.font = { bold: true, size: 14, color: { argb: "FFFFFFFF" } };
         tAlert.fill = {
           type: "pattern",
@@ -2857,9 +2871,9 @@ export default function App() {
         });
         headerAlert.height = 25;
 
-        // Filter data for Muda >= 5
+        // Filter data for Muda >= 6
         const alertData = monthData
-          .filter((d) => (d.muda || 0) >= 5)
+          .filter((d) => (d.muda || 0) >= 6)
           .sort((a, b) => (b.muda || 0) - (a.muda || 0));
 
         // Add rows
@@ -3851,8 +3865,10 @@ PERATURAN TEKNIKAL:
       );
       const yieldHek = totalLuas > 0 ? totalTan / totalLuas : 0;
 
+      const isFutureMonth = monthStr > currentMonth;
+
       // Block-specific yield for filtering
-      const blockYields: Record<string, number> = {};
+      const blockYields: Record<string, number | null> = {};
       Object.keys(MASTER_DATA).forEach((blok) => {
         const blokData = monthDataForTrend.filter((d) => d.blok === blok);
         const ffbBlokData = blokData.filter((d) => d.peringkat !== "EFB");
@@ -3861,20 +3877,21 @@ PERATURAN TEKNIKAL:
           0,
         );
         const blokLuas = MASTER_DATA[blok].luas;
-        blockYields[`yield_${blok}`] =
-          blokLuas > 0 ? parseFloat((blokTan / blokLuas).toFixed(2)) : 0;
+        blockYields[`yield_${blok}`] = isFutureMonth ? null : (
+          blokLuas > 0 ? parseFloat((blokTan / blokLuas).toFixed(2)) : 0
+        );
         blockYields[`t_h2025_blok_${blok}`] =
           blokLuas > 0
             ? parseFloat(((hist2025?.blok?.[blok] || 0) / blokLuas).toFixed(2))
             : 0;
-        blockYields[`muda_${blok}`] = ffbBlokData.reduce(
+        blockYields[`muda_${blok}`] = isFutureMonth ? null : ffbBlokData.reduce(
           (acc, curr) => acc + (curr.muda || 0),
           0,
         );
-        blockYields[`efb_${blok}`] = blokData
+        blockYields[`efb_${blok}`] = isFutureMonth ? null : blokData
           .filter((d) => d.peringkat === "EFB")
           .reduce((acc, curr) => acc + (curr.tan || 0), 0);
-        blockYields[`kpg_${blok}`] = ffbBlokData.filter((item) => {
+        blockYields[`kpg_${blok}`] = isFutureMonth ? null : ffbBlokData.filter((item) => {
           const kpgVal = parseFloat(item.kpg || "0");
           const rowDate =
             item.tarikh ||
@@ -3925,8 +3942,8 @@ PERATURAN TEKNIKAL:
 
       return {
         month: monthNames[i],
-        yield: parseFloat(yieldHek.toFixed(2)),
-        yieldHek: parseFloat(yieldHek.toFixed(2)),
+        yield: isFutureMonth ? null : parseFloat(yieldHek.toFixed(2)),
+        yieldHek: isFutureMonth ? null : parseFloat(yieldHek.toFixed(2)),
         yield2025: hist2025?.yield || 0,
         t_h2025: hist2025?.t_h || 0,
         t_h2025_pkt1:
@@ -3945,27 +3962,26 @@ PERATURAN TEKNIKAL:
         target_2026_pkt1: targetPKT1,
         target_2026_pkt2: targetPKT2,
         target_2026_felda: targetFELDA,
-        pkt1: pkt1Luas > 0 ? parseFloat((pkt1Tan / pkt1Luas).toFixed(2)) : 0,
-        pkt2: pkt2Luas > 0 ? parseFloat((pkt2Tan / pkt2Luas).toFixed(2)) : 0,
-        felda:
-          feldaLuas > 0 ? parseFloat((feldaTan / feldaLuas).toFixed(2)) : 0,
-        muda: totalMuda,
-        pkt1Muda,
-        pkt2Muda,
-        feldaMuda,
-        kpg: totalKpg,
-        kpg_match_count: totalKpg,
-        pkt1Kpg,
-        pkt2Kpg,
-        feldaKpg,
-        tan: parseFloat(totalTan.toFixed(2)),
-        efb: parseFloat(efbTan.toFixed(2)),
-        efb_tan: parseFloat(efbTan.toFixed(2)),
-        pkt1Efb: parseFloat(pkt1Efb.toFixed(1)),
-        pkt2Efb: parseFloat(pkt2Efb.toFixed(1)),
-        feldaEfb: parseFloat(feldaEfb.toFixed(1)),
-        avgPrice: parseFloat(avgPrice.toFixed(2)),
-        avgPrice1Pct: parseFloat(avgPrice1Pct.toFixed(2)),
+        pkt1: isFutureMonth ? null : (pkt1Luas > 0 ? parseFloat((pkt1Tan / pkt1Luas).toFixed(2)) : 0),
+        pkt2: isFutureMonth ? null : (pkt2Luas > 0 ? parseFloat((pkt2Tan / pkt2Luas).toFixed(2)) : 0),
+        felda: isFutureMonth ? null : (feldaLuas > 0 ? parseFloat((feldaTan / feldaLuas).toFixed(2)) : 0),
+        muda: isFutureMonth ? null : totalMuda,
+        pkt1Muda: isFutureMonth ? null : pkt1Muda,
+        pkt2Muda: isFutureMonth ? null : pkt2Muda,
+        feldaMuda: isFutureMonth ? null : feldaMuda,
+        kpg: isFutureMonth ? null : totalKpg,
+        kpg_match_count: isFutureMonth ? null : totalKpg,
+        pkt1Kpg: isFutureMonth ? null : pkt1Kpg,
+        pkt2Kpg: isFutureMonth ? null : pkt2Kpg,
+        feldaKpg: isFutureMonth ? null : feldaKpg,
+        tan: isFutureMonth ? null : parseFloat(totalTan.toFixed(2)),
+        efb: isFutureMonth ? null : parseFloat(efbTan.toFixed(2)),
+        efb_tan: isFutureMonth ? null : parseFloat(efbTan.toFixed(2)),
+        pkt1Efb: isFutureMonth ? null : parseFloat(pkt1Efb.toFixed(1)),
+        pkt2Efb: isFutureMonth ? null : parseFloat(pkt2Efb.toFixed(1)),
+        feldaEfb: isFutureMonth ? null : parseFloat(feldaEfb.toFixed(1)),
+        avgPrice: isFutureMonth ? null : parseFloat(avgPrice.toFixed(2)),
+        avgPrice1Pct: isFutureMonth ? null : parseFloat(avgPrice1Pct.toFixed(2)),
         ...blockYields,
         isCurrentMonth: monthIndex === new Date().getMonth() + 1,
       };
