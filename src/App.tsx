@@ -3108,12 +3108,13 @@ LOGIK EKSTRAKSI (RESIT FGV):
 - masa_masuk: Cari baris "Gross". Ambil waktu (HH:MM:SS) yang berada di bawah kolum "Masa".
 - no_resit: Ambil nilai di sebelah "No. Akuan Terima" atau "No. Resit" (cth: A00008947). Ambil salah satu sahaja kerana ia adalah data yang sama.
 - no_lori: Ambil nilai di sebelah "No. Lori" (cth: CCR1449).
-- no_nota_hantaran: Ambil nilai 10-digit di sebelah "Nota Hantaran" (cth: 1552600137).
 - kpg: Cari baris yang sama dengan "Nota Hantaran". Ambil digit dengan 2 titik perpuluhan yang berada selepas corak "21.00/" (cth: jika "21.00/19.50", ambil "19.50").
+- no_nota_hantaran: Lihat baris yang sama dengan kadar KPG. Cari nombor 10-digit yang kebiasaannya bermula dengan "155" (cth: 1552600137). Nombor ini adalah "Nota Hantaran".
 - blok: Cari baris "Penjual". Ambil 2 digit nombor yang berada tepat sebelum perkataan "SKB" (cth: jika "12 SKB", ambil "12").
 - tan: Cari label "Nett.". Ambil nilai nombor (tan) di sebelahnya (cth: 3.24). 
 - muda: pada baris >25 0, Muda, ambil number selepas 'muda :' biasanya 1 atau 2 digit (tandan).
-- no_seal: Cari tulisan tangan 6-digit nombor yang terletak di bawah "M-Manual" di bahagian bawah kanan resit.
+- no_seal: Cari perkataan "M-Manual" di penjuru bawah kanan. Selalunya akan ada nombor tulisan tangan 6-digit (sertakan '0' di hadapan jika ada) di ruang kosong berdekatan dengannya (cth: 084532). Ambil nombor ini.
+- rm_mt: Cari label berkaitan harga bagi setiap tan BTS seperti "Harga/Tan" atau "RM/MT". Ambil nilai nombor tersebut berserta titik perpuluhan (cth: 1070.79). JANGAN ambil nilai "Harga 1%" (cth: 51.14). Kadangkala harga tertera tulisan tangan di tepi. Abaikan sekiranya tidak dijumpai.
 - is_efb: false
 
 LOGIK EKSTRAKSI (RESIT EFB):
@@ -3172,6 +3173,10 @@ PERATURAN TEKNIKAL:
                 description:
                   "Nombor seal (6 digit tulisan tangan di bawah M-Manual)",
               },
+              rm_mt: {
+                type: Type.NUMBER,
+                description: "Harga bagi 1 tan BTS (RM/MT) jika ada",
+              },
               is_efb: {
                 type: Type.BOOLEAN,
                 description: "Adakah ini resit EFB?",
@@ -3203,6 +3208,7 @@ PERATURAN TEKNIKAL:
           no_nota_hantaran: result.no_nota_hantaran || prev.no_nota_hantaran,
           no_seal: result.no_seal || prev.no_seal,
           kpg: result.kpg?.toString() || prev.kpg,
+          rm_mt: result.rm_mt?.toString() || prev.rm_mt,
           tan: result.tan?.toString() || prev.tan,
           muda: result.muda?.toString() || prev.muda,
           tarikh: result.tarikh || prev.tarikh,
@@ -3700,8 +3706,7 @@ PERATURAN TEKNIKAL:
         let existing = acc.find((d) => d.date === date);
 
         const kpgVal = parseFloat(curr.kpg || "0");
-        const currentPrice1Pct =
-          curr.rm_mt && kpgVal > 0 ? curr.rm_mt / kpgVal : 0;
+        const currentPrice1Pct = curr.rm_mt ? curr.rm_mt / 21.25 : 0;
 
         if (!existing) {
           acc.push({
