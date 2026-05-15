@@ -3706,7 +3706,8 @@ PERATURAN TEKNIKAL:
         let existing = acc.find((d) => d.date === date);
 
         const kpgVal = parseFloat(curr.kpg || "0");
-        const currentPrice1Pct = curr.rm_mt ? curr.rm_mt / 21.25 : 0;
+        const currentPrice1Pct =
+          curr.rm_mt && kpgVal > 0 ? curr.rm_mt / kpgVal : 0;
 
         if (!existing) {
           acc.push({
