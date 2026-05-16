@@ -1493,6 +1493,7 @@ export default function App() {
 
       if (result.success) {
         showToast("success", editingRecordId ? `Berjaya dikemaskini: Resit ${result.ref}` : `Berjaya ditambah: Resit ${result.ref}`);
+        const submittedDate = formData.tarikh;
         setFormData({
           no_resit: "",
           no_akaun_terima: "",
@@ -1514,6 +1515,10 @@ export default function App() {
           is_hujan: false,
         });
         setEditingRecordId(null);
+        if (submittedDate) {
+          setHistoryFilterDate(submittedDate);
+          setDashboardDate(submittedDate);
+        }
         fetchData(true);
         if (editingRecordId) {
           setActiveTab("sejarah");
