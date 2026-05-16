@@ -156,7 +156,8 @@ apiRouter.post("/hantaran", async (req, res) => {
 
     // Hanya ubah jika dateStr sama dengan calendarToday (bermaksud ia mungkin menggunakan calendar date)
     // dan masa masuk TERTULIS DI RESIT adalah sebelum 8 pagi. Ini mengelakkan shift dua kali jika weighbridge sudah menggunakan tarikh bekerja.
-    if (dateStr === calendarToday && !isNaN(receiptHour) && receiptHour < 8) {
+    // Pengecualian: Jangan anjak tarikh untuk lot Felda (B88)
+    if (dateStr === calendarToday && !isNaN(receiptHour) && receiptHour < 8 && cleanBlok !== "88") {
        const [y, m, d] = dateStr.split('-');
        const dObj = new Date(Date.UTC(parseInt(y), parseInt(m)-1, parseInt(d)));
        dObj.setUTCDate(dObj.getUTCDate() - 1);
@@ -388,6 +389,100 @@ apiRouter.delete("/hantaran/all", async (req, res) => {
   } catch (err: any) {
     console.error("Delete all error:", err.message || err);
     res.status(500).json({ success: false, error: "Gagal memadam semua data." });
+  }
+});
+
+apiRouter.put("/hantaran/:no_resit", async (req, res) => {
+  try {
+    const { no_resit } = req.params;
+    const data = req.body;
+    
+    if (!no_resit) return res.status(400).json({ success: false, error: "No. Resit diperlukan." });
+    if (!data.no_lori || !data.blok) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Maklumat tidak lengkap. Sila pastikan No. Lori dan Blok diisi." 
+      });
+    }
+
+    const BLOK_AREAS: Record<string, number> = {
+      "1": 72.15, "2": 68.37, "3": 76.59, "4": 92.39, "5": 60.19,
+      "6": 80.42, "7": 89.46, "8": 82.03, "9": 83.61, "10": 84.36,
+      "11": 47.85, "12": 76.50, "13": 50.75, "14": 70.45, "15": 68.36,
+      "16": 64.44, "17": 84.08, "18": 76.20, "19": 81.75, "20": 68.62,
+      "21": 24.26, "22": 65.29, "88": 98.51
+    };
+
+    const rawBlok = data.blok ? data.blok.toString().replace(/[^0-9]/g, '') : '';
+    const blokNum = parseInt(rawBlok, 10);
+    const cleanBlok = isNaN(blokNum) ? '' : blokNum.toString();
+    
+    let pkt = "001";
+    if (blokNum >= 18 && blokNum <= 22) pkt = "002";
+    else if (blokNum === 88) pkt = "003";
+
+    let dateStr = data.tarikh;
+    if (dateStr) {
+      dateStr = dateStr.trim();
+      if (dateStr.includes('/')) {
+        let [d, m, y] = dateStr.split('/');
+        if (y && y.length === 2) y = '20' + y;
+        dateStr = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+      } else if (dateStr.includes('-')) {
+        const parts = dateStr.split('-');
+        if (parts[0].length === 4) {
+          // Keep as is
+        } else if (parts[2] && parts[2].length === 4) {
+          dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+    }
+
+    const tanValue = parseFloat(data.tan) || 0;
+    const rm_mt = parseFloat(data.rm_mt) || 0;
+    const hasil_rm = parseFloat((tanValue * rm_mt).toFixed(2));
+    const luasBlok = BLOK_AREAS[cleanBlok] || 1;
+    const thekValue = tanValue / luasBlok;
+
+    const payload = {
+      no_akaun_terima: data.no_akaun_terima?.trim().toUpperCase() || '',
+      no_lori: data.no_lori.trim().toUpperCase(),
+      no_seal: data.no_seal?.trim().toUpperCase() || '',
+      no_nota_hantaran: data.no_nota_hantaran?.trim().toUpperCase() || '',
+      kpg: data.kpg?.trim().toUpperCase() || '',
+      blok: cleanBlok,
+      peringkat: data.is_efb ? "EFB" : `PKT ${pkt}`,
+      tan: tanValue,
+      muda: parseInt(data.muda) || 0,
+      reject: parseFloat(data.reject) || 0,
+      sample: parseInt(data.sample) || 0,
+      rm_mt: rm_mt,
+      hasil_rm: hasil_rm,
+      thek: parseFloat(thekValue.toFixed(4)),
+      tarikh: dateStr,
+      masa_masuk: data.masa_masuk || undefined
+    };
+
+    const supabase = getSupabase();
+    if (supabase) {
+      const { error } = await supabase
+        .from('hantaran_hasil')
+        .update(payload)
+        .eq('no_resit', no_resit.toUpperCase());
+
+      if (error) throw error;
+      res.json({ success: true, ref: no_resit });
+    } else {
+      const localData = getLocalHantaran();
+      const updatedData = localData.map((r: any) => 
+        r.no_resit === no_resit.toUpperCase() ? { ...r, ...payload } : r
+      );
+      saveLocalHantaran(updatedData);
+      res.json({ success: true, ref: no_resit });
+    }
+  } catch (err: any) {
+    console.error("Update error:", err.message || err);
+    res.status(500).json({ success: false, error: "Gagal mengemaskini data." });
   }
 });
 

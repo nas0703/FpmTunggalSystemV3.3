@@ -15,6 +15,8 @@ export interface InputTabProps {
   submitTransaction: (e: any) => void;
   isProcessing: boolean;
   onAddHujan?: (bulan: string, tahun: string, jumlah: number) => void;
+  isEditing?: boolean;
+  onCancelEdit?: () => void;
 }
 
 export const InputTab: React.FC<InputTabProps> = ({
@@ -26,6 +28,8 @@ export const InputTab: React.FC<InputTabProps> = ({
   submitTransaction,
   isProcessing,
   onAddHujan,
+  isEditing = false,
+  onCancelEdit
 }) => {
   const isBlokValid =
     formData.blok === "" ||
@@ -358,6 +362,7 @@ export const InputTab: React.FC<InputTabProps> = ({
                     setFormData({ ...formData, no_resit: e.target.value })
                   }
                   required
+                  disabled={isEditing}
                 />
                 {!formData.is_efb && (
                   <FloatingInput
@@ -518,34 +523,67 @@ export const InputTab: React.FC<InputTabProps> = ({
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setFormData({
-                    no_resit: "", no_akaun_terima: "", no_lori: "", no_seal: "", no_nota_hantaran: "", kpg: "", blok: "", tan: "", muda: "", reject: "0.00", sample: "0", rm_mt: "", tarikh: "", masa_masuk: "", is_efb: false
-                  })}
-                  className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-black py-4 rounded-2xl flex justify-center items-center gap-2 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-slate-300"
-                >
-                  <RefreshCw size={16} /> Reset
-                </button>
-                <button
-                  type="submit"
-                  disabled={isProcessing || !isBlokValid}
-                  className={`flex-[2] text-white text-xs font-black py-4 rounded-2xl flex justify-center items-center gap-2 transition-all shadow-xl shadow-emerald-600/20 outline-none active:scale-95 ${
-                    isProcessing || !isBlokValid
-                      ? "bg-emerald-400 cursor-not-allowed"
-                      : "bg-emerald-600 hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
-                  }`}
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" /> Menyimpan...
-                    </>
-                  ) : (
-                    <>
-                      <Send size={16} /> Simpan Data
-                    </>
-                  )}
-                </button>
+                {isEditing ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={onCancelEdit}
+                      className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-black py-4 rounded-2xl flex justify-center items-center gap-2 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-slate-300"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isProcessing || !isBlokValid}
+                      className={`flex-[2] text-white text-xs font-black py-4 rounded-2xl flex justify-center items-center gap-2 transition-all shadow-xl shadow-amber-600/20 outline-none active:scale-95 ${
+                        isProcessing || !isBlokValid
+                          ? "bg-amber-400 cursor-not-allowed"
+                          : "bg-amber-500 hover:bg-amber-600 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+                      }`}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" /> Kemaskini...
+                        </>
+                      ) : (
+                        <>
+                          <Send size={16} /> Kemaskini Data
+                        </>
+                      )}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({
+                        no_resit: "", no_akaun_terima: "", no_lori: "", no_seal: "", no_nota_hantaran: "", kpg: "", blok: "", tan: "", muda: "", reject: "0.00", sample: "0", rm_mt: "", tarikh: "", masa_masuk: "", is_efb: false
+                      })}
+                      className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-black py-4 rounded-2xl flex justify-center items-center gap-2 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-slate-300"
+                    >
+                      <RefreshCw size={16} /> Reset
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isProcessing || !isBlokValid}
+                      className={`flex-[2] text-white text-xs font-black py-4 rounded-2xl flex justify-center items-center gap-2 transition-all shadow-xl shadow-emerald-600/20 outline-none active:scale-95 ${
+                        isProcessing || !isBlokValid
+                          ? "bg-emerald-400 cursor-not-allowed"
+                          : "bg-emerald-600 hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+                      }`}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" /> Menyimpan...
+                        </>
+                      ) : (
+                        <>
+                          <Send size={16} /> Simpan Data
+                        </>
+                      )}
+                    </button>
+                  </>
+                )}
               </div>
             </form>
           )}

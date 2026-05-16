@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { History, X, Download, Trash2 } from "lucide-react";
+import { History, X, Download, Trash2, Edit2 } from "lucide-react";
 import { Transaction } from "../../../App";
 
 interface SejarahTabProps {
@@ -9,6 +9,8 @@ interface SejarahTabProps {
   setShowExportModal: Dispatch<SetStateAction<boolean>>;
   rawData: Transaction[];
   setRecordToDelete: Dispatch<SetStateAction<string | null>>;
+  onEditRecord: (record: Transaction) => void;
+  authRole: "staff" | "fc" | "afc" | "fs" | null;
 }
 
 export const SejarahTab: React.FC<SejarahTabProps> = ({
@@ -17,6 +19,8 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
   setShowExportModal,
   rawData,
   setRecordToDelete,
+  onEditRecord,
+  authRole,
 }) => {
   const [activeTab, setActiveTab] = React.useState<"bts" | "efb">("bts");
 
@@ -218,13 +222,26 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                             </td>
                           )}
                           <td className="p-3 text-center whitespace-nowrap">
-                            <motion.button
-                              whileTap={{ scale: 0.8 }}
-                              onClick={() => setRecordToDelete(row.no_resit)}
-                              className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors shadow-sm"
-                            >
-                              <Trash2 size={16} />
-                            </motion.button>
+                            {(authRole === "staff" || authRole === "fc") && (
+                              <div className="flex items-center justify-center gap-1">
+                                <motion.button
+                                  whileTap={{ scale: 0.8 }}
+                                  onClick={() => onEditRecord(row)}
+                                  className="p-2 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-full transition-colors shadow-sm"
+                                  title="Kemaskini Rekod"
+                                >
+                                  <Edit2 size={16} />
+                                </motion.button>
+                                <motion.button
+                                  whileTap={{ scale: 0.8 }}
+                                  onClick={() => setRecordToDelete(row.no_resit)}
+                                  className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors shadow-sm"
+                                  title="Padam Rekod"
+                                >
+                                  <Trash2 size={16} />
+                                </motion.button>
+                              </div>
+                            )}
                           </td>
                         </motion.tr>
                       ))}

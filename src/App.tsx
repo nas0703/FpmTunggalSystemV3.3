@@ -499,6 +499,7 @@ export default function App() {
     "all",
   );
   const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
+  const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
   const [exportDate, setExportDate] = useState(
     new Date(new Date().getTime() + 8 * 60 * 60 * 1000)
@@ -537,7 +538,20 @@ export default function App() {
     "tan",
     "muda",
     "kpg",
+    "thek",
+    "kpa",
+    "hasil_rm",
   ]);
+
+  useEffect(() => {
+    if (activeTab !== "scan" && editingRecordId) {
+      setEditingRecordId(null);
+      setFormData({
+        no_resit: "", no_akaun_terima: "", no_lori: "", no_seal: "", no_nota_hantaran: "", kpg: "", blok: "", tan: "", muda: "", reject: "0.00", sample: "0", rm_mt: "", tarikh: "", masa_masuk: "", is_efb: false, is_baja: false, is_pruning: false, is_hujan: false
+      });
+    }
+  }, [activeTab, editingRecordId]);
+
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("theme");
@@ -1147,6 +1161,32 @@ export default function App() {
     showToast("success", "Laporan disalin ke papan klip.");
   };
 
+  const handleEditRecord = (record: Transaction) => {
+    setFormData({
+      no_resit: record.no_resit || "",
+      no_akaun_terima: record.no_akaun_terima || "",
+      no_lori: record.no_lori || "",
+      no_seal: record.no_seal || "",
+      no_nota_hantaran: record.no_nota_hantaran || "",
+      kpg: record.kpg ? record.kpg.toString() : "",
+      blok: record.blok ? record.blok.replace(/[^0-9A-Z]/g, '') : "",
+      tan: record.tan ? record.tan.toString() : "",
+      muda: record.muda ? record.muda.toString() : "",
+      reject: record.reject ? record.reject.toString() : "0.00",
+      sample: record.sample ? record.sample.toString() : "0",
+      rm_mt: record.rm_mt ? record.rm_mt.toString() : "",
+      tarikh: record.tarikh || "",
+      masa_masuk: record.masa_masuk || "",
+      is_efb: !!record.is_efb,
+      is_baja: false,
+      is_pruning: false,
+      is_hujan: false,
+    });
+    setEditingRecordId(record.no_resit);
+    setActiveTab("scan");
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const tableToCaptureRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
 
@@ -1443,14 +1483,16 @@ export default function App() {
 
     setIsProcessing(true);
     try {
-      const result = await safeFetch("/api/hantaran", {
-        method: "POST",
+      const url = editingRecordId ? `/api/hantaran/${encodeURIComponent(editingRecordId)}` : "/api/hantaran";
+      const method = editingRecordId ? "PUT" : "POST";
+      const result = await safeFetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       if (result.success) {
-        showToast("success", `Berjaya: Resit ${result.ref}`);
+        showToast("success", editingRecordId ? `Berjaya dikemaskini: Resit ${result.ref}` : `Berjaya ditambah: Resit ${result.ref}`);
         setFormData({
           no_resit: "",
           no_akaun_terima: "",
@@ -1467,8 +1509,15 @@ export default function App() {
           tarikh: "",
           masa_masuk: "",
           is_efb: false,
+          is_baja: false,
+          is_pruning: false,
+          is_hujan: false,
         });
+        setEditingRecordId(null);
         fetchData(true);
+        if (editingRecordId) {
+          setActiveTab("sejarah");
+        }
       } else {
         // Handle specific status codes or error messages
         const errorMsg = result.error || "Ralat tidak dijangka berlaku.";
@@ -4465,6 +4514,31 @@ PERATURAN TEKNIKAL:
                 submitTransaction={submitTransaction}
                 isProcessing={isProcessing}
                 onAddHujan={handleAddHujan}
+                isEditing={!!editingRecordId}
+                onCancelEdit={() => {
+                  setEditingRecordId(null);
+                  setFormData({
+                    no_resit: "",
+                    no_akaun_terima: "",
+                    no_lori: "",
+                    no_seal: "",
+                    no_nota_hantaran: "",
+                    kpg: "",
+                    blok: "",
+                    tan: "",
+                    muda: "",
+                    reject: "0.00",
+                    sample: "0",
+                    rm_mt: "",
+                    tarikh: "",
+                    masa_masuk: "",
+                    is_efb: false,
+                    is_baja: false,
+                    is_pruning: false,
+                    is_hujan: false,
+                  });
+                  setActiveTab("sejarah");
+                }}
               />
             )}
 
@@ -7174,6 +7248,8 @@ PERATURAN TEKNIKAL:
                 setShowExportModal={setShowExportModal}
                 rawData={rawData}
                 setRecordToDelete={setRecordToDelete}
+                onEditRecord={handleEditRecord}
+                authRole={authRole}
               />
             )}
           </motion.div>
