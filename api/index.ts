@@ -245,18 +245,36 @@ apiRouter.get("/hantaran", async (req, res) => {
   try {
     const supabase = getSupabase();
     if (supabase) {
-      const { data: records, error } = await supabase
-        .from('hantaran_hasil')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5000);
+      let allRecords: any[] = [];
+      let start = 0;
+      const step = 1000;
+      let hasMore = true;
 
-      if (error) {
-        console.error("Supabase Fetch Error:", error);
-        return res.status(500).json({ error: "Gagal mengambil data dari pangkalan data." });
+      while (hasMore) {
+        const { data: records, error } = await supabase
+          .from('hantaran_hasil')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .range(start, start + step - 1);
+
+        if (error) {
+          console.error("Supabase Fetch Error:", error);
+          return res.status(500).json({ error: "Gagal mengambil data dari pangkalan data." });
+        }
+
+        if (records && records.length > 0) {
+          allRecords = allRecords.concat(records);
+          start += step;
+          if (records.length < step) {
+             hasMore = false;
+          }
+        } else {
+          hasMore = false;
+        }
       }
-      console.log(`Fetched ${records?.length || 0} records from hantaran_hasil`);
-      res.json(records);
+
+      console.log(`Fetched ${allRecords.length} records from hantaran_hasil`);
+      res.json(allRecords);
     } else {
       console.log("Supabase not configured, returning from local JSON");
       res.json(getLocalHantaran());

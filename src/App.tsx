@@ -1177,7 +1177,7 @@ export default function App() {
       rm_mt: record.rm_mt ? record.rm_mt.toString() : "",
       tarikh: record.tarikh || "",
       masa_masuk: record.masa_masuk || "",
-      is_efb: !!record.is_efb,
+      is_efb: record.is_efb !== undefined ? !!record.is_efb : record.peringkat === "EFB",
       is_baja: false,
       is_pruning: false,
       is_hujan: false,
