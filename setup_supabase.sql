@@ -136,3 +136,8 @@ VALUES
   ('NPK 15-15-15', 0, 50, 'BEG'),
   ('NPK 12-12-17-2', 0, 50, 'BEG')
 ON CONFLICT (name) DO NOTHING;
+
+-- 9. Helpful Indexes for hantaran_hasil table (Performance Optimization)
+CREATE INDEX IF NOT EXISTS idx_hantaran_tarikh ON hantaran_hasil(tarikh);
+CREATE INDEX IF NOT EXISTS idx_hantaran_blok ON hantaran_hasil(blok);
+CREATE INDEX IF NOT EXISTS idx_hantaran_created_at ON hantaran_hasil(created_at DESC);

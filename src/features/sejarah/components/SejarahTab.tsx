@@ -1,6 +1,17 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { History, X, Download, Trash2, Edit2 } from "lucide-react";
+import { motion } from "motion/react";
+import { 
+  History, 
+  X, 
+  Download, 
+  Trash2, 
+  Edit2, 
+  ChevronLeft, 
+  ChevronRight, 
+  ChevronsLeft, 
+  ChevronsRight,
+  FileText
+} from "lucide-react";
 import { Transaction } from "../../../App";
 
 interface SejarahTabProps {
@@ -23,6 +34,13 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
   authRole,
 }) => {
   const [activeTab, setActiveTab] = React.useState<"bts" | "efb">("bts");
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [itemsPerPage, setItemsPerPage] = React.useState(25);
+
+  // Reset page when tab or date filter changes to prevent being stuck on empty pages
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, historyFilterDate]);
 
   return (
     <div className="w-full">
@@ -36,13 +54,21 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
             <div className="bg-slate-100 dark:bg-slate-800 p-1 flex justify-center rounded-2xl w-full max-w-sm shrink-0">
               <button
                 onClick={() => setActiveTab("bts")}
-                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === "bts" ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm" : "text-slate-500 hover:text-emerald-600"}`}
+                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${
+                  activeTab === "bts" 
+                    ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm" 
+                    : "text-slate-500 hover:text-emerald-600"
+                }`}
               >
                 BTS
               </button>
               <button
                 onClick={() => setActiveTab("efb")}
-                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === "efb" ? "bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm" : "text-slate-500 hover:text-purple-600"}`}
+                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${
+                  activeTab === "efb" 
+                    ? "bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm" 
+                    : "text-slate-500 hover:text-purple-600"
+                }`}
               >
                 EFB
               </button>
@@ -76,6 +102,7 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
             </motion.button>
           </div>
         </div>
+        
         <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
           {(() => {
             let filteredData = (rawData || []).filter((row: any) => 
@@ -86,70 +113,72 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
               filteredData = filteredData.filter(
                 (row) => row.tarikh === historyFilterDate,
               );
-            } else {
-              // Jika tiada date spesifik, tunjuk 500 rekod terkini sahaja (elak lag)
-              // Daripada limit 3 bulan, kita allow semua tapi slice.
-              filteredData = filteredData.slice(0, 500);
             }
 
-            if (filteredData.length === 0) {
+            const totalCount = filteredData.length;
+
+            if (totalCount === 0) {
               return (
-                <p className="text-center p-6 text-xs font-bold text-slate-400">
+                <p className="text-center p-8 text-xs font-bold text-slate-400 dark:text-slate-500">
                   Tiada rekod hantaran untuk dipaparkan.
                 </p>
               );
             }
 
+            // Calculate pagination parameters
+            const totalPages = Math.ceil(totalCount / itemsPerPage);
+            const verifiedCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+            const startIndex = (verifiedCurrentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, totalCount);
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+
             const isEfb = activeTab === "efb";
 
             return (
-              <div className="overflow-x-auto w-full custom-scrollbar">
-                <table className="w-full text-left border-collapse min-w-[700px]">
-                  <thead>
-                    <tr className="bg-emerald-50 dark:bg-emerald-900/50 text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
-                      <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap">
-                        Tarikh
-                      </th>
-                      <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap">
-                        Resit / Nota
-                      </th>
-                      <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap">
-                        Lori / Seal
-                      </th>
-                      {!isEfb && (
-                        <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">
-                          Muda
+              <div className="flex flex-col w-full">
+                {/* Table Area */}
+                <div className="overflow-x-auto w-full custom-scrollbar">
+                  <table className="w-full text-left border-collapse min-w-[700px]">
+                    <thead>
+                      <tr className="bg-emerald-50 dark:bg-emerald-900/50 text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
+                        <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap">
+                          Tarikh
                         </th>
-                      )}
-                      <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">
-                        Blok
-                      </th>
-                      {!isEfb && (
-                        <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">
-                          KPG
+                        <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap">
+                          Resit / Nota
                         </th>
-                      )}
-                      <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 text-right whitespace-nowrap">
-                        Tan
-                      </th>
-                      {!isEfb && (
+                        <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap">
+                          Lori / Seal
+                        </th>
+                        {!isEfb && (
+                          <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">
+                            Muda
+                          </th>
+                        )}
+                        <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">
+                          Blok
+                        </th>
+                        {!isEfb && (
+                          <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">
+                            KPG
+                          </th>
+                        )}
                         <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 text-right whitespace-nowrap">
-                          CAPAI (RM)
+                          Tan
                         </th>
-                      )}
-                      <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 text-center whitespace-nowrap">
-                        Tindakan
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    <AnimatePresence>
-                      {filteredData.map((row, i) => (
-                        <motion.tr
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.2, delay: i * 0.05 }}
+                        {!isEfb && (
+                          <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 text-right whitespace-nowrap">
+                            CAPAI (RM)
+                          </th>
+                        )}
+                        <th className="p-3 border-b border-emerald-100 dark:border-emerald-800 text-center whitespace-nowrap">
+                          Tindakan
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {paginatedData.map((row, i) => (
+                        <tr
                           key={row.no_resit || i}
                           className="border-b border-emerald-50 dark:border-emerald-900/20 last:border-0 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-colors"
                         >
@@ -204,7 +233,11 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                           </td>
                           {!isEfb && (
                             <td
-                              className={`p-3 font-black text-center whitespace-nowrap \${parseFloat(row.kpg || "0") >= 21 ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg" : "text-slate-400 dark:text-slate-500"}`}
+                              className={`p-3 font-black text-center whitespace-nowrap ${
+                                parseFloat(row.kpg || "0") >= 21 
+                                  ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg" 
+                                  : "text-slate-400 dark:text-slate-500"
+                              }`}
                             >
                               {row.kpg || "-"}
                             </td>
@@ -243,11 +276,78 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                               </div>
                             )}
                           </td>
-                        </motion.tr>
+                        </tr>
                       ))}
-                    </AnimatePresence>
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Paginated Footer Controls */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 text-xs font-bold text-slate-500">
+                  <div className="flex items-center gap-2">
+                    <span>Papar</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-sm text-xs font-black"
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                    <span>baris seminit</span>
+                    <span className="text-slate-300 dark:text-slate-700 mx-1">|</span>
+                    <span className="text-slate-400 text-[11px]">
+                      Menunjukkan <strong className="text-slate-700 dark:text-slate-200">{startIndex + 1}</strong> hingga <strong className="text-slate-700 dark:text-slate-200">{endIndex}</strong> daripada <strong className="text-slate-700 dark:text-slate-200">{totalCount}</strong> rekod
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage(1)}
+                      disabled={verifiedCurrentPage === 1}
+                      className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-colors"
+                      title="Halaman Pertama"
+                    >
+                      <ChevronsLeft size={16} />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={verifiedCurrentPage === 1}
+                      className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-colors flex items-center gap-1 px-3 ml-1"
+                      title="Halaman Sebelumnya"
+                    >
+                      <ChevronLeft size={16} />
+                      <span className="hidden sm:inline text-[11px] font-black uppercase">Sebelum</span>
+                    </button>
+
+                    <span className="px-4 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-xs font-black min-w-[60px] text-center">
+                      Muka {verifiedCurrentPage} / {totalPages}
+                    </span>
+
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={verifiedCurrentPage === totalPages}
+                      className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-colors flex items-center gap-1 px-3 mr-1"
+                      title="Halaman Seterusnya"
+                    >
+                      <span className="hidden sm:inline text-[11px] font-black uppercase">Seterusnya</span>
+                      <ChevronRight size={16} />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={verifiedCurrentPage === totalPages}
+                      className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-colors"
+                      title="Halaman Terakhir"
+                    >
+                      <ChevronsRight size={16} />
+                    </button>
+                  </div>
+                </div>
               </div>
             );
           })()}

@@ -44,6 +44,9 @@ function saveLocalHantaran(data: any[]) {
 // Initialize Supabase client lazily to pick up runtime environment variables
 let supabaseClient: any = null;
 
+// Global Cache for hantaran records to optimize application loading speed
+let hantaranCache: any[] | null = null;
+
 function getSupabase() {
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
@@ -230,6 +233,8 @@ apiRouter.post("/hantaran", async (req, res) => {
       dbSuccess = true;
     }
 
+    hantaranCache = null; // Invalidate cache on new entry insert
+
     res.json({ 
       success: true, 
       ref: payload.no_resit,
@@ -243,6 +248,12 @@ apiRouter.post("/hantaran", async (req, res) => {
 
 apiRouter.get("/hantaran", async (req, res) => {
   try {
+    // Return cached data if available for high performance
+    if (hantaranCache) {
+      console.log(`Returning cached hantaran records count: ${hantaranCache.length}`);
+      return res.json(hantaranCache);
+    }
+
     const supabase = getSupabase();
     if (supabase) {
       let allRecords: any[] = [];
@@ -273,7 +284,8 @@ apiRouter.get("/hantaran", async (req, res) => {
         }
       }
 
-      console.log(`Fetched ${allRecords.length} records from hantaran_hasil`);
+      console.log(`Fetched ${allRecords.length} records from hantaran_hasil and storing in cache`);
+      hantaranCache = allRecords;
       res.json(allRecords);
     } else {
       console.log("Supabase not configured, returning from local JSON");
@@ -399,9 +411,11 @@ apiRouter.delete("/hantaran/all", async (req, res) => {
         .neq('no_resit', '0'); // Delete all rows where no_resit is not '0' (effectively all)
 
       if (error) throw error;
+      hantaranCache = null; // Invalidate cache
       res.json({ success: true });
     } else {
       saveLocalHantaran([]);
+      hantaranCache = null; // Invalidate cache
       res.json({ success: true });
     }
   } catch (err: any) {
@@ -489,6 +503,7 @@ apiRouter.put("/hantaran/:no_resit", async (req, res) => {
         .eq('no_resit', no_resit.toUpperCase());
 
       if (error) throw error;
+      hantaranCache = null; // Invalidate cache
       res.json({ success: true, ref: no_resit });
     } else {
       const localData = getLocalHantaran();
@@ -496,6 +511,7 @@ apiRouter.put("/hantaran/:no_resit", async (req, res) => {
         r.no_resit === no_resit.toUpperCase() ? { ...r, ...payload } : r
       );
       saveLocalHantaran(updatedData);
+      hantaranCache = null; // Invalidate cache
       res.json({ success: true, ref: no_resit });
     }
   } catch (err: any) {
@@ -517,11 +533,13 @@ apiRouter.delete("/hantaran/:no_resit", async (req, res) => {
         .eq('no_resit', no_resit.toUpperCase());
 
       if (error) throw error;
+      hantaranCache = null; // Invalidate cache
       res.json({ success: true });
     } else {
       const localData = getLocalHantaran();
       const updatedData = localData.filter((r: any) => r.no_resit !== no_resit.toUpperCase());
       saveLocalHantaran(updatedData);
+      hantaranCache = null; // Invalidate cache
       res.json({ success: true });
     }
   } catch (err: any) {
