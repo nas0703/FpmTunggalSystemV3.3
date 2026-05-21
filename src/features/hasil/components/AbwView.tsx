@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { TrendingUp, FileSpreadsheet, Plus, X } from 'lucide-react';
 import { CHART_COLORS, ABW_DATA } from '../../../utils/constants';
@@ -26,6 +26,11 @@ export const AbwView: React.FC = () => {
     }
     return hist;
   });
+
+  // Save history to localStorage on modification
+  useEffect(() => {
+    localStorage.setItem("fpm_abw_history", JSON.stringify(abwHistory));
+  }, [abwHistory]);
 
   const abwDataState = useMemo(() => {
     const result = [];
@@ -56,10 +61,6 @@ export const AbwView: React.FC = () => {
         record.avg2 = pkt2Count > 0 ? pkt2Sum / pkt2Count : null;
         result.push(record);
     }
-    
-    setTimeout(() => {
-        localStorage.setItem("fpm_abw_history", JSON.stringify(abwHistory));
-    }, 100);
     return result;
   }, [abwHistory]);
 
@@ -72,7 +73,7 @@ export const AbwView: React.FC = () => {
             <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
               <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest flex items-center gap-2">
                 <TrendingUp size={16} className="text-emerald-500" />
-                Tambah Data ABW
+                Tambah / Kemaskini Data ABW
               </h3>
               <button onClick={() => setShowABWModal(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 hover:text-rose-500 transition-colors active:scale-95">
                 <X size={16} />
@@ -85,7 +86,19 @@ export const AbwView: React.FC = () => {
                 <select
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                   value={newAbwRecord.month || ""}
-                  onChange={(e) => setNewAbwRecord({ ...newAbwRecord, month: e.target.value })}
+                  onChange={(e) => {
+                    const selectedMonth = e.target.value;
+                    const updatedRecord: any = { month: selectedMonth };
+                    const existingMonthData = abwHistory[selectedMonth];
+                    for (let i = 1; i <= 22; i++) {
+                      if (existingMonthData && existingMonthData[i] && existingMonthData[i].length > 0) {
+                        updatedRecord[i] = existingMonthData[i].join(", ");
+                      } else {
+                        updatedRecord[i] = "";
+                      }
+                    }
+                    setNewAbwRecord(updatedRecord);
+                  }}
                 >
                   <option value="" disabled>Pilih Bulan</option>
                   <option value="Jan">Januari</option>
@@ -103,45 +116,50 @@ export const AbwView: React.FC = () => {
                 </select>
               </div>
 
-              <div className="space-y-4">
-                <h4 className="text-[11px] font-black text-emerald-500 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2">Data PKT 001 (Blok 1-17)</h4>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                  {Array.from({length: 17}, (_, i) => String(i + 1)).map(blok => (
-                    <div key={blok}>
-                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Blok {blok}</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all"
-                        value={newAbwRecord[blok] || ""}
-                        onChange={(e) => setNewAbwRecord({ ...newAbwRecord, [blok]: e.target.value })}
-                      />
+              {newAbwRecord.month && (
+                <>
+                  <div className="space-y-4">
+                    <h4 className="text-[11px] font-black text-emerald-500 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2">Data PKT 001 (Blok 1-17)</h4>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                      {Array.from({length: 17}, (_, i) => String(i + 1)).map(blok => (
+                        <div key={blok}>
+                          <label className="block text-[10px] font-bold text-slate-500 mb-1">Blok {blok}</label>
+                          <input
+                            type="text"
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all"
+                            value={newAbwRecord[blok] || ""}
+                            placeholder="e.g. 21.4"
+                            onChange={(e) => setNewAbwRecord({ ...newAbwRecord, [blok]: e.target.value })}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              <div className="space-y-4">
-                <h4 className="text-[11px] font-black text-emerald-500 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2 mt-4">Data PKT 002 (Blok 18-22)</h4>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                  {Array.from({length: 5}, (_, i) => String(i + 18)).map(blok => (
-                    <div key={blok}>
-                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Blok {blok}</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all"
-                        value={newAbwRecord[blok] || ""}
-                        onChange={(e) => setNewAbwRecord({ ...newAbwRecord, [blok]: e.target.value })}
-                      />
+                  <div className="space-y-4">
+                    <h4 className="text-[11px] font-black text-emerald-500 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2 mt-4">Data PKT 002 (Blok 18-22)</h4>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                      {Array.from({length: 5}, (_, i) => String(i + 18)).map(blok => (
+                        <div key={blok}>
+                          <label className="block text-[10px] font-bold text-slate-500 mb-1">Blok {blok}</label>
+                          <input
+                            type="text"
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all"
+                            value={newAbwRecord[blok] || ""}
+                            placeholder="e.g. 19.8"
+                            onChange={(e) => setNewAbwRecord({ ...newAbwRecord, [blok]: e.target.value })}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="p-6 border-t border-slate-100 dark:border-slate-800 flex gap-3">
               <button
+                disabled={!newAbwRecord.month}
                 onClick={() => {
                     if (!newAbwRecord.month) {
                       alert("Sila pilih bulan.");
@@ -159,15 +177,14 @@ export const AbwView: React.FC = () => {
                             newState[month] = { ...newState[month] };
                         }
                         
-                        // Parse string entries with commas (e.g. "21.5, 22.1")
+                        // Parse and overwrite the string entries for all blocks (1 to 22)
                         for (let i = 1; i <= 22; i++) {
-                            if (newAbwRecord[i]) {
-                                const valStr = String(newAbwRecord[i]);
+                            const valStr = newAbwRecord[i] !== undefined && newAbwRecord[i] !== null ? String(newAbwRecord[i]).trim() : "";
+                            if (valStr !== "") {
                                 const parts = valStr.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-                                
-                                if (parts.length > 0) {
-                                    newState[month][i] = [...(newState[month][i] || []), ...parts];
-                                }
+                                newState[month][i] = parts;
+                            } else {
+                                newState[month][i] = [];
                             }
                         }
                         return newState;
@@ -176,7 +193,11 @@ export const AbwView: React.FC = () => {
                     setShowABWModal(false);
                     setNewAbwRecord({ month: "" });
                 }}
-                className="flex-1 bg-emerald-500 text-white font-black text-xs uppercase tracking-widest py-4 rounded-xl shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all active:scale-95"
+                className={`flex-1 text-white font-black text-xs uppercase tracking-widest py-4 rounded-xl shadow-lg transition-all active:scale-95 ${
+                  newAbwRecord.month 
+                    ? "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30" 
+                    : "bg-slate-300 dark:bg-slate-800 cursor-not-allowed text-slate-450 shadow-none"
+                }`}
               >
                 Simpan Data
               </button>
@@ -199,7 +220,10 @@ export const AbwView: React.FC = () => {
                Prestasi ABW 2026 (PKT 001 vs PKT 002)
              </h3>
              <button 
-              onClick={() => setShowABWModal(true)} 
+              onClick={() => {
+                setNewAbwRecord({ month: "" });
+                setShowABWModal(true);
+              }} 
               className="flex items-center gap-2 bg-emerald-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20 active:scale-95"
              >
                 <Plus size={14} /> KEMASKINI
