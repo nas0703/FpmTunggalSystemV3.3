@@ -31,6 +31,7 @@ export const FertilizerProgress: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const start = Date.now();
     const fetchData = async () => {
       try {
         const [mRes, eRes] = await Promise.all([
@@ -46,7 +47,11 @@ export const FertilizerProgress: React.FC = () => {
       } catch (err) {
         console.error(err);
       } finally {
-        setIsLoading(false);
+        const elapsed = Date.now() - start;
+        const delay = Math.max(0, 350 - elapsed);
+        setTimeout(() => {
+          setIsLoading(false);
+        }, delay);
       }
     };
     fetchData();

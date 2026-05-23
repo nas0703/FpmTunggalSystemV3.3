@@ -29,6 +29,7 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
   }, []);
 
   const fetchEntries = async () => {
+    const start = Date.now();
     setIsLoading(true);
     try {
       const [entriesRes, transactionsRes, inventoryRes] = await Promise.all([
@@ -93,7 +94,11 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
     } catch (err) {
       console.error('Failed to fetch entries', err);
     } finally {
-      setIsLoading(false);
+      const elapsed = Date.now() - start;
+      const delay = Math.max(0, 350 - elapsed);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, delay);
     }
   };
 

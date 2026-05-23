@@ -95,11 +95,13 @@ const GanttBar = (props: any) => {
 };
 
 export const FertilizerProductivity: React.FC = () => {
+  const [isLoading, setIsLoading] = React.useState(true);
   const [entries, setEntries] = useState<any[]>([]);
   const [master, setMaster] = useState<any[]>([]);
   const [ganttData, setGanttData] = useState<any[]>(mockGanttData);
 
   useEffect(() => {
+    const start = Date.now();
     Promise.all([
       fetch('/api/fertilizer/entries').then(res => res.json()),
       fetch('/api/fertilizer/master').then(res => res.json())
@@ -168,6 +170,13 @@ export const FertilizerProductivity: React.FC = () => {
       .catch(err => {
         console.error('Failed to fetch data', err);
         setEntries([]);
+      })
+      .finally(() => {
+        const elapsed = Date.now() - start;
+        const delay = Math.max(0, 350 - elapsed);
+        setTimeout(() => {
+          setIsLoading(false);
+        }, delay);
       });
   }, []);
 
@@ -198,6 +207,8 @@ export const FertilizerProductivity: React.FC = () => {
     : 0;
 
   const bestDay = dailyStats.length > 0 ? [...dailyStats].sort((a, b) => b.productivity - a.productivity)[0] : null;
+
+  if (isLoading) return <div className="flex justify-center p-12"><div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div></div>;
 
   return (
     <div className="space-y-4">
@@ -238,7 +249,7 @@ export const FertilizerProductivity: React.FC = () => {
                   'Kemajuan'
                 ]}
               />
-              <Bar dataKey="planned" shape={<GanttBar />} isAnimationActive={true} />
+              <Bar dataKey="planned" shape={<GanttBar />} isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -295,7 +306,7 @@ export const FertilizerProductivity: React.FC = () => {
                  strokeWidth={3} 
                  dot={{ r: 4, fill: '#8b5cf6', strokeWidth: 2, stroke: '#fff' }}
                  activeDot={{ r: 6 }}
-                 name="Produktiviti"
+                 name="Produktiviti" isAnimationActive={false}
                />
              </LineChart>
            </ResponsiveContainer>

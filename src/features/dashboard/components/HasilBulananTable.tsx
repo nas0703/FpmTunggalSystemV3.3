@@ -28,7 +28,7 @@ export const HasilBulananTable = ({
   isDownloadingPdf?: boolean;
   onPrint?: () => void;
 }) => {
-  const [zoom, setZoom] = useState(85);
+  const [zoom, setZoom] = useState(30);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [sortBy, setSortBy] = useState<"id" | "month" | "ytd" | "yoy">("id");
@@ -761,11 +761,11 @@ export const HasilBulananTable = ({
  return (
  <div
  id="hasil-bulanan-report"
- className="mt-8 md:mt-20 w-full px-4 mb-32 max-w-7xl mx-auto font-sans"
+  className={`mt-8 md:mt-20 w-full px-4 mb-32 mx-auto font-sans ${isCapturing ? "max-w-none" : "max-w-7xl"}`}
  >
- <div className="flex flex-col lg:flex-row justify-between items-center lg:items-end mb-6 gap-4 md:gap-6">
- <div className="flex items-center gap-3 md:gap-4 w-full lg:w-auto">
- <div className="flex flex-col items-center flex-shrink-0">
+ <div className="flex flex-col items-center justify-center text-center mb-6 gap-4 md:gap-6 w-full">
+ <div className="flex flex-col items-center justify-center text-center w-full">
+ <div className="hidden flex-col items-center flex-shrink-0">
  <div className="bg-[#E11D48] text-white p-1.5 md:p-2 rounded-xl mb-1 shadow-md shadow-rose-900/20 ring-1 ring-[#E11D48]/30">
  <Leaf className="w-5 h-5 md:w-8 md:h-8" strokeWidth={2.5}/>
  </div>
@@ -773,14 +773,14 @@ export const HasilBulananTable = ({
  FELDA
  </span>
  </div>
- <div className="flex flex-col">
- <h2 className="text-[11px] md:text-xl font-display font-black text-slate-800 dark:text-white tracking-tight leading-tight uppercase">
+ <div className="flex flex-col items-center justify-center text-center w-full">
+ <h2 className={`font-display font-black text-slate-800 dark:text-white tracking-tight leading-tight uppercase text-center w-full ${isCapturing ? "text-[42px] sm:text-[45px] md:text-[48px] mb-2" : "text-[18px] sm:text-[21px] md:text-[34px]"}`}>
  FELDA PLANTATION MANAGEMENT SDN BHD
  </h2>
- <h3 className="text-[9px] md:text-sm font-bold dark:text-emerald-100 mt-0.5 uppercase tracking-wide">
+ <h3 className={`font-bold dark:text-emerald-100 mt-1 uppercase tracking-wide text-center w-full ${isCapturing ? "text-[28px] sm:text-[30px] md:text-[32px] mb-1.5" : "text-[14px] sm:text-[17px] md:text-[22px]"}`}>
  LAPORAN HASIL BULANAN MENGIKUT BLOK ${dbYear}
  </h3>
- <p className="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tighter">
+ <p className={`font-bold text-slate-400 uppercase tracking-tighter mt-1.5 text-center w-full ${isCapturing ? "text-[18px] sm:text-[21px] md:text-[24px]" : "text-[13px] sm:text-[14px] md:text-[17px]"}`}>
  BULAN {currentMonthName} SEHINGGA : {dateStr}
  </p>
  </div>
@@ -906,7 +906,7 @@ export const HasilBulananTable = ({
 
  <div className="flex items-center gap-1 bg-white dark:bg-slate-800 py-2 px-1 md:p-1.5 rounded-xl border-emerald-200 dark:border-emerald-700 shadow-sm">
  <button
- onClick={() => setZoom(Math.max(30, zoom - 10))}
+ onClick={() => setZoom(Math.max(5, zoom - 5))}
  className="p-1.5 md:p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg transition-all dark:text-emerald-100 active:scale-95"
  title="Zum Keluar"
  >
@@ -916,7 +916,7 @@ export const HasilBulananTable = ({
  {zoom}%
  </span>
  <button
- onClick={() => setZoom(Math.min(200, zoom + 10))}
+ onClick={() => setZoom(Math.min(60, zoom + 5))}
  className="p-1.5 md:p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg transition-all dark:text-emerald-100 active:scale-95"
  title="Zum Masuk"
  >

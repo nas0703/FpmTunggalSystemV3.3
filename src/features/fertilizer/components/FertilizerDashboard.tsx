@@ -20,6 +20,7 @@ export const FertilizerDashboard: React.FC<{ authRole: string }> = ({ authRole }
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const start = Date.now();
     const fetchData = async () => {
       try {
         const [entriesRes, masterRes, transRes] = await Promise.all([
@@ -38,7 +39,11 @@ export const FertilizerDashboard: React.FC<{ authRole: string }> = ({ authRole }
       } catch (err) {
         console.error('Failed to fetch data', err);
       } finally {
-        setIsLoading(false);
+        const elapsed = Date.now() - start;
+        const delay = Math.max(0, 350 - elapsed);
+        setTimeout(() => {
+          setIsLoading(false);
+        }, delay);
       }
     };
     fetchData();
@@ -144,8 +149,8 @@ export const FertilizerDashboard: React.FC<{ authRole: string }> = ({ authRole }
                       itemStyle={{ fontSize: '10px', fontWeight: 'bold' }}
                       labelStyle={{ fontSize: '11px', fontWeight: 900, marginBottom: '4px', color: '#064E3B' }}
                     />
-                    <Bar dataKey="target" radius={[4, 4, 0, 0]} fill="#F1F5F9" barSize={34} name="Sasaran (BEG)" />
-                    <Bar dataKey="actual" radius={[4, 4, 0, 0]} barSize={26} name="Aktual (BEG)">
+                    <Bar dataKey="target" radius={[4, 4, 0, 0]} fill="#F1F5F9" barSize={34} name="Sasaran (BEG)" isAnimationActive={false} />
+                    <Bar dataKey="actual" radius={[4, 4, 0, 0]} barSize={26} name="Aktual (BEG)" isAnimationActive={false}>
                       {pusData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
@@ -183,8 +188,7 @@ export const FertilizerDashboard: React.FC<{ authRole: string }> = ({ authRole }
                        innerRadius={70}
                        outerRadius={95}
                        paddingAngle={8}
-                       stroke="none"
-                       dataKey="value"
+                       stroke="none" dataKey="value" isAnimationActive={false}
                      >
                        <Cell fill="#059669" />
                        <Cell fill="#10b981" />
