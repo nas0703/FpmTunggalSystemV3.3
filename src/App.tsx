@@ -4498,6 +4498,23 @@ PERATURAN TEKNIKAL:
             exit={{ opacity: 0, x: direction * -40 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             onPanEnd={(_e, info) => {
+              // Ignore swipe if dragging a chart/brush
+              const target = _e?.target as any;
+              const isRecharts = (() => {
+                if (!target) return false;
+                if (typeof target.closest === 'function') {
+                  if (target.closest('.recharts-wrapper') || target.closest('.recharts-brush')) return true;
+                }
+                let curr = target;
+                while (curr) {
+                  const cls = typeof curr.className === 'string' ? curr.className : (curr.className?.baseVal || "");
+                  if (cls && cls.includes && cls.includes("recharts")) return true;
+                  curr = curr.parentNode || curr.parentElement;
+                }
+                return false;
+              })();
+              if (isRecharts) return;
+
               const threshold = 50;
               // If we are on dashboard, sub-tabs (report types) take priority for swipes
               // Unless it's a very large swipe or we explicitly want main tab navigation
@@ -4569,6 +4586,23 @@ PERATURAN TEKNIKAL:
                     }}
                     transition={{ duration: 0.3 }}
                     onPanEnd={(_e, info) => {
+                      // Ignore swipe if dragging a chart/brush
+                      const target = _e?.target as any;
+                      const isRecharts = (() => {
+                        if (!target) return false;
+                        if (typeof target.closest === 'function') {
+                          if (target.closest('.recharts-wrapper') || target.closest('.recharts-brush')) return true;
+                        }
+                        let curr = target;
+                        while (curr) {
+                          const cls = typeof curr.className === 'string' ? curr.className : (curr.className?.baseVal || "");
+                          if (cls && cls.includes && cls.includes("recharts")) return true;
+                          curr = curr.parentNode || curr.parentElement;
+                        }
+                        return false;
+                      })();
+                      if (isRecharts) return;
+
                       const threshold = 30; // More sensitive for sub-tabs
                       if (info.offset.x < -threshold) handleSwipe("left");
                       else if (info.offset.x > threshold) handleSwipe("right");
