@@ -1885,7 +1885,6 @@ export default function App() {
           (c) => exportColumns.includes(c.key) || c.key === "tarikh",
         );
         ws.columns = activeCols.map((col) => ({
-          header: col.header,
           key: col.key,
           width: col.width,
         }));
@@ -2573,7 +2572,7 @@ export default function App() {
         const worksheet = workbook.addWorksheet("Rekod Hantaran");
         const displayTitle =
           reportType === "hasil"
-            ? "LAPORAN ANALITIK: CAPAI (BERAT TAN)"
+            ? "LAPORAN :  HANTARAN HASIL HARIAN"
             : reportType === "muda"
               ? "LAPORAN ANALITIK: BTS MUDA (TANDAN MUDA)"
               : reportType === "efb"

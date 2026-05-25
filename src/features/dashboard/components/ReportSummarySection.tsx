@@ -186,7 +186,12 @@ export const ReportSummarySection = ({
         <div className="h-full">
           {/* Hero Summary Card - New Red Box Layout - Condensed to fit */}
           {showHero && (
-            <div className="bg-[#020617] dark:bg-[#020617] p-2 rounded-[16px] border border-slate-800/60 shadow-2xl relative overflow-hidden h-full flex flex-col justify-between">
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              className="bg-[#020617] dark:bg-[#020617] p-2 rounded-[16px] border border-slate-800/60 shadow-2xl relative overflow-hidden h-full flex flex-col justify-between"
+            >
               {/* Card Header: Title + Icon */}
               <div className="flex items-center gap-1 mb-1.5 opacity-90">
                 <Calendar size={8} className="text-emerald-500" />
@@ -272,7 +277,7 @@ export const ReportSummarySection = ({
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Details sections remain largely the same */}
@@ -314,9 +319,12 @@ export const ReportSummarySection = ({
 
                 return (
                   <>
-                    {cards.map((c) => (
-                      <div
+                    {cards.map((c, index) => (
+                      <motion.div
                         key={c.id}
+                        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
                         className="space-y-0 h-full flex flex-col relative"
                       >
                         {/* ZONE LABEL: Professional Flag Style (Top Left Outside) */}
@@ -403,7 +411,7 @@ export const ReportSummarySection = ({
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}</>);
               })()}
             </div>
@@ -415,7 +423,12 @@ export const ReportSummarySection = ({
         <div className="space-y-1.5 h-full flex flex-col">
           {/* Hero Summary Card - Total Muda (Consistent Layout) */}
           {showHero && (
-            <div className="bg-[#0b1224] p-1.5 rounded-xl shadow-lg border border-white/5 relative overflow-hidden group h-full flex flex-col">
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              className="bg-[#0b1224] p-1.5 rounded-xl shadow-lg border border-white/5 relative overflow-hidden group h-full flex flex-col"
+            >
               {/* Info Header */}
               <div className="bg-slate-800/40 px-2 py-0.5 rounded-lg border border-white/5 mb-1 flex items-center justify-between">
                 <p className="text-[5.5px] font-black text-slate-500 uppercase tracking-widest">
@@ -486,14 +499,19 @@ export const ReportSummarySection = ({
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {(showDetails || isPkt1 || isPkt2 || isFelda) && (
             <div className="flex flex-col gap-1 h-full pt-1.5">
               
               {(showDetails || isPkt1) && (
-                <div className="space-y-0 h-full flex flex-col relative">
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.05, ease: "easeOut" }}
+                  className="space-y-0 h-full flex flex-col relative"
+                >
                   {showDetails && period === "day" && (
                     <div className="absolute -top-2.5 left-1 z-10 p-0 pointer-events-none">
                       <div className="bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 shadow-md px-1.5 py-0.5 rounded-sm">
@@ -513,10 +531,15 @@ export const ReportSummarySection = ({
                       </p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               )}
               {(showDetails || isPkt2) && (
-                <div className="space-y-0 h-full flex flex-col relative">
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+                  className="space-y-0 h-full flex flex-col relative"
+                >
                   {showDetails && period === "day" && (
                     <div className="absolute -top-2.5 left-1 z-10 p-0 pointer-events-none">
                       <div className="bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 shadow-md px-1.5 py-0.5 rounded-sm">
@@ -536,10 +559,15 @@ export const ReportSummarySection = ({
                       </p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               )}
               {(showDetails || isFelda) && (
-                <div className="space-y-0 h-full flex flex-col relative">
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.15, ease: "easeOut" }}
+                  className="space-y-0 h-full flex flex-col relative"
+                >
                   {showDetails && period === "day" && (
                     <div className="absolute -top-2.5 left-1 z-10 p-0 pointer-events-none">
                       <div className="bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 shadow-md px-1.5 py-0.5 rounded-sm">
@@ -559,7 +587,7 @@ export const ReportSummarySection = ({
                       </p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
           )}
@@ -570,7 +598,12 @@ export const ReportSummarySection = ({
         <div className="space-y-1.5 h-full flex flex-col">
           {/* Hero Summary Card - KPA/KPG Match (Consistent Layout) */}
           {showHero && (
-            <div className="bg-[#0b1224] p-1.5 rounded-xl shadow-lg border border-white/5 relative overflow-hidden group h-full flex flex-col">
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              className="bg-[#0b1224] p-1.5 rounded-xl shadow-lg border border-white/5 relative overflow-hidden group h-full flex flex-col"
+            >
               {/* Header: Total Resit (KPA) */}
               <div className="bg-slate-800/40 px-2 py-0.5 rounded-lg border border-white/5 mb-1 flex items-center justify-between">
                 <p className="text-[5.5px] font-black text-slate-500 uppercase tracking-widest">
@@ -655,14 +688,19 @@ export const ReportSummarySection = ({
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {(showDetails || isPkt1 || isPkt2 || isFelda) && (
             <div className="flex flex-col gap-1 h-full pt-1.5">
               
               {(showDetails || isPkt1) && (
-                <div className="space-y-0 h-full flex flex-col relative">
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.05, ease: "easeOut" }}
+                  className="space-y-0 h-full flex flex-col relative"
+                >
                   {showDetails && period === "day" && (
                     <div className="absolute -top-2.5 left-1 z-10 p-0 pointer-events-none">
                       <div className="bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 shadow-md px-1.5 py-0.5 rounded-sm">
@@ -685,10 +723,15 @@ export const ReportSummarySection = ({
                       </p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               )}
               {(showDetails || isPkt2) && (
-                <div className="space-y-0 h-full flex flex-col relative">
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.15, ease: "easeOut" }}
+                  className="space-y-0 h-full flex flex-col relative"
+                >
                   {showDetails && period === "day" && (
                     <div className="absolute -top-2.5 left-1 z-10 p-0 pointer-events-none">
                       <div className="bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 shadow-md px-1.5 py-0.5 rounded-sm">
@@ -711,10 +754,15 @@ export const ReportSummarySection = ({
                       </p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               )}
               {(showDetails || isFelda) && (
-                <div className="space-y-0 h-full flex flex-col relative">
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.15, ease: "easeOut" }}
+                  className="space-y-0 h-full flex flex-col relative"
+                >
                   {showDetails && period === "day" && (
                     <div className="absolute -top-2.5 left-1 z-10 p-0 pointer-events-none">
                       <div className="bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 shadow-md px-1.5 py-0.5 rounded-sm">
@@ -737,7 +785,7 @@ export const ReportSummarySection = ({
                       </p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
           )}
@@ -748,7 +796,12 @@ export const ReportSummarySection = ({
         <div className="space-y-1.5 h-full flex flex-col">
           {/* Hero Summary Card - Average Price */}
           {showHero && (
-            <div className="bg-slate-900 p-2 rounded-xl shadow-lg border border-white/5 relative overflow-hidden h-full">
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              className="bg-slate-900 p-2 rounded-xl shadow-lg border border-white/5 relative overflow-hidden h-full"
+            >
               <div className="relative z-10">
                 <div className="flex items-baseline gap-1">
                   <p className="text-lg font-display font-black text-white">
@@ -764,14 +817,19 @@ export const ReportSummarySection = ({
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {(showDetails || isPkt1 || isPkt2 || isFelda) && (
             <div className="flex flex-col gap-1 h-full pt-1.5">
               
               {(showDetails || isPkt1) && (
-                <div className="space-y-0 h-full flex flex-col relative">
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.05, ease: "easeOut" }}
+                  className="space-y-0 h-full flex flex-col relative"
+                >
                   {showDetails && period === "day" && (
                     <div className="absolute -top-2.5 left-1 z-10 p-0 pointer-events-none">
                       <div className="bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 shadow-md px-1.5 py-0.5 rounded-sm">
@@ -786,10 +844,15 @@ export const ReportSummarySection = ({
                       RM {(data.pkt1_avg_price || 0).toFixed(2)}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               )}
               {(showDetails || isPkt2) && (
-                <div className="space-y-0 h-full flex flex-col relative">
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+                  className="space-y-0 h-full flex flex-col relative"
+                >
                   {showDetails && period === "day" && (
                     <div className="absolute -top-2.5 left-1 z-10 p-0 pointer-events-none">
                       <div className="bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 shadow-md px-1.5 py-0.5 rounded-sm">
@@ -804,10 +867,15 @@ export const ReportSummarySection = ({
                       RM {(data.pkt2_avg_price || 0).toFixed(2)}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               )}
               {(showDetails || isFelda) && (
-                <div className="space-y-0 h-full flex flex-col relative">
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.15, ease: "easeOut" }}
+                  className="space-y-0 h-full flex flex-col relative"
+                >
                   {showDetails && period === "day" && (
                     <div className="absolute -top-2.5 left-1 z-10 p-0 pointer-events-none">
                       <div className="bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 shadow-md px-1.5 py-0.5 rounded-sm">
@@ -822,7 +890,7 @@ export const ReportSummarySection = ({
                       RM {(data.felda_avg_price || 0).toFixed(2)}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
           )}
@@ -832,7 +900,12 @@ export const ReportSummarySection = ({
         <div className="space-y-1.5 h-full flex flex-col">
           {/* Hero Summary Card - Total EFB */}
           {showHero && (
-            <div className="bg-slate-900 p-2 rounded-xl shadow-lg border border-white/5 relative overflow-hidden h-full">
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              className="bg-slate-900 p-2 rounded-xl shadow-lg border border-white/5 relative overflow-hidden h-full"
+            >
               <div className="relative z-10">
                 <div className="flex items-center gap-1 mb-1.5 opacity-90">
                   <Calendar size={8} className="text-emerald-500" />
@@ -862,7 +935,7 @@ export const ReportSummarySection = ({
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
       )}
