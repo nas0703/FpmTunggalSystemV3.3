@@ -3131,6 +3131,10 @@ export default function App() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Switch tab to input (scan) tab and close profile menu automatically
+    setActiveTab("scan");
+    setShowUserMenu(false);
+
     setIsScanning(true);
     showToast("success", "Menganalisis resit dengan Gemini AI...");
 
@@ -7316,6 +7320,23 @@ PERATURAN TEKNIKAL:
         setIsProfileActive={setShowUserMenu}
         onUploadClick={() => uploadInputRef.current?.click()}
         onCameraClick={() => fileInputRef.current?.click()}
+      />
+
+      {/* Global Hidden Inputs to allow scanning/uploading resit from any page/tab */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleOcrScan}
+        accept="image/*"
+        className="hidden"
+        capture="environment"
+      />
+      <input
+        type="file"
+        ref={uploadInputRef}
+        onChange={handleOcrScan}
+        accept="image/*"
+        className="hidden"
       />
 
       {/* --- MODAL: CARTA TREND DIPERBESARKAN --- */}

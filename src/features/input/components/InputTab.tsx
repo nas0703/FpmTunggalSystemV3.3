@@ -42,21 +42,6 @@ export const InputTab: React.FC<InputTabProps> = ({
           <h2 className="text-sm font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
             <FileText size={14} /> Rekod Hantaran
           </h2>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleOcrScan}
-            accept="image/*"
-            className="hidden"
-            capture="environment"
-          />
-          <input
-            type="file"
-            ref={uploadInputRef}
-            onChange={handleOcrScan}
-            accept="image/*"
-            className="hidden"
-          />
         </div>
 
         <div className="space-y-3 mt-2">
