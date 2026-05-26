@@ -6,6 +6,16 @@
   --font-display: "Montserrat", sans-serif;
 }
 
+@keyframes shine {
+  100% {
+    left: 125%;
+  }
+}
+
+@utility animate-shine {
+  animation: shine 0.75s ease-in-out;
+}
+
 @variant dark (&:where(.dark, .dark *));
 
 @utility scrollbar-hide {

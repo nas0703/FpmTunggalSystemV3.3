@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { 
   Leaf, ChevronDown, Moon, Info, Download, 
   Settings, HelpCircle, LogOut 
@@ -124,6 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.15, ease: "easeInOut" }}
                   className="absolute top-14 right-0 w-56 bg-slate-900/98 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] overflow-hidden"
                 >
                   {/* User Profile Header */}

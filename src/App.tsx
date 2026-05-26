@@ -278,9 +278,11 @@ export default function App() {
   } = useAuth({
     onLoginSuccess: (role) => {
       setActiveTab(role === "staff" ? "scan" : "dashboard");
+      setShowUserMenu(false);
     },
     onLogout: () => {
       setActiveTab("scan");
+      setShowUserMenu(false);
     }
   });
 
@@ -512,6 +514,14 @@ export default function App() {
       .slice(0, 7),
   );
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Skrol ke atas secara automatik apabila menu profil dibuka
+  useEffect(() => {
+    if (showUserMenu) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [showUserMenu]);
+
   const [showNewFeatures, setShowNewFeatures] = useState(false);
   const [expandedTrendChart, setExpandedTrendChart] = useState<
     "overall" | "pkt1" | "pkt2" | "felda" | null
@@ -996,6 +1006,10 @@ export default function App() {
         userMenuRef.current &&
         !userMenuRef.current.contains(event.target as Node)
       ) {
+        const target = event.target as HTMLElement;
+        if (target && target.closest(".bottom-nav-profile-btn")) {
+          return;
+        }
         setShowUserMenu(false);
       }
     };
@@ -7294,62 +7308,14 @@ PERATURAN TEKNIKAL:
         </AnimatePresence>
       </main>
 
-      {/* --- MENU NAVIGASI BAWAH --- */}
-      {activeTab === "scan" && (
-        <div className="fixed bottom-24 right-6 z-[60] flex flex-col items-end gap-3">
-          <AnimatePresence>
-            {showOcrActions && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                className="flex flex-col items-end gap-3 mb-2"
-              >
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    uploadInputRef.current?.click();
-                    setShowOcrActions(false);
-                  }}
-                  className="bg-blue-600 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-black uppercase tracking-widest active:scale-95 transition-all"
-                >
-                  Muat Naik <Upload size={16} />
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    fileInputRef.current?.click();
-                    setShowOcrActions(false);
-                  }}
-                  className="bg-emerald-600 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-black uppercase tracking-widest active:scale-95 transition-all"
-                >
-                  Imbas Resit <Camera size={16} />
-                </motion.button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setShowOcrActions(!showOcrActions)}
-            className={`w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-all active:scale-90 ${showOcrActions ? "bg-slate-800 dark:bg-slate-700 rotate-45" : "bg-emerald-600 dark:bg-emerald-500"}`}
-          >
-            {isScanning ? (
-              <Loader2 className="animate-spin text-white" size={24} />
-            ) : (
-              <Plus
-                className={`text-white transition-transform ${showOcrActions ? "" : ""}`}
-                size={28}
-              />
-            )}
-          </motion.button>
-        </div>
-      )}
-
+      {/* --- MENU NAVIGASI BAWAH BELA BELAH BARU --- */}
       <BottomNav 
         activeTab={activeTab} 
         handleTabChange={handleTabChange} 
-        authRole={authRole} 
+        isProfileActive={showUserMenu}
+        setIsProfileActive={setShowUserMenu}
+        onUploadClick={() => uploadInputRef.current?.click()}
+        onCameraClick={() => fileInputRef.current?.click()}
       />
 
       {/* --- MODAL: CARTA TREND DIPERBESARKAN --- */}
