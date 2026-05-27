@@ -45,20 +45,20 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const isSejarahActive = activeTab === "sejarah" && !isProfileActive;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-full h-[64px] z-40 select-none pb-safe">
+    <div className="fixed bottom-0 left-0 right-0 w-full h-[76px] z-40 select-none pb-safe">
       
       {/* 1. CURVED BACKDROP COMBINATION WITH STRETCHED SIDES AND CENTER NOTCH */}
       <div className="absolute inset-0 flex pointer-events-none">
         
         {/* Left flat bar */}
-        <div className="flex-1 h-[48px] mt-[16px] bg-gradient-to-b from-[#011f19] to-[#01140f] border-t border-emerald-500/20" />
+        <div className="flex-1 h-[58px] mt-[18px] bg-gradient-to-b from-[#011f19] to-[#01140f] border-t border-emerald-500/20" />
         
         {/* Center notch SVG */}
-        <div className="w-[72px] h-[64px] relative shrink-0">
+        <div className="w-[88px] h-[76px] relative shrink-0">
           <svg
-            width="72"
-            height="64"
-            viewBox="0 0 72 64"
+            width="88"
+            height="76"
+            viewBox="0 0 88 76"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className="absolute inset-0"
@@ -78,28 +78,28 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               </linearGradient>
             </defs>
 
-            {/* Seamless solid fill for center cutout */}
+            {/* Seamless solid fill for center cutout (scaled by 20%) */}
             <path
-              d="M 0,16
-                 L 4,16
-                 C 8,16 12,20 12,25
-                 A 24,24 0 0 0 60,25
-                 C 60,20 64,16 68,16
-                 L 72,16
-                 L 72,64
-                 L 0,64
+              d="M 0,18
+                 L 6,18
+                 C 11,18 15,22 15,28
+                 A 29,29 0 0 0 73,28
+                 C 73,22 77,18 82,18
+                 L 88,18
+                 L 88,76
+                 L 0,76
                  Z"
               fill="url(#navBgGrad)"
             />
 
-            {/* Glowing top line connecting the shoulder edges */}
+            {/* Glowing top line connecting the shoulder edges (scaled by 20%) */}
             <path
-              d="M 0,16
-                 L 4,16
-                 C 8,16 12,20 12,25
-                 A 24,24 0 0 0 60,25
-                 C 60,20 64,16 68,16
-                 L 72,16"
+              d="M 0,18
+                 L 6,18
+                 C 11,18 15,22 15,28
+                 A 29,29 0 0 0 73,28
+                 C 73,22 77,18 82,18
+                 L 88,18"
               stroke="url(#navBorderGrad)"
               strokeWidth="1.2"
               fill="none"
@@ -108,12 +108,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         </div>
 
         {/* Right flat bar */}
-        <div className="flex-1 h-[48px] mt-[16px] bg-gradient-to-b from-[#011f19] to-[#01140f] border-t border-emerald-500/20" />
+        <div className="flex-1 h-[58px] mt-[18px] bg-gradient-to-b from-[#011f19] to-[#01140f] border-t border-emerald-500/20" />
         
       </div>
 
       {/* 2. NAVIGATION BUTTONS LAYER */}
-      <div className="absolute left-0 right-0 top-[16px] h-[48px] flex items-center justify-between px-3 pb-1 max-w-lg mx-auto">
+      <div className="absolute left-0 right-0 top-[18px] h-[58px] flex items-center justify-between px-4 pb-2.5 max-w-lg mx-auto">
         
         {/* BUTTON 1: INPUT */}
         <button
@@ -130,7 +130,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               }`}
             />
             <span
-              className={`text-[8px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+              className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
                 isInputActive ? "text-emerald-400" : "text-slate-500 font-bold"
               }`}
             >
@@ -149,7 +149,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         {/* BUTTON 2: DASHBOARD */}
         <button
           onClick={() => selectTab("dashboard")}
-          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group"
+          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group pr-5"
         >
           <div className="flex flex-col items-center justify-center relative">
             <LayoutGrid
@@ -161,7 +161,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               }`}
             />
             <span
-              className={`text-[8px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+              className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
                 isDashboardActive ? "text-emerald-400" : "text-slate-500 font-bold"
               }`}
             >
@@ -178,12 +178,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         </button>
 
         {/* 100% SPACER FOR THE CENTRAL NOTCH */}
-        <div className="w-[72px] shrink-0" />
+        <div className="w-[108px] shrink-0" />
 
         {/* BUTTON 4: SEJARAH */}
         <button
           onClick={() => selectTab("sejarah")}
-          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group"
+          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group pl-5"
         >
           <div className="flex flex-col items-center justify-center relative">
             <History
@@ -195,7 +195,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               }`}
             />
             <span
-              className={`text-[8px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+              className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
                 isSejarahActive ? "text-emerald-400" : "text-slate-500 font-bold"
               }`}
             >
@@ -226,7 +226,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               }`}
             />
             <span
-              className={`text-[8px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+              className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
                 isProfileActive ? "text-emerald-400" : "text-slate-500 font-bold"
               }`}
             >
@@ -245,7 +245,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       </div>
 
       {/* 3. CENTRAL CAMERA ACTION BUTTON */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-[4px] z-50">
+      <div className="absolute left-1/2 -translate-x-1/2 top-[2px] z-50">
         
         {/* Subtle breathing outer glow behind the circle */}
         <div className="absolute -inset-1 bg-emerald-500/30 rounded-full blur-[8px] pointer-events-none animate-pulse" />
@@ -258,17 +258,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 15, scale: 0.9 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="absolute bottom-16 left-1/2 -translate-x-1/2 w-32 bg-[#041e18]/95 border border-emerald-500/20 backdrop-blur-md rounded-xl shadow-xl p-1.5 flex flex-col gap-1 z-50"
+              className="absolute bottom-20 left-1/2 -translate-x-1/2 w-36 bg-[#041e18]/95 border border-emerald-500/20 backdrop-blur-md rounded-xl shadow-xl p-1.5 flex flex-col gap-1 z-50"
             >
               <button
                 onClick={() => {
                   setShowQuickMenu(false);
                   onUploadClick?.();
                 }}
-                className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-500/10 rounded-md text-[8px] font-black uppercase tracking-wider text-slate-250 flex items-center justify-between transition-colors cursor-pointer"
+                className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-500/10 rounded-md text-[9.5px] font-black uppercase tracking-wider text-slate-250 flex items-center justify-between transition-colors cursor-pointer"
               >
                 Muat Naik
-                <Upload size={12} className="text-emerald-450" />
+                <Upload size={14} className="text-emerald-450" />
               </button>
               <div className="h-px bg-emerald-500/10" />
               <button
@@ -276,22 +276,22 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                   setShowQuickMenu(false);
                   onCameraClick?.();
                 }}
-                className="w-full text-left px-2.5 py-1.5 hover:bg-[#10b981]/15 rounded-md text-[8px] font-black uppercase tracking-wider text-slate-250 flex items-center justify-between transition-colors cursor-pointer"
+                className="w-full text-left px-2.5 py-1.5 hover:bg-[#10b981]/15 rounded-md text-[9.5px] font-black uppercase tracking-wider text-slate-250 flex items-center justify-between transition-colors cursor-pointer"
               >
                 Imbas Resit
-                <Camera size={12} className="text-emerald-450" />
+                <Camera size={14} className="text-emerald-450" />
               </button>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Main circular Camera button */}
+        {/* Main circular Camera button (scaled up by 20% to 52px) */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           transition={{ type: "spring", stiffness: 450, damping: 20 }}
           onClick={toggleQuickMenu}
-          className="w-[44px] h-[44px] rounded-full flex items-center justify-center cursor-pointer relative overflow-hidden outline-none bg-gradient-to-tr from-[#024a3b] to-[#10b981] border-2 border-emerald-400/50 shadow-[0_6px_18px_rgba(2,26,20,0.5),_inset_0_1px_1.5px_rgba(255,255,255,0.3)] select-none group"
+          className="w-[52px] h-[52px] rounded-full flex items-center justify-center cursor-pointer relative overflow-hidden outline-none bg-gradient-to-tr from-[#024a3b] to-[#10b981] border-2 border-emerald-400/50 shadow-[0_6px_18px_rgba(2,26,20,0.5),_inset_0_1px_1.5px_rgba(255,255,255,0.3)] select-none group"
         >
           {/* Shiny overlay sheen decoration */}
           <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
@@ -306,7 +306,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                 transition={{ duration: 0.15, ease: "easeOut" }}
                 className="flex items-center justify-center relative z-10"
               >
-                <X className="text-white drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.5)]" size={17} />
+                <X className="text-white drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.5)]" size={20} />
               </motion.div>
             ) : (
               <motion.div
@@ -317,7 +317,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                 transition={{ duration: 0.15, ease: "easeOut" }}
                 className="flex items-center justify-center relative z-10"
               >
-                <Camera className="text-white drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-200" size={16} />
+                <Camera className="text-white drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-200" size={20} />
               </motion.div>
             )}
           </AnimatePresence>
