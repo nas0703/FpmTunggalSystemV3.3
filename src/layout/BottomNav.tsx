@@ -113,134 +113,140 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       </div>
 
       {/* 2. NAVIGATION BUTTONS LAYER */}
-      <div className="absolute left-0 right-0 top-[18px] h-[58px] flex items-center justify-between px-4 pb-2.5 max-w-lg mx-auto">
+      <div className="absolute left-0 right-0 top-[18px] h-[58px] flex items-center justify-between px-3 pb-2.5 max-w-lg mx-auto">
         
-        {/* BUTTON 1: INPUT */}
-        <button
-          onClick={() => selectTab("scan")}
-          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group"
-        >
-          <div className="flex flex-col items-center justify-center relative">
-            <Home
-              size={15}
-              className={`transition-colors duration-250 ${
-                isInputActive
-                  ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                  : "text-slate-450 group-hover:text-slate-350"
-              }`}
-            />
-            <span
-              className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
-                isInputActive ? "text-emerald-400" : "text-slate-500 font-bold"
-              }`}
-            >
-              Input
-            </span>
-            {isInputActive && (
-              <motion.div
-                layoutId="activeIndicator"
-                className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
-                transition={springConfig}
+        {/* LEFT BUTTONS CONTAINER */}
+        <div className="flex-grow flex-shrink basis-0 grid grid-cols-2 w-full h-full justify-items-center items-center">
+          {/* BUTTON 1: INPUT */}
+          <button
+            onClick={() => selectTab("scan")}
+            className="w-full flex flex-col items-center justify-center h-full cursor-pointer relative group outline-none"
+          >
+            <div className="flex flex-col items-center justify-center relative">
+              <Home
+                size={15}
+                className={`transition-colors duration-250 ${
+                  isInputActive
+                    ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                    : "text-slate-400 group-hover:text-slate-200"
+                }`}
               />
-            )}
-          </div>
-        </button>
+              <span
+                className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+                  isInputActive ? "text-emerald-400" : "text-slate-500 font-bold"
+                }`}
+              >
+                Input
+              </span>
+              {isInputActive && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+                  transition={springConfig}
+                />
+              )}
+            </div>
+          </button>
 
-        {/* BUTTON 2: DASHBOARD */}
-        <button
-          onClick={() => selectTab("dashboard")}
-          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group pr-5"
-        >
-          <div className="flex flex-col items-center justify-center relative">
-            <LayoutGrid
-              size={15}
-              className={`transition-colors duration-250 ${
-                isDashboardActive
-                  ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                  : "text-slate-450 group-hover:text-slate-350"
-              }`}
-            />
-            <span
-              className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
-                isDashboardActive ? "text-emerald-400" : "text-slate-500 font-bold"
-              }`}
-            >
-              Dashboard
-            </span>
-            {isDashboardActive && (
-              <motion.div
-                layoutId="activeIndicator"
-                className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
-                transition={springConfig}
+          {/* BUTTON 2: DASHBOARD */}
+          <button
+            onClick={() => selectTab("dashboard")}
+            className="w-full flex flex-col items-center justify-center h-full cursor-pointer relative group outline-none"
+          >
+            <div className="flex flex-col items-center justify-center relative">
+              <LayoutGrid
+                size={15}
+                className={`transition-colors duration-250 ${
+                  isDashboardActive
+                    ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                    : "text-slate-400 group-hover:text-slate-200"
+                }`}
               />
-            )}
-          </div>
-        </button>
+              <span
+                className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+                  isDashboardActive ? "text-emerald-400" : "text-slate-500 font-bold"
+                }`}
+              >
+                Dashboard
+              </span>
+              {isDashboardActive && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+                  transition={springConfig}
+                />
+              )}
+            </div>
+          </button>
+        </div>
 
         {/* 100% SPACER FOR THE CENTRAL NOTCH */}
-        <div className="w-[108px] shrink-0" />
+        <div className="w-[88px] shrink-0" />
 
-        {/* BUTTON 4: SEJARAH */}
-        <button
-          onClick={() => selectTab("sejarah")}
-          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group pl-5"
-        >
-          <div className="flex flex-col items-center justify-center relative">
-            <History
-              size={15}
-              className={`transition-colors duration-250 ${
-                isSejarahActive
-                  ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                  : "text-slate-450 group-hover:text-slate-350"
-              }`}
-            />
-            <span
-              className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
-                isSejarahActive ? "text-emerald-400" : "text-slate-500 font-bold"
-              }`}
-            >
-              Sejarah
-            </span>
-            {isSejarahActive && (
-              <motion.div
-                layoutId="activeIndicator"
-                className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
-                transition={springConfig}
+        {/* RIGHT BUTTONS CONTAINER */}
+        <div className="flex-grow flex-shrink basis-0 grid grid-cols-2 w-full h-full justify-items-center items-center">
+          {/* BUTTON 4: SEJARAH */}
+          <button
+            onClick={() => selectTab("sejarah")}
+            className="w-full flex flex-col items-center justify-center h-full cursor-pointer relative group outline-none"
+          >
+            <div className="flex flex-col items-center justify-center relative">
+              <History
+                size={15}
+                className={`transition-colors duration-250 ${
+                  isSejarahActive
+                    ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                    : "text-slate-400 group-hover:text-slate-200"
+                }`}
               />
-            )}
-          </div>
-        </button>
+              <span
+                className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+                  isSejarahActive ? "text-emerald-400" : "text-slate-500 font-bold"
+                }`}
+              >
+                Sejarah
+              </span>
+              {isSejarahActive && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+                  transition={springConfig}
+                />
+              )}
+            </div>
+          </button>
 
-        {/* BUTTON 5: PROFIL */}
-        <button
-          onClick={selectProfile}
-          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group bottom-nav-profile-btn"
-        >
-          <div className="flex flex-col items-center justify-center relative">
-            <User
-              size={15}
-              className={`transition-colors duration-250 ${
-                isProfileActive
-                  ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                  : "text-slate-450 group-hover:text-slate-350"
-              }`}
-            />
-            <span
-              className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
-                isProfileActive ? "text-emerald-400" : "text-slate-500 font-bold"
-              }`}
-            >
-              Profil
-            </span>
-            {isProfileActive && (
-              <motion.div
-                layoutId="activeIndicator"
-                className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
-                transition={springConfig}
+          {/* BUTTON 5: PROFIL */}
+          <button
+            onClick={selectProfile}
+            className="w-full flex flex-col items-center justify-center h-full cursor-pointer relative group bottom-nav-profile-btn outline-none"
+          >
+            <div className="flex flex-col items-center justify-center relative">
+              <User
+                size={15}
+                className={`transition-colors duration-250 ${
+                  isProfileActive
+                    ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                    : "text-slate-400 group-hover:text-slate-200"
+                }`}
               />
-            )}
-          </div>
-        </button>
+              <span
+                className={`text-[8.5px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+                  isProfileActive ? "text-emerald-400" : "text-slate-500 font-bold"
+                }`}
+              >
+                Profil
+              </span>
+              {isProfileActive && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+                  transition={springConfig}
+                />
+              )}
+            </div>
+          </button>
+        </div>
 
       </div>
 
@@ -265,10 +271,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                   setShowQuickMenu(false);
                   onUploadClick?.();
                 }}
-                className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-500/10 rounded-md text-[9.5px] font-black uppercase tracking-wider text-slate-250 flex items-center justify-between transition-colors cursor-pointer"
+                className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-500/10 rounded-md text-[9.5px] font-black uppercase tracking-wider text-slate-50 flex items-center justify-between transition-colors cursor-pointer"
               >
-                Muat Naik
-                <Upload size={14} className="text-emerald-450" />
+                <span className="text-slate-100">Muat Naik</span>
+                <Upload size={14} className="text-emerald-400" />
               </button>
               <div className="h-px bg-emerald-500/10" />
               <button
@@ -276,10 +282,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                   setShowQuickMenu(false);
                   onCameraClick?.();
                 }}
-                className="w-full text-left px-2.5 py-1.5 hover:bg-[#10b981]/15 rounded-md text-[9.5px] font-black uppercase tracking-wider text-slate-250 flex items-center justify-between transition-colors cursor-pointer"
+                className="w-full text-left px-2.5 py-1.5 hover:bg-[#10b981]/15 rounded-md text-[9.5px] font-black uppercase tracking-wider text-slate-50 flex items-center justify-between transition-colors cursor-pointer"
               >
-                Imbas Resit
-                <Camera size={14} className="text-emerald-450" />
+                <span className="text-slate-100">Imbas Resit</span>
+                <Camera size={14} className="text-emerald-400" />
               </button>
             </motion.div>
           )}
