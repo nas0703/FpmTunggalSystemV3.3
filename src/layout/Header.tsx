@@ -48,34 +48,34 @@ export const Header: React.FC<HeaderProps> = ({
   longPressTimer
 }) => {
   return (
-    <header className="bg-gradient-to-br from-emerald-900 via-slate-900 to-emerald-950 pt-12 pb-8 px-5 rounded-b-[48px] shadow-2xl relative z-40 border-b border-white/5">
+    <header className="bg-gradient-to-br from-emerald-900 via-slate-900 to-emerald-950 pt-9 pb-5 px-4 rounded-b-[32px] shadow-2xl relative z-40 border-b border-white/5">
       {/* Modern decorative elements */}
-      <div className="absolute inset-0 rounded-b-[48px] overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 rounded-b-[32px] overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -mr-32 -mt-32" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-400/5 rounded-full blur-[80px] -ml-24 -mb-24" />
       </div>
 
-      <div className="relative z-50 flex justify-between items-start mb-4">
-        <div className="flex items-center gap-5 flex-1 min-w-0">
-          <div className="w-14 h-14 bg-white/5 backdrop-blur-xl rounded-[22px] border border-white/10 flex items-center justify-center shadow-2xl shrink-0 group transition-all duration-500 hover:bg-emerald-500/20 hover:border-emerald-500/30">
+      <div className="relative z-50 flex justify-between items-start mb-3">
+        <div className="flex items-center gap-3.5 flex-1 min-w-0">
+          <div className="w-11 h-11 bg-white/5 backdrop-blur-xl rounded-[16px] border border-white/10 flex items-center justify-center shadow-2xl shrink-0 group transition-all duration-500 hover:bg-emerald-500/20 hover:border-emerald-500/30">
             <Leaf
               className="text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)] transition-transform duration-500 group-hover:rotate-12"
-              size={28}
+              size={22}
             />
           </div>
           <div className="flex flex-col min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-display font-black text-white tracking-widest leading-none uppercase drop-shadow-lg">
+            <h1 className="text-xl sm:text-2xl font-display font-black text-white tracking-widest leading-none uppercase drop-shadow-lg">
               FPMSB TUNGGAL
-              <div className="flex items-center gap-2 mt-2.5">
+              <div className="flex items-center gap-2 mt-1.5">
                 <span className="inline-block px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/30 rounded text-[9px] sm:text-[10px] font-sans font-black text-emerald-300 tracking-widest uppercase">
                   Version 3.3
                 </span>
                 <div className="h-px bg-white/10 flex-grow max-w-[40px]" />
               </div>
-              <span className="block text-[10px] sm:text-[11px] font-sans font-black text-emerald-400/90 tracking-[0.25em] mt-1.5 uppercase opacity-90">
+              <span className="block text-[10px] sm:text-[11px] font-sans font-black text-emerald-400/90 tracking-[0.25em] mt-1 uppercase opacity-90">
                 Integrated Plantation Data System
               </span>
-              <span className="block text-[8px] sm:text-[9px] font-sans font-medium text-emerald-200/50 tracking-[0.3em] mt-1 uppercase">
+              <span className="block text-[8px] sm:text-[9px] font-sans font-medium text-emerald-200/50 tracking-[0.3em] mt-0.5 uppercase">
                 Sistem Maklumat Ladang Bersepadu
               </span>
             </h1>
@@ -287,13 +287,13 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Toggle Laporan (Dashboard) */}
       {(authRole === "fc" || authRole === "afc" || authRole === "fs") &&
         activeTab === "dashboard" && (
-          <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-500">
+          <div className="mt-2.5 animate-in fade-in slide-in-from-top-2 duration-500">
             {/* Level 1: Jenis Laporan (Pill Style) - Scrollable */}
             <Reorder.Group
               axis="x"
               values={reportTabs}
               onReorder={setReportTabs}
-              className="flex w-full overflow-x-auto scrollbar-hide bg-black/30 p-1.5 rounded-full border border-white/10 backdrop-blur-md shadow-inner gap-1"
+              className="flex w-full overflow-x-auto scrollbar-hide bg-black/30 p-1 rounded-full border border-white/10 backdrop-blur-md shadow-inner gap-1"
               style={{ WebkitOverflowScrolling: "touch" }}
             >
               {reportTabs.map((r) => (

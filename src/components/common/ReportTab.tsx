@@ -56,7 +56,7 @@ export const ReportTab = ({
             inline: "center",
           });
         }}
-        className={`whitespace-nowrap px-6 text-[12px] font-black py-2.5 rounded-full transition-all duration-300 uppercase tracking-widest flex-shrink-0 ${reportType === r.id ? "bg-white text-emerald-900 shadow-[0_4px_12px_rgba(255,255,255,0.3)] scale-[1.02]" : "text-emerald-100/60 hover:text-white hover:bg-white/5"} ${isReordering ? "scale-110 !bg-emerald-500 !text-white cursor-grabbing shadow-2xl z-50" : ""}`}
+        className={`whitespace-nowrap px-4.5 text-[10.5px] font-black py-1.5 rounded-full transition-all duration-300 uppercase tracking-widest flex-shrink-0 ${reportType === r.id ? "bg-white text-emerald-900 shadow-[0_4px_10px_rgba(255,255,255,0.25)] scale-[1.01]" : "text-emerald-100/60 hover:text-white hover:bg-white/5"} ${isReordering ? "scale-105 !bg-emerald-500 !text-white cursor-grabbing shadow-2xl z-50" : ""}`}
       >
         {r.label}
       </button>
