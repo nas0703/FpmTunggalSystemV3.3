@@ -45,262 +45,289 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const isSejarahActive = activeTab === "sejarah" && !isProfileActive;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-full bg-[#031d17]/98 border-t border-emerald-500/20 px-4 pt-2.5 pb-5 z-40 select-none shadow-[0_-8px_30px_rgba(2,18,14,0.6),inset_0_1px_0_rgba(255,255,255,0.05)]">
-      <div className="flex items-center justify-between relative max-w-lg mx-auto">
+    <div className="fixed bottom-0 left-0 right-0 w-full h-[64px] z-40 select-none pb-safe">
+      
+      {/* 1. CURVED BACKDROP COMBINATION WITH STRETCHED SIDES AND CENTER NOTCH */}
+      <div className="absolute inset-0 flex pointer-events-none">
         
-        {/* TAB 1: INPUT */}
-        <motion.button
-          whileTap={{ scale: 0.88, y: 0.5 }}
-          transition={microBounceConfig}
-          onClick={() => selectTab("scan")}
-          className="flex-1 flex flex-col items-center justify-center py-1 h-[44px] rounded-xl cursor-pointer relative overflow-hidden group min-w-[50px]"
-        >
-          {isInputActive && (
-            <motion.div
-              layoutId="activeTabPill"
-              transition={springConfig}
-              className="absolute inset-x-1 inset-y-0.5 bg-[#0a3127]/80 border border-emerald-500/30 rounded-xl z-0"
-            />
-          )}
+        {/* Left flat bar */}
+        <div className="flex-1 h-[48px] mt-[16px] bg-gradient-to-b from-[#011f19] to-[#01140f] border-t border-emerald-500/20" />
+        
+        {/* Center notch SVG */}
+        <div className="w-[72px] h-[64px] relative shrink-0">
+          <svg
+            width="72"
+            height="64"
+            viewBox="0 0 72 64"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0"
+          >
+            <defs>
+              {/* Natural Deep Emerald Gradient fill */}
+              <linearGradient id="navBgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#011f19" stopOpacity="0.98" />
+                <stop offset="100%" stopColor="#01140f" stopOpacity="0.99" />
+              </linearGradient>
 
-          <div className="relative z-10 flex flex-col items-center justify-center">
-            <motion.div
-              animate={{ 
-                scale: isInputActive ? 1.06 : 1.0,
-                y: isInputActive ? -0.5 : 0 
-              }}
-              transition={springConfig}
-            >
-              <Home
-                size={14}
-                className={`transition-colors duration-200 ${
-                  isInputActive
-                    ? "text-[#10B981] drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                    : "text-slate-400 group-hover:text-slate-200"
-                }`}
-              />
-            </motion.div>
+              {/* Glowing Green stroke gradient */}
+              <linearGradient id="navBorderGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
+                <stop offset="60%" stopColor="#047857" stopOpacity="0.1" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0.05" />
+              </linearGradient>
+            </defs>
+
+            {/* Seamless solid fill for center cutout */}
+            <path
+              d="M 0,16
+                 L 4,16
+                 C 8,16 12,20 12,25
+                 A 24,24 0 0 0 60,25
+                 C 60,20 64,16 68,16
+                 L 72,16
+                 L 72,64
+                 L 0,64
+                 Z"
+              fill="url(#navBgGrad)"
+            />
+
+            {/* Glowing top line connecting the shoulder edges */}
+            <path
+              d="M 0,16
+                 L 4,16
+                 C 8,16 12,20 12,25
+                 A 24,24 0 0 0 60,25
+                 C 60,20 64,16 68,16
+                 L 72,16"
+              stroke="url(#navBorderGrad)"
+              strokeWidth="1.2"
+              fill="none"
+            />
+          </svg>
+        </div>
+
+        {/* Right flat bar */}
+        <div className="flex-1 h-[48px] mt-[16px] bg-gradient-to-b from-[#011f19] to-[#01140f] border-t border-emerald-500/20" />
+        
+      </div>
+
+      {/* 2. NAVIGATION BUTTONS LAYER */}
+      <div className="absolute left-0 right-0 top-[16px] h-[48px] flex items-center justify-between px-3 pb-1 max-w-lg mx-auto">
+        
+        {/* BUTTON 1: INPUT */}
+        <button
+          onClick={() => selectTab("scan")}
+          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group"
+        >
+          <div className="flex flex-col items-center justify-center relative">
+            <Home
+              size={15}
+              className={`transition-colors duration-250 ${
+                isInputActive
+                  ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                  : "text-slate-450 group-hover:text-slate-350"
+              }`}
+            />
             <span
-              className={`text-[8px] font-black tracking-wider uppercase mt-0.5 transition-colors duration-200 ${
-                isInputActive ? "text-emerald-400" : "text-slate-400 font-bold"
+              className={`text-[8px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+                isInputActive ? "text-emerald-400" : "text-slate-500 font-bold"
               }`}
             >
               Input
             </span>
-          </div>
-        </motion.button>
-
-        {/* TAB 2: DASHBOARD */}
-        <motion.button
-          whileTap={{ scale: 0.88, y: 0.5 }}
-          transition={microBounceConfig}
-          onClick={() => selectTab("dashboard")}
-          className="flex-1 flex flex-col items-center justify-center py-1 h-[44px] rounded-xl cursor-pointer relative overflow-hidden group min-w-[50px]"
-        >
-          {isDashboardActive && (
-            <motion.div
-              layoutId="activeTabPill"
-              transition={springConfig}
-              className="absolute inset-x-1 inset-y-0.5 bg-[#0a3127]/80 border border-emerald-500/30 rounded-xl z-0"
-            />
-          )}
-
-          <div className="relative z-10 flex flex-col items-center justify-center">
-            <motion.div
-              animate={{ 
-                scale: isDashboardActive ? 1.06 : 1.0,
-                y: isDashboardActive ? -0.5 : 0
-              }}
-              transition={springConfig}
-            >
-              <LayoutGrid
-                size={14}
-                className={`transition-colors duration-200 ${
-                  isDashboardActive
-                    ? "text-[#10B981] drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                    : "text-slate-400 group-hover:text-slate-200"
-                }`}
+            {isInputActive && (
+              <motion.div
+                layoutId="activeIndicator"
+                className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+                transition={springConfig}
               />
-            </motion.div>
+            )}
+          </div>
+        </button>
+
+        {/* BUTTON 2: DASHBOARD */}
+        <button
+          onClick={() => selectTab("dashboard")}
+          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group"
+        >
+          <div className="flex flex-col items-center justify-center relative">
+            <LayoutGrid
+              size={15}
+              className={`transition-colors duration-250 ${
+                isDashboardActive
+                  ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                  : "text-slate-450 group-hover:text-slate-350"
+              }`}
+            />
             <span
-              className={`text-[8px] font-black tracking-wider uppercase mt-0.5 transition-colors duration-200 ${
-                isDashboardActive ? "text-emerald-400" : "text-slate-400 font-bold"
+              className={`text-[8px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+                isDashboardActive ? "text-emerald-400" : "text-slate-500 font-bold"
               }`}
             >
               Dashboard
             </span>
-          </div>
-        </motion.button>
-
-        {/* TAB 3: CAMERA (Modern Matte-Metallic Camera Button) */}
-        <div className="w-[48px] flex justify-center items-center relative -mt-5 z-20 shrink-0 select-none mx-0.5">
-          {/* Ambient Breathing Glow */}
-          <div className="absolute -inset-1 bg-gradient-to-tr from-emerald-500 via-teal-500 to-emerald-400 rounded-full blur-[6px] opacity-40 animate-pulse pointer-events-none" />
-          
-          {/* Floating Actions Menu */}
-          <AnimatePresence>
-            {showQuickMenu && (
+            {isDashboardActive && (
               <motion.div
-                initial={{ opacity: 0, y: 15, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 15, scale: 0.9 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                className="absolute bottom-14 w-32 bg-[#041e18]/95 border border-emerald-500/20 backdrop-blur-md rounded-xl shadow-xl p-1.5 flex flex-col gap-1 z-50 mb-1.5"
-              >
-                <button
-                  onClick={() => {
-                    setShowQuickMenu(false);
-                    onUploadClick?.();
-                  }}
-                  className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-500/10 rounded-md text-[8px] font-black uppercase tracking-wider text-slate-200 flex items-center justify-between transition-colors cursor-pointer"
-                >
-                  Muat Naik
-                  <Upload size={12} className="text-emerald-400" />
-                </button>
-                <div className="h-px bg-emerald-500/10" />
-                <button
-                  onClick={() => {
-                    setShowQuickMenu(false);
-                    onCameraClick?.();
-                  }}
-                  className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-500/10 rounded-md text-[8px] font-black uppercase tracking-wider text-slate-200 flex items-center justify-between transition-colors cursor-pointer"
-                >
-                  Imbas Resit
-                  <Camera size={12} className="text-emerald-450" />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <motion.button
-            whileHover={{ scale: 1.1, y: -1 }}
-            whileTap={{ scale: 0.88 }}
-            transition={{ type: "spring", stiffness: 450, damping: 20 }}
-            onClick={toggleQuickMenu}
-            className="w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer relative overflow-hidden outline-none bg-gradient-to-b from-[#0a3127] to-[#01140f] border border-emerald-400/50 shadow-[0_6px_15px_rgba(1,20,15,0.7),_inset_0_1px_1.5px_rgba(255,255,255,0.3)] select-none group"
-          >
-            {/* Glossy Overlay Sheen (Toned down matte-metallic finish) */}
-            <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-white/5 to-transparent rounded-t-full pointer-events-none" />
-            
-            {/* Inner Ring Alignment (Camera Lens Effect) */}
-            <div className="absolute inset-1 rounded-full border border-emerald-500/10 bg-[#011f19]/20 pointer-events-none flex items-center justify-center" />
-
-            <AnimatePresence mode="wait">
-              {showQuickMenu ? (
-                <motion.div
-                  key="close"
-                  initial={{ opacity: 0, rotate: -45, scale: 0.7 }}
-                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                  exit={{ opacity: 0, rotate: -45, scale: 0.7 }}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
-                  className="flex items-center justify-center relative z-10"
-                >
-                  <X className="text-white drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.4)]" size={15} />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="camera"
-                  initial={{ opacity: 0, rotate: 45, scale: 0.7 }}
-                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                  exit={{ opacity: 0, rotate: 45, scale: 0.7 }}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
-                  className="flex items-center justify-center relative z-10"
-                >
-                  <Camera className="text-emerald-300 drop-shadow-[0_1.5px_3px_rgba(6,78,59,0.4)] group-hover:text-emerald-100 transition-colors duration-200" size={15} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Subtle Radiant Shine Line Transition */}
-            <div className="absolute top-0 -left-[100%] h-full w-1/2 block bg-gradient-to-r from-transparent via-white/8 to-transparent transform -skew-x-12 group-hover:animate-shine pointer-events-none" />
-          </motion.button>
-        </div>
-
-        {/* TAB 4: SEJARAH */}
-        <motion.button
-          whileTap={{ scale: 0.88, y: 0.5 }}
-          transition={microBounceConfig}
-          onClick={() => selectTab("sejarah")}
-          className="flex-1 flex flex-col items-center justify-center py-1 h-[44px] rounded-xl cursor-pointer relative overflow-hidden group min-w-[50px]"
-        >
-          {isSejarahActive && (
-            <motion.div
-              layoutId="activeTabPill"
-              transition={springConfig}
-              className="absolute inset-x-1 inset-y-0.5 bg-[#0a3127]/80 border border-emerald-500/30 rounded-xl z-0"
-            />
-          )}
-
-          <div className="relative z-10 flex flex-col items-center justify-center">
-            <motion.div
-              animate={{ 
-                scale: isSejarahActive ? 1.06 : 1.0,
-                y: isSejarahActive ? -0.5 : 0
-              }}
-              transition={springConfig}
-            >
-              <History
-                size={14}
-                className={`transition-colors duration-200 ${
-                  isSejarahActive
-                    ? "text-[#10B981] drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                    : "text-slate-400 group-hover:text-slate-200"
-                }`}
+                layoutId="activeIndicator"
+                className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+                transition={springConfig}
               />
-            </motion.div>
+            )}
+          </div>
+        </button>
+
+        {/* 100% SPACER FOR THE CENTRAL NOTCH */}
+        <div className="w-[72px] shrink-0" />
+
+        {/* BUTTON 4: SEJARAH */}
+        <button
+          onClick={() => selectTab("sejarah")}
+          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group"
+        >
+          <div className="flex flex-col items-center justify-center relative">
+            <History
+              size={15}
+              className={`transition-colors duration-250 ${
+                isSejarahActive
+                  ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                  : "text-slate-450 group-hover:text-slate-350"
+              }`}
+            />
             <span
-              className={`text-[8px] font-black tracking-wider uppercase mt-0.5 transition-colors duration-205 ${
-                isSejarahActive ? "text-emerald-400" : "text-slate-400 font-bold"
+              className={`text-[8px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+                isSejarahActive ? "text-emerald-400" : "text-slate-500 font-bold"
               }`}
             >
               Sejarah
             </span>
-          </div>
-        </motion.button>
-
-        {/* TAB 5: PROFIL */}
-        <motion.button
-          whileTap={{ scale: 0.88, y: 0.5 }}
-          transition={microBounceConfig}
-          onClick={selectProfile}
-          className="flex-1 flex flex-col items-center justify-center py-1 h-[44px] rounded-xl cursor-pointer relative overflow-hidden group min-w-[50px] bottom-nav-profile-btn"
-        >
-          {isProfileActive && (
-            <motion.div
-              layoutId="activeTabPill"
-              transition={springConfig}
-              className="absolute inset-x-1 inset-y-0.5 bg-[#0a3127]/80 border border-emerald-500/30 rounded-xl z-0"
-            />
-          )}
-
-          <div className="relative z-10 flex flex-col items-center justify-center">
-            <motion.div
-              animate={{ 
-                scale: isProfileActive ? 1.06 : 1.0,
-                y: isProfileActive ? -0.5 : 0
-              }}
-              transition={springConfig}
-            >
-              <User
-                size={14}
-                className={`transition-colors duration-200 ${
-                  isProfileActive
-                    ? "text-[#10B981] drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                    : "text-slate-400 group-hover:text-slate-200"
-                }`}
+            {isSejarahActive && (
+              <motion.div
+                layoutId="activeIndicator"
+                className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+                transition={springConfig}
               />
-            </motion.div>
+            )}
+          </div>
+        </button>
+
+        {/* BUTTON 5: PROFIL */}
+        <button
+          onClick={selectProfile}
+          className="flex-1 flex flex-col items-center justify-center h-full cursor-pointer relative group bottom-nav-profile-btn"
+        >
+          <div className="flex flex-col items-center justify-center relative">
+            <User
+              size={15}
+              className={`transition-colors duration-250 ${
+                isProfileActive
+                  ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                  : "text-slate-450 group-hover:text-slate-350"
+              }`}
+            />
             <span
-              className={`text-[8px] font-black tracking-wider uppercase mt-0.5 transition-colors duration-205 ${
-                isProfileActive ? "text-emerald-400" : "text-slate-400 font-bold"
+              className={`text-[8px] font-black tracking-wider uppercase mt-1 transition-colors duration-250 ${
+                isProfileActive ? "text-emerald-400" : "text-slate-500 font-bold"
               }`}
             >
               Profil
             </span>
+            {isProfileActive && (
+              <motion.div
+                layoutId="activeIndicator"
+                className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+                transition={springConfig}
+              />
+            )}
           </div>
-        </motion.button>
+        </button>
 
       </div>
+
+      {/* 3. CENTRAL CAMERA ACTION BUTTON */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-[4px] z-50">
+        
+        {/* Subtle breathing outer glow behind the circle */}
+        <div className="absolute -inset-1 bg-emerald-500/30 rounded-full blur-[8px] pointer-events-none animate-pulse" />
+
+        {/* Floating dropdown actions menu */}
+        <AnimatePresence>
+          {showQuickMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: 15, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 15, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className="absolute bottom-16 left-1/2 -translate-x-1/2 w-32 bg-[#041e18]/95 border border-emerald-500/20 backdrop-blur-md rounded-xl shadow-xl p-1.5 flex flex-col gap-1 z-50"
+            >
+              <button
+                onClick={() => {
+                  setShowQuickMenu(false);
+                  onUploadClick?.();
+                }}
+                className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-500/10 rounded-md text-[8px] font-black uppercase tracking-wider text-slate-250 flex items-center justify-between transition-colors cursor-pointer"
+              >
+                Muat Naik
+                <Upload size={12} className="text-emerald-450" />
+              </button>
+              <div className="h-px bg-emerald-500/10" />
+              <button
+                onClick={() => {
+                  setShowQuickMenu(false);
+                  onCameraClick?.();
+                }}
+                className="w-full text-left px-2.5 py-1.5 hover:bg-[#10b981]/15 rounded-md text-[8px] font-black uppercase tracking-wider text-slate-250 flex items-center justify-between transition-colors cursor-pointer"
+              >
+                Imbas Resit
+                <Camera size={12} className="text-emerald-450" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Main circular Camera button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 450, damping: 20 }}
+          onClick={toggleQuickMenu}
+          className="w-[44px] h-[44px] rounded-full flex items-center justify-center cursor-pointer relative overflow-hidden outline-none bg-gradient-to-tr from-[#024a3b] to-[#10b981] border-2 border-emerald-400/50 shadow-[0_6px_18px_rgba(2,26,20,0.5),_inset_0_1px_1.5px_rgba(255,255,255,0.3)] select-none group"
+        >
+          {/* Shiny overlay sheen decoration */}
+          <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+
+          <AnimatePresence mode="wait">
+            {showQuickMenu ? (
+              <motion.div
+                key="close"
+                initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: -45, scale: 0.8 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="flex items-center justify-center relative z-10"
+              >
+                <X className="text-white drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.5)]" size={17} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="camera"
+                initial={{ opacity: 0, rotate: 45, scale: 0.8 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 45, scale: 0.8 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="flex items-center justify-center relative z-10"
+              >
+                <Camera className="text-white drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-200" size={16} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Glancing shine animation line */}
+          <div className="absolute top-0 -left-[100%] h-full w-1/2 block bg-gradient-to-r from-transparent via-white/12 to-transparent transform -skew-x-12 group-hover:animate-shine pointer-events-none" />
+        </motion.button>
+      </div>
+
     </div>
   );
 };
+
