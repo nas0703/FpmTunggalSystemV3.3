@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { History, X, Download, Trash2, Edit2, ArrowDownCircle } from "lucide-react";
+import { History, X, Download, Trash2, Edit2, ArrowDownCircle, Search } from "lucide-react";
 import { Transaction } from "../../../App";
 
 interface SejarahTabProps {
@@ -23,6 +23,8 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
   authRole,
 }) => {
   const [activeTab, setActiveTab] = useState<"bts" | "efb">("bts");
+  const [showSearch, setShowSearch] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   
   // HAD RENDERING AWAL (Hanya paparkan 25 rekod pada satu masa untuk kelancaran)
   const [visibleLimit, setVisibleLimit] = useState<number>(25);
@@ -30,7 +32,7 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
   // Setkan semula had jika penapis atau tab bertukar untuk menjaga kelancaran memori
   useEffect(() => {
     setVisibleLimit(25);
-  }, [activeTab, historyFilterDate]);
+  }, [activeTab, historyFilterDate, searchQuery]);
 
   // ULTRA HIGH PERFORMANCE MEMOIZATION OF FILTERED TRANS
   const filteredData = useMemo(() => {
@@ -45,8 +47,26 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
       return (b.tarikh || "").localeCompare(a.tarikh || "");
     });
 
-    // 3. Tapis tarikh
-    if (historyFilterDate) {
+    // 3. Tapis tarikh atau Carian No Resit/Nota/Lori
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      data = data.filter((row) => {
+        const resit = (row.no_resit || "").toLowerCase();
+        const nota = (row.no_nota_hantaran || "").toLowerCase();
+        const akaun = (row.no_akaun_terima || "").toLowerCase();
+        const lori = (row.no_lori || "").toLowerCase();
+        const seal = (row.no_seal || "").toLowerCase();
+        const blok = `b${row.blok || ""}`.toLowerCase();
+        return (
+          resit.includes(q) || 
+          nota.includes(q) || 
+          akaun.includes(q) || 
+          lori.includes(q) || 
+          seal.includes(q) ||
+          blok.includes(q)
+        );
+      });
+    } else if (historyFilterDate) {
       data = data.filter((row) => row.tarikh === historyFilterDate);
     } else {
       // TEMPORAL WINDOWING: Had paparan automatik hanya data 3 bulan terakhir sahaja.
@@ -63,7 +83,7 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
     }
 
     return data;
-  }, [rawData, activeTab, historyFilterDate]);
+  }, [rawData, activeTab, historyFilterDate, searchQuery]);
 
   // CHUNK SLICING (Hanya muat turun baris dalam had memori kecil pelayar)
   const displayedData = useMemo(() => {
@@ -108,13 +128,19 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-center gap-2 w-full px-4">
-            <div className="relative flex-1 max-w-[200px]">
+          <div className="flex justify-center items-center gap-2 w-full px-4">
+            {/* Tapis Tarikh */}
+            <div className="relative flex-1 max-w-[150px]">
               <input
                 type="date"
                 value={historyFilterDate}
-                onChange={(e) => setHistoryFilterDate(e.target.value)}
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                onChange={(e) => {
+                  setHistoryFilterDate(e.target.value);
+                  if (e.target.value) {
+                    setSearchQuery(""); // Auto clear text search if specific date is manually filtered
+                  }
+                }}
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono tracking-tighter"
               />
               {historyFilterDate && (
                 <button
@@ -126,9 +152,31 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
               )}
             </div>
 
+            {/* Tombol Toggle Carian (Search Toggle) */}
+            <button
+              onClick={() => {
+                const nextShowSearch = !showSearch;
+                setShowSearch(nextShowSearch);
+                if (nextShowSearch) {
+                  setHistoryFilterDate(""); // Auto clear specific date to allow searching across other dates
+                } else {
+                  setSearchQuery(""); // Cancel/clear search on closing
+                }
+              }}
+              className={`p-2.5 rounded-xl border flex items-center justify-center transition-all active:scale-95 shrink-0 ${
+                showSearch || searchQuery.trim()
+                  ? "bg-emerald-500 border-emerald-400 text-white shadow-md shadow-emerald-500/20"
+                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              }`}
+              title="Cari No. Resit / Nota / Lori"
+            >
+              <Search size={14} className="stroke-[2.5]" />
+            </button>
+
+            {/* Export (Excel) Button */}
             <button
               onClick={() => setShowExportModal(true)}
-              className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black px-4 py-2 rounded-xl flex items-center gap-2 active:scale-95 transition-all shadow-sm shrink-0 uppercase"
+              className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-all shadow-sm shrink-0 uppercase"
             >
               <Download size={14} />
               <span className="hidden sm:inline">Export (Excel)</span>
@@ -136,10 +184,56 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
           </div>
         </div>
 
+        {/* Slot Input Carian (Animasi Slide Down) */}
+        {showSearch && (
+          <motion.div 
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="w-full px-4 mb-3"
+          >
+            <div className="relative w-full max-w-sm mx-auto">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Masukkan No. Resit, Nota, atau Lori..."
+                className={`w-full py-2.5 pl-9 pr-8 bg-white dark:bg-slate-900 border text-xs font-black rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all ${
+                  searchQuery.trim() 
+                    ? "border-emerald-500 dark:border-emerald-500 ring-2 ring-emerald-500/10 text-emerald-600 dark:text-emerald-400" 
+                    : "border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200"
+                }`}
+              />
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <Search size={14} className={`${searchQuery.trim() ? "text-emerald-500 animate-pulse" : ""}`} />
+              </div>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            {searchQuery.trim() && (
+              <p className="text-[9px] text-center text-emerald-500 font-black uppercase tracking-widest mt-1.5 animate-pulse">
+                🔍 Mencari merentasi semua tarikh rekod BTS/EFB...
+              </p>
+            )}
+          </motion.div>
+        )}
+
         {/* Note on Automatic Pagination Filter */}
-        {!historyFilterDate && (
+        {!historyFilterDate && !searchQuery.trim() && (
           <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold px-2 py-1 mb-2 tracking-wide text-center">
             * Memaparkan rekod 3 bulan terakhir sahaja untuk kelajuan aplikasi. Sila tapis tarikh untuk rekod lampau.
+          </p>
+        )}
+
+        {searchQuery.trim() && (
+          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-black px-2 py-1.5 mb-2 tracking-wide text-center bg-emerald-500/10 border border-emerald-500/25 rounded-xl mx-4">
+            ✓ Mod Pencarian Global Aktif: Edit mana-mana resit/nota lama merentasi tarikh pilihan terus.
           </p>
         )}
 
