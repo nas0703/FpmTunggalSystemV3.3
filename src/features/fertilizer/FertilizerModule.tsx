@@ -36,11 +36,11 @@ export const FertilizerModule: React.FC<FertilizerModuleProps> = ({ authRole, is
 
   const subTabs = [
     { id: 'dashboard', label: 'KPI Utama', icon: LayoutDashboard, roles: ['fc', 'afc', 'fs', 'staff'] },
-    { id: 'inventory', label: 'Inventori', icon: Package, roles: ['fc', 'afc', 'fs', 'staff'] },
-    { id: 'program', label: 'Program 2026', icon: FileSpreadsheet, roles: ['fc', 'afc', 'fs', 'staff'] },
-    { id: 'history', label: 'Rekod Sejarah', icon: History, roles: ['fc', 'afc', 'fs', 'staff'] },
-    { id: 'progress', label: 'Progress PUS', icon: TrendingUp, roles: ['fc', 'afc', 'fs'] },
+    { id: 'progress', label: 'Progres Membaja', icon: TrendingUp, roles: ['fc', 'afc', 'fs'] },
+    { id: 'program', label: 'Program Membaja', icon: FileSpreadsheet, roles: ['fc', 'afc', 'fs', 'staff'] },
     { id: 'productivity', label: 'Analitik', icon: BarChart3, roles: ['fc', 'afc', 'fs'] },
+    { id: 'inventory', label: 'Inventori', icon: Package, roles: ['fc', 'afc', 'fs', 'staff'] },
+    { id: 'history', label: 'Sejarah', icon: History, roles: ['fc', 'afc', 'fs', 'staff'] },
     { id: 'admin', label: 'Admin', icon: Settings, roles: ['fc', 'afc'] }
   ].filter(tab => tab.roles.includes(authRole));
 
