@@ -28,7 +28,6 @@ import {
   Calendar,
   AlertTriangle,
   Leaf,
-  Sparkles,
   Check
 } from 'lucide-react';
 
@@ -47,8 +46,6 @@ export const MerumputModule: React.FC<MerumputModuleProps> = ({ isDarkMode, onSh
   const [isProcessing, setIsProcessing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<Partial<MerumputProgress> | null>(null);
-  const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
-  const [popupShowsRemaining, setPopupShowsRemaining] = useState(0);
   
   const excelInputRef = useRef<HTMLInputElement>(null);
 
@@ -220,23 +217,6 @@ export const MerumputModule: React.FC<MerumputModuleProps> = ({ isDarkMode, onSh
 
   useEffect(() => {
     fetchWeedingData();
-
-    // Features pop-up logic: 7 times per user when logged in / initial load in session
-    const hasShownThisSession = sessionStorage.getItem('merumput_session_popup_shown') === 'true';
-    if (!hasShownThisSession) {
-      const storedCount = localStorage.getItem('merumput_features_shows_count');
-      const shownCount = storedCount ? parseInt(storedCount, 10) : 0;
-      if (shownCount < 7) {
-        setShowNewFeaturesModal(true);
-        setPopupShowsRemaining(7 - (shownCount + 1));
-        localStorage.setItem('merumput_features_shows_count', String(shownCount + 1));
-        sessionStorage.setItem('merumput_session_popup_shown', 'true');
-      }
-    } else {
-      const storedCount = localStorage.getItem('merumput_features_shows_count');
-      const shownCount = storedCount ? parseInt(storedCount, 10) : 0;
-      setPopupShowsRemaining(Math.max(0, 7 - shownCount));
-    }
   }, []);
 
   // Compute stats summary
@@ -772,125 +752,6 @@ export const MerumputModule: React.FC<MerumputModuleProps> = ({ isDarkMode, onSh
                   </button>
                 </div>
               </form>
-            </motion.div>
-          </div>
-        )}
-
-        {/* NEW FEATURES NOTIFICATION POPUP MODAL */}
-        {showNewFeaturesModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop with Blur */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowNewFeaturesModal(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-            />
-
-            {/* Modal Body */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className={`relative w-full max-w-lg rounded-[32px] p-6 shadow-2xl border overflow-hidden ${
-                isDarkMode 
-                  ? 'bg-slate-900 border-white/10 text-white' 
-                  : 'bg-white border-slate-100 text-slate-800'
-              }`}
-            >
-              {/* Header Badge */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/10 text-amber-500 rounded-full font-mono text-[9px] font-black uppercase tracking-wider">
-                  <Sparkles size={11} className="animate-pulse" />
-                  <span>Kemas Kini Ciri Baharu</span>
-                </div>
-                <button
-                  onClick={() => setShowNewFeaturesModal(false)}
-                  className={`p-2 rounded-full transition-colors ${
-                    isDarkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'
-                  }`}
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              {/* Title & Desc */}
-              <div className="mb-6">
-                <h3 className="text-xl font-black uppercase tracking-tight font-display mb-1">
-                  Modul Merumput Pintar 🌿
-                </h3>
-                <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'} font-medium`}>
-                  Berikut adalah naik taraf sistem yang dibina khusus untuk kemudahan dan kelancaran rekod tugas anda.
-                </p>
-              </div>
-
-              {/* Feature Highlights */}
-              <div className="space-y-3 mb-6">
-                <div className={`p-4 rounded-2xl border flex gap-3 ${
-                  isDarkMode ? 'bg-slate-850/50 border-white/5' : 'bg-slate-50 border-slate-100'
-                }`}>
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                    <Check size={16} className="stroke-[3]" />
-                  </div>
-                  <div>
-                    <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-400 leading-none mb-1">Butang Sentuh Padat (All-Box Touch)</h4>
-                    <p className={`text-xs ${isDarkMode ? 'text-slate-300' : 'text-slate-600'} font-semibold`}>
-                      Suhu & interaksi tapisan skrin kini dioptimumkan! Seluruh kotak pilihan bertindak sebagai satu butang selesa bagi memudahkan input sentuhan di ladang.
-                    </p>
-                  </div>
-                </div>
-
-                <div className={`p-4 rounded-2xl border flex gap-3 ${
-                  isDarkMode ? 'bg-slate-850/50 border-white/5' : 'bg-slate-50 border-slate-100'
-                }`}>
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                    <Check size={16} className="stroke-[3]" />
-                  </div>
-                  <div>
-                    <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-400 leading-none mb-1">Peta Grid Segmentasi Peringkat</h4>
-                    <p className={`text-xs ${isDarkMode ? 'text-slate-300' : 'text-slate-600'} font-semibold`}>
-                      Blok diasingkan kemas untuk baki Peringkat 1 (Blok 1-17) & Peringkat 2 (Blok 18-22, LF) bagi paparan dan laporan prestasi yang lebih berstruktur.
-                    </p>
-                  </div>
-                </div>
-
-                <div className={`p-4 rounded-2xl border flex gap-3 ${
-                  isDarkMode ? 'bg-slate-850/50 border-white/5' : 'bg-slate-50 border-slate-100'
-                }`}>
-                  <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
-                    <Check size={16} className="stroke-[3]" />
-                  </div>
-                  <div>
-                    <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-400 leading-none mb-1">Unjuran Carta Gantt Kalendar</h4>
-                    <p className={`text-xs ${isDarkMode ? 'text-slate-300' : 'text-slate-600'} font-semibold`}>
-                      Padanan tempo jadual sasaran dinamik vs pelaksanaan sebenar, lengkap dengan peratus baki hektar yang kemas.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Counter Badge & Dismiss Button */}
-              <div className="space-y-3">
-                <div className={`p-3 rounded-xl border text-center ${
-                  isDarkMode ? 'bg-slate-800/30 border-white/5 text-slate-400' : 'bg-slate-50 border-slate-150 text-slate-500'
-                }`}>
-                  <p className="text-[10px] font-bold">
-                    🔔 Pop-up panduan ini akan dipaparkan sebanyak <span className="font-extrabold text-blue-500">7 kali</span> semasa anda log masuk siri demi siri.
-                  </p>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mt-1">
-                    Baki bimbingan siri: {popupShowsRemaining} kali lagi
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowNewFeaturesModal(false)}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-950/20 active:scale-[0.98] transition-all"
-                >
-                  Faham & Teruskan
-                </button>
-              </div>
             </motion.div>
           </div>
         )}
