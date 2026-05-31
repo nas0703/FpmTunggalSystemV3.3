@@ -13,6 +13,30 @@ interface SejarahTabProps {
   authRole: "staff" | "fc" | "afc" | "fs" | null;
 }
 
+// Timezone safe and local-format date formatter (Avoids day shift errors for client offsets)
+const formatTarikhMalay = (tarikhStr: string) => {
+  if (!tarikhStr) return "-";
+  const parts = tarikhStr.split('-');
+  if (parts.length === 3) {
+    const m = parts[1];
+    const d = parts[2];
+    const months = ["Jan", "Feb", "Mac", "Apr", "Mei", "Jun", "Jul", "Ogos", "Sep", "Okt", "Nov", "Dis"];
+    const monthIndex = parseInt(m, 10) - 1;
+    if (monthIndex >= 0 && monthIndex < 12) {
+      return `${parseInt(d, 10)} ${months[monthIndex]}`;
+    }
+  }
+  // Fallback
+  try {
+    const d = new Date(tarikhStr);
+    if (!isNaN(d.getTime())) {
+      const localDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+      return localDate.toLocaleDateString("ms-MY", { day: "2-digit", month: "short" });
+    }
+  } catch {}
+  return tarikhStr;
+};
+
 export const SejarahTab: React.FC<SejarahTabProps> = ({
   rawData,
   historyFilterDate,
@@ -273,10 +297,7 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                         className="border-b border-slate-100 dark:border-slate-800/50 text-xs text-slate-700 dark:text-slate-300 hover:bg-emerald-50/20 dark:hover:bg-emerald-950/10 transition-colors"
                       >
                         <td className="px-3 py-3.5 font-bold">
-                          {new Date(row.tarikh).toLocaleDateString("ms-MY", {
-                            day: "2-digit",
-                            month: "short",
-                          })}
+                          {formatTarikhMalay(row.tarikh)}
                         </td>
                         <td className="px-3 py-3.5 font-mono tracking-tighter whitespace-nowrap">
                           <div className="font-black text-emerald-900 dark:text-white uppercase truncate max-w-[120px]">

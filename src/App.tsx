@@ -785,9 +785,8 @@ export default function App() {
             ? parseInt(rawBlok.replace(/[^0-9]/g, ""), 10).toString()
             : "";
 
-          // Normalize date to YYYY-MM-DD
+          // Normalize date to YYYY-MM-DD (Preserves the stored year exactly without corrupting manual edits to other years)
           let normalizedDate = "";
-          const currentYearVal = new Date().getFullYear().toString();
           if (item.tarikh) {
             const datePart = item.tarikh.split(/T| /)[0];
             const separator = datePart.includes("-")
@@ -800,11 +799,9 @@ export default function App() {
               if (parts.length === 3) {
                 if (parts[0].length === 4) {
                   // YYYY-MM-DD or YYYY/MM/DD
-                  if (parts[0] !== currentYearVal) parts[0] = currentYearVal; // Auto-correct OCR year
                   normalizedDate = `${parts[0]}-${parts[1].padStart(2, "0")}-${parts[2].padStart(2, "0")}`;
                 } else if (parts[2].length === 4) {
                   // DD-MM-YYYY or DD/MM/YYYY
-                  if (parts[2] !== currentYearVal) parts[2] = currentYearVal; // Auto-correct OCR year
                   normalizedDate = `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
                 }
               }
@@ -3330,22 +3327,42 @@ PERATURAN TEKNIKAL:
       console.log("GEMINI OCR RESULT:", result);
 
       if (result.no_resit || result.no_lori || result.tan) {
-        setFormData((prev) => ({
-          ...prev,
-          no_resit: result.no_resit || prev.no_resit,
-          no_akaun_terima: "", // Clear this as it's now merged with no_resit
-          no_lori: result.no_lori || prev.no_lori,
-          no_nota_hantaran: result.no_nota_hantaran || prev.no_nota_hantaran,
-          no_seal: result.no_seal || prev.no_seal,
-          kpg: result.kpg?.toString() || prev.kpg,
-          rm_mt: result.rm_mt?.toString() || prev.rm_mt,
-          tan: result.tan?.toString() || prev.tan,
-          muda: result.muda?.toString() || prev.muda,
-          tarikh: result.tarikh || prev.tarikh,
-          masa_masuk: result.masa_masuk || prev.masa_masuk,
-          is_efb: !!result.is_efb,
-          blok: result.is_efb ? "99" : result.blok || prev.blok,
-        }));
+        setFormData((prev) => {
+          // Auto-correct year specifically on newly scanned OCR results to fix OCR extraction year mismatch errors, but do not override manually edited fields
+          let ocrDate = result.tarikh || prev.tarikh;
+          if (ocrDate) {
+            const currentYearVal = new Date().getFullYear().toString();
+            const separator = ocrDate.includes("-") ? "-" : ocrDate.includes("/") ? "/" : "";
+            if (separator) {
+              const parts = ocrDate.split(separator);
+              if (parts.length === 3) {
+                if (parts[0].length === 4 && parts[0] !== currentYearVal) {
+                  parts[0] = currentYearVal;
+                  ocrDate = parts.join(separator);
+                } else if (parts[2].length === 4 && parts[2] !== currentYearVal) {
+                  parts[2] = currentYearVal;
+                  ocrDate = parts.join(separator);
+                }
+              }
+            }
+          }
+          return {
+            ...prev,
+            no_resit: result.no_resit || prev.no_resit,
+            no_akaun_terima: "", // Clear this as it's now merged with no_resit
+            no_lori: result.no_lori || prev.no_lori,
+            no_nota_hantaran: result.no_nota_hantaran || prev.no_nota_hantaran,
+            no_seal: result.no_seal || prev.no_seal,
+            kpg: result.kpg?.toString() || prev.kpg,
+            rm_mt: result.rm_mt?.toString() || prev.rm_mt,
+            tan: result.tan?.toString() || prev.tan,
+            muda: result.muda?.toString() || prev.muda,
+            tarikh: ocrDate,
+            masa_masuk: result.masa_masuk || prev.masa_masuk,
+            is_efb: !!result.is_efb,
+            blok: result.is_efb ? "99" : result.blok || prev.blok,
+          };
+        });
 
         if (result.confidence < 70) {
           showToast(
