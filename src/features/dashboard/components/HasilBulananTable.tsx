@@ -1163,7 +1163,7 @@ export const HasilBulananTable = ({
  </span>
  </div>
  <p className="opacity-80">
- DIJANA SECARA AUTOMATIK OLEH SISTEM FPMSB TUNGGAL v3.3
+ DIJANA SECARA AUTOMATIK OLEH SISTEM FPMSB TUNGGAL v3.4
  </p>
  </div>
  </div>

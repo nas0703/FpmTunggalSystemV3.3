@@ -49,6 +49,8 @@ export function useAuth({ onLoginSuccess, onLogout }: UseAuthProps) {
   const handleLogout = useCallback(() => {
     setAuthRole(null);
     setPin("");
+    // Padam flag sesi modal semasa logout supaya login yang baru boleh paparkan pop up
+    sessionStorage.removeItem("merumput_app_session_modal_v34_premium");
     onLogout();
   }, [onLogout]);
 

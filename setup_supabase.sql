@@ -44,7 +44,10 @@ ALTER TABLE fertilizer_master_schedule ENABLE ROW LEVEL SECURITY;
 ALTER TABLE fertilizer_daily_entries ENABLE ROW LEVEL SECURITY;
 
 -- 4. Create Policies (Allow all for development)
+DROP POLICY IF EXISTS "Enable all access for master" ON fertilizer_master_schedule;
 CREATE POLICY "Enable all access for master" ON fertilizer_master_schedule FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for entries" ON fertilizer_daily_entries;
 CREATE POLICY "Enable all access for entries" ON fertilizer_daily_entries FOR ALL USING (true) WITH CHECK (true);
 
 -- 5. Helpful Indexes
@@ -70,6 +73,7 @@ CREATE TABLE IF NOT EXISTS hantaran_pruning (
 ALTER TABLE hantaran_pruning ENABLE ROW LEVEL SECURITY;
 
 -- Create Policies
+DROP POLICY IF EXISTS "Enable all access for pruning" ON hantaran_pruning;
 CREATE POLICY "Enable all access for pruning" ON hantaran_pruning FOR ALL USING (true) WITH CHECK (true);
 
 -- 6. Monthly Targets Table
@@ -84,6 +88,7 @@ CREATE TABLE IF NOT EXISTS monthly_targets (
 );
 
 ALTER TABLE monthly_targets ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Enable all access for monthly_targets" ON monthly_targets;
 CREATE POLICY "Enable all access for monthly_targets" ON monthly_targets FOR ALL USING (true) WITH CHECK (true);
 
 -- Insert seed data for 2026
@@ -121,7 +126,10 @@ ALTER TABLE fertilizer_inventory ENABLE ROW LEVEL SECURITY;
 ALTER TABLE fertilizer_inventory_transactions ENABLE ROW LEVEL SECURITY;
 
 -- Create Policies
+DROP POLICY IF EXISTS "Enable all access for inventory" ON fertilizer_inventory;
 CREATE POLICY "Enable all access for inventory" ON fertilizer_inventory FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for inventory_transactions" ON fertilizer_inventory_transactions;
 CREATE POLICY "Enable all access for inventory_transactions" ON fertilizer_inventory_transactions FOR ALL USING (true) WITH CHECK (true);
 
 -- Seed Initial Inventory Items
@@ -141,3 +149,63 @@ ON CONFLICT (name) DO NOTHING;
 CREATE INDEX IF NOT EXISTS idx_hantaran_tarikh ON hantaran_hasil(tarikh);
 CREATE INDEX IF NOT EXISTS idx_hantaran_blok ON hantaran_hasil(blok);
 CREATE INDEX IF NOT EXISTS idx_hantaran_created_at ON hantaran_hasil(created_at DESC);
+
+-- 10. MERUMPUT (WEEDING/MERACUN) SCHEMA
+CREATE TABLE IF NOT EXISTS merumput_inventory (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  quantity DECIMAL DEFAULT 0, -- Store with precision for Liters / KG
+  min_threshold DECIMAL DEFAULT 10,
+  unit TEXT DEFAULT 'LITER',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS merumput_inventory_transactions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  inventory_id UUID REFERENCES merumput_inventory(id) ON DELETE CASCADE,
+  type TEXT CHECK (type IN ('IN', 'OUT')),
+  quantity DECIMAL NOT NULL,
+  reference TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS merumput_progress (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  blok TEXT NOT NULL,
+  luas DECIMAL DEFAULT 0,
+  pusingan INTEGER NOT NULL DEFAULT 1,
+  jenis TEXT NOT NULL, -- 'BULATAN & LORONG', 'DADA (R&S)'
+  tarikh_mula DATE NOT NULL,
+  tarikh_siap DATE,
+  hek_siap DECIMAL DEFAULT 0,
+  workers_count INTEGER DEFAULT 1,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT merumput_progress_key UNIQUE (blok, pusingan, jenis)
+);
+
+-- Enable RLS for merumput
+ALTER TABLE merumput_inventory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE merumput_inventory_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE merumput_progress ENABLE ROW LEVEL SECURITY;
+
+-- Create Policies for merumput
+DROP POLICY IF EXISTS "Enable all access for merumput_inventory" ON merumput_inventory;
+CREATE POLICY "Enable all access for merumput_inventory" ON merumput_inventory FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for merumput_inventory_transactions" ON merumput_inventory_transactions;
+CREATE POLICY "Enable all access for merumput_inventory_transactions" ON merumput_inventory_transactions FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for merumput_progress" ON merumput_progress;
+CREATE POLICY "Enable all access for merumput_progress" ON merumput_progress FOR ALL USING (true) WITH CHECK (true);
+
+-- Seed Initial Merumput Inventory Items (Common Weedicide/Herbicides in Estate)
+INSERT INTO merumput_inventory (name, quantity, min_threshold, unit)
+VALUES 
+  ('GLYPHOSATE 41% (GLYPHOSENE/KEN-UP)', 0, 20, 'LITER'),
+  ('TRICLOPYR 32% (KENELON/GARLON)', 0, 10, 'LITER'),
+  ('METSULFURON-METHYL (ALLY 20DF)', 0, 5, 'KG'),
+  ('GLUFOSINATE-AMMONIUM (BASTA 15)', 0, 20, 'LITER'),
+  ('FLUROXYPYR (STARANE HARMONY)', 0, 10, 'LITER')
+ON CONFLICT (name) DO NOTHING;

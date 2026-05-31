@@ -68,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
               FPMSB TUNGGAL
               <div className="flex items-center gap-2 mt-1.5">
                 <span className="inline-block px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/30 rounded text-[9px] sm:text-[10px] font-sans font-black text-emerald-300 tracking-widest uppercase">
-                  Version 3.3
+                  Version 3.4
                 </span>
                 <div className="h-px bg-white/10 flex-grow max-w-[40px]" />
               </div>

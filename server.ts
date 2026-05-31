@@ -10,13 +10,13 @@ async function startServer() {
 
   app.use(express.json());
 
-  // API routes mounted at /api
-  app.use("/api", apiRouter);
-  
   app.get("/api/health", (req, res) => {
     console.log("Health check requested");
     res.json({ status: "ok" });
   });
+
+  // API routes exported as a complete app expecting /api prefix in api/index.ts
+  app.use(apiRouter);
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {

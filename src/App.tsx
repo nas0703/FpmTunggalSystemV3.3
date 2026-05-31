@@ -104,6 +104,7 @@ import {
 import { FertilizerModule } from "./features/fertilizer/FertilizerModule";
 import { FertilizerInput } from "./features/fertilizer/components/FertilizerInput";
 import { PruningModule } from "./features/pruning/PruningModule";
+import { MerumputModule } from "./features/merumput/MerumputModule";
 import { AbwView } from "./features/hasil/components/AbwView";
 import { BbcView } from "./features/hasil/components/BbcView";
 import { LaporanView } from "./features/hasil/components/LaporanView";
@@ -279,6 +280,20 @@ export default function App() {
     onLoginSuccess: (role) => {
       setActiveTab(role === "staff" ? "scan" : "dashboard");
       setShowUserMenu(false);
+
+      // Paparkan pop up pemberitahuan module baru merumput di default utama screen sebanyak 7 kali login
+      const sessionKey = "merumput_app_session_modal_v34_premium";
+      const countKey = "merumput_login_modal_count_v34_premium";
+      const hasShownThisSession = sessionStorage.getItem(sessionKey) === "true";
+      if (!hasShownThisSession) {
+        const storedCount = localStorage.getItem(countKey);
+        const shownCount = storedCount ? parseInt(storedCount, 10) : 0;
+        if (shownCount < 7) {
+          setShowNewFeaturesModal(true);
+          localStorage.setItem(countKey, String(shownCount + 1));
+          sessionStorage.setItem(sessionKey, "true");
+        }
+      }
     },
     onLogout: () => {
       setActiveTab("scan");
@@ -310,6 +325,42 @@ export default function App() {
 
   // Recent Updates / What's New Data
   const recentUpdates = [
+    {
+      version: "VER 3.4",
+      date: "30 Mei 2026",
+      items: [
+        {
+          title: "Modul Merumput & Racun",
+          desc: "Pengurusan rekod menyembur racun dan pembersihan rumpai mengikut pusingan, berserta penjejakan status dan indikator tarikh.",
+          icon: <Scissors size={16} className="text-emerald-400" />,
+          iconBg: "bg-emerald-500/10",
+        },
+        {
+          title: "Sistem Navigasi Bawah Baharu",
+          desc: "Rekaan bottom nav yang lebih mesra peranti mudah alih, ergonomik, lengkap dengan butang terapung tangkapan foto.",
+          icon: <LayoutDashboard size={16} className="text-teal-400" />,
+          iconBg: "bg-teal-500/10",
+        },
+        {
+          title: "Indikator Overdue > 120 Hari",
+          desc: "Sistem amaran pintar yang berkedip (pulsing alert) pada senarai blok sekiranya aktiviti semburan/weed kawalan melebihi 120 hari berlalu.",
+          icon: <Zap size={16} className="text-rose-400" />,
+          iconBg: "bg-rose-500/10",
+        },
+        {
+          title: "Sistem Log Masuk Premium v3.4",
+          desc: "Rekaan papan kekunci PIN premium yang taktil dengan tindak balas visual (soft glow), getaran haptic yang responsif, serta penunjuk PIN yang beranimasi mewah.",
+          icon: <Lock size={16} className="text-cyan-400" />,
+          iconBg: "bg-cyan-500/10",
+        },
+        {
+          title: "Integrasi Inventori Automatik",
+          desc: "Pengurangan kuantiti stok racun secara automatik dalam modul inventori apabila rekod merumput harian disimpan.",
+          icon: <Package size={16} className="text-amber-400" />,
+          iconBg: "bg-amber-500/10",
+        },
+      ],
+    },
     {
       version: "VER 3.3",
       date: "27 April 2026",
@@ -376,29 +427,34 @@ export default function App() {
     | "efc_format"
     | "baja"
     | "pruning"
+    | "merumput"
   >("hasil");
   const [reportTabs, setReportTabs] = useState<any[]>(() => {
     const defaultTabs = [
-      { id: "pruning", label: "Pruning" },
       { id: "hasil", label: "Hasil" },
-      { id: "baja", label: "Baja" },
+      { id: "baja", label: "Membaja" },
+      { id: "merumput", label: "Merumput" },
+      { id: "pruning", label: "Pruning" },
       { id: "muda", label: "Bts Muda" },
       { id: "kpa_kpg", label: "Kpg=Kpa" },
-      { id: "efb", label: "Efb" },
       { id: "harga", label: "Harga Bts" },
+      { id: "efb", label: "Efb" },
     ];
 
-    const saved = localStorage.getItem("report_tabs_order");
+    const saved = localStorage.getItem("report_tabs_order_v5");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Ensure 'pruning' exists in the saved tabs
-        const hasPruning = parsed.some((t: any) => t.id === "pruning");
+        let finalTabs = [...parsed];
+        const hasPruning = finalTabs.some((t: any) => t.id === "pruning");
         if (!hasPruning) {
-          // Splice it at the beginning or merge
-          return [{ id: "pruning", label: "Pruning" }, ...parsed];
+          finalTabs = [...finalTabs, { id: "pruning", label: "Pruning" }];
         }
-        return parsed;
+        const hasMerumput = finalTabs.some((t: any) => t.id === "merumput");
+        if (!hasMerumput) {
+          finalTabs = [...finalTabs, { id: "merumput", label: "Merumput" }];
+        }
+        return finalTabs;
       } catch (e) {
         return defaultTabs;
       }
@@ -407,7 +463,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    localStorage.setItem("report_tabs_order", JSON.stringify(reportTabs));
+    localStorage.setItem("report_tabs_order_v5", JSON.stringify(reportTabs));
   }, [reportTabs]);
 
   const [isReordering, setIsReordering] = useState(false);
@@ -479,6 +535,7 @@ export default function App() {
     is_baja: false,
     is_pruning: false,
     is_hujan: false,
+    is_meracun: false,
   });
   const [rawData, setRawData] = useState<Transaction[]>([]);
   const [blockAnnualData, setBlockAnnualData] = useState<any[]>([]);
@@ -557,7 +614,7 @@ export default function App() {
     if (activeTab !== "scan" && editingRecordId) {
       setEditingRecordId(null);
       setFormData({
-        no_resit: "", no_akaun_terima: "", no_lori: "", no_seal: "", no_nota_hantaran: "", kpg: "", blok: "", tan: "", muda: "", reject: "0.00", sample: "0", rm_mt: "", tarikh: "", masa_masuk: "", is_efb: false, is_baja: false, is_pruning: false, is_hujan: false
+        no_resit: "", no_akaun_terima: "", no_lori: "", no_seal: "", no_nota_hantaran: "", kpg: "", blok: "", tan: "", muda: "", reject: "0.00", sample: "0", rm_mt: "", tarikh: "", masa_masuk: "", is_efb: false, is_baja: false, is_pruning: false, is_hujan: false, is_meracun: false
       });
     }
   }, [activeTab, editingRecordId]);
@@ -1195,6 +1252,7 @@ export default function App() {
       is_baja: false,
       is_pruning: false,
       is_hujan: false,
+      is_meracun: false,
     });
     setEditingRecordId(record.no_resit);
     setActiveTab("scan");
@@ -1527,6 +1585,7 @@ export default function App() {
           is_baja: false,
           is_pruning: false,
           is_hujan: false,
+          is_meracun: false,
         });
         setEditingRecordId(null);
         if (submittedDate) {
@@ -4437,7 +4496,7 @@ PERATURAN TEKNIKAL:
                       Ciri Baharu
                     </h3>
                     <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-[0.2em]">
-                      Kemas Kini April 2026
+                      Kemas Kini {recentUpdates[0]?.date || "Terkini"}
                     </p>
                   </div>
                   <button
@@ -4575,6 +4634,7 @@ PERATURAN TEKNIKAL:
                     is_baja: false,
                     is_pruning: false,
                     is_hujan: false,
+                    is_meracun: false,
                   });
                   setActiveTab("sejarah");
                 }}
@@ -4626,11 +4686,17 @@ PERATURAN TEKNIKAL:
                     }}
                     className="space-y-4 touch-pan-y pb-24"
                   >
-                    {/* BAJA & PRUNING SPECIAL VIEWS */}
+                    {/* BAJA & MERUMPUT & PRUNING SPECIAL VIEWS */}
                     {reportType === "baja" ? (
                       <FertilizerModule
                         authRole={authRole}
                         isDarkMode={isDarkMode}
+                      />
+                    ) : reportType === "merumput" ? (
+                      <MerumputModule
+                        authRole={authRole}
+                        isDarkMode={isDarkMode}
+                        onShowToast={showToast}
                       />
                     ) : reportType === "pruning" ? (
                       <PruningModule
@@ -4766,12 +4832,6 @@ PERATURAN TEKNIKAL:
                         {/* SUBSECTION DETAILS */}
                         {(reportType !== "hasil" || activeHasilTab === 'kpi') && reportType !== "efb" && (
                           <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-[24px] border border-slate-200 dark:border-slate-800 mb-4 relative mt-6">
-                          {/* OVERALL TITLE FOR THIS SECTION */}
-                          {reportType === "muda" && (
-                            <div className="absolute -top-3 left-4 z-10 px-3 py-1 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/50 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm">
-                              BTS MUDA
-                            </div>
-                          )}
                           <div className="overflow-hidden">
                             <div className="grid grid-cols-3 gap-x-2 mb-2 px-1">
                               <div className="flex items-center gap-1 justify-center opacity-90 pb-1 border-b border-emerald-500/20">
@@ -5782,7 +5842,7 @@ PERATURAN TEKNIKAL:
 
                         {/* CHART SECTION: PRESTASI ANALITIK */}
                         {((reportType === "hasil" && activeHasilTab === 'analitik') || 
-                          (reportType !== 'hasil' && reportType !== "harga" && reportType !== "baja" && reportType !== "pruning")) && (
+                          (reportType !== 'hasil' && reportType !== "harga" && reportType !== "baja" && reportType !== "pruning" && reportType !== "merumput")) && (
                             <div
                               ref={thekChartRef}
                               className="bg-white dark:bg-slate-900 rounded-2xl p-3 shadow-md border border-slate-100 dark:border-slate-800 relative mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
@@ -6645,7 +6705,7 @@ PERATURAN TEKNIKAL:
 
                         {/* Togol Ranking */}
                         {((reportType === "hasil" && activeHasilTab === 'analitik') || 
-                          (reportType !== "hasil" && reportType !== "harga" && reportType !== "efb" && reportType !== "pruning")) && (
+                          (reportType !== "hasil" && reportType !== "harga" && reportType !== "efb" && reportType !== "pruning" && reportType !== "merumput")) && (
                             <>
                               <div className="flex flex-col gap-1 px-1 mt-2">
                                 <div className="flex justify-between items-center">

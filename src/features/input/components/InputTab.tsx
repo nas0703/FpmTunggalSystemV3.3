@@ -5,6 +5,8 @@ import { FloatingInput } from "../../../components/ui/FloatingInput";
 import { FertilizerInput } from "../../fertilizer/components/FertilizerInput";
 import { PruningInput } from "../../pruning/components/PruningInput";
 import { HujanInput } from "../../hujan/components/HujanInput";
+import { MerumputInput } from "../../merumput/components/MerumputInput";
+import { Leaf } from "lucide-react";
 
 export interface InputTabProps {
   formData: any;
@@ -35,6 +37,13 @@ export const InputTab: React.FC<InputTabProps> = ({
     formData.blok === "" ||
     (parseInt(formData.blok) >= 1 && parseInt(formData.blok) <= 99);
 
+  const isNoActiveTab = 
+    !formData.is_efb && 
+    !formData.is_baja && 
+    !formData.is_pruning && 
+    !formData.is_hujan && 
+    !formData.is_meracun;
+
   return (
     <div className="w-full">
       <div className="animate-in fade-in duration-300">
@@ -48,11 +57,27 @@ export const InputTab: React.FC<InputTabProps> = ({
           {/* TOGGLES SECTION */}
           <div className="grid grid-cols-1 gap-2">
             {/* REKOD HANTARAN Toggle */}
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+            <div
+              onClick={() => {
+                setFormData({
+                  ...formData,
+                  is_efb: false,
+                  is_baja: false,
+                  is_pruning: false,
+                  is_hujan: false,
+                  is_meracun: false,
+                });
+              }}
+              className={`flex items-center justify-between p-4 rounded-2xl border shadow-sm cursor-pointer select-none transition-all duration-200 active:scale-[0.98] ${
+                isNoActiveTab
+                  ? "bg-slate-50/85 dark:bg-slate-800/90 border-slate-300 dark:border-slate-700"
+                  : "bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700"
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                    !formData.is_efb && !formData.is_baja && !formData.is_pruning && !formData.is_hujan
+                    isNoActiveTab
                       ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
                       : "bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300"
                   }`}
@@ -68,21 +93,11 @@ export const InputTab: React.FC<InputTabProps> = ({
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setFormData({
-                    ...formData,
-                    is_efb: false,
-                    is_baja: false,
-                    is_pruning: false,
-                    is_hujan: false,
-                  });
-                }}
-                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 overflow-hidden ${
-                  !formData.is_efb && !formData.is_baja && !formData.is_pruning && !formData.is_hujan
+              <div
+                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 ${
+                  isNoActiveTab
                     ? "bg-blue-500 shadow-inner"
-                    : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 shadow-inner"
+                    : "bg-slate-200 dark:bg-slate-700 shadow-inner"
                 }`}
               >
                 <div
@@ -90,17 +105,41 @@ export const InputTab: React.FC<InputTabProps> = ({
                 >
                   <div
                     className={`absolute top-1/2 -translate-y-1/2 w-[20px] h-[20px] bg-white rounded-full shadow-md transition-transform duration-300 ${
-                      !formData.is_efb && !formData.is_baja && !formData.is_pruning && !formData.is_hujan
+                      isNoActiveTab
                         ? "translate-x-[20px]"
                         : "translate-x-0"
                     }`}
                   />
                 </div>
-              </button>
+              </div>
             </div>
 
             {/* RESIT EFB Toggle */}
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+            <div
+              onClick={() => {
+                if (!formData.is_efb) {
+                  setFormData({
+                    ...formData,
+                    is_efb: true,
+                    is_baja: false,
+                    is_pruning: false,
+                    is_hujan: false,
+                    is_meracun: false,
+                    kpg: "",
+                    muda: "0",
+                    reject: "0.00",
+                    sample: "0",
+                    no_seal: "",
+                    rm_mt: "",
+                  });
+                }
+              }}
+              className={`flex items-center justify-between p-4 rounded-2xl border shadow-sm cursor-pointer select-none transition-all duration-200 active:scale-[0.98] ${
+                formData.is_efb
+                  ? "bg-slate-50/85 dark:bg-slate-800/90 border-slate-300 dark:border-slate-700"
+                  : "bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700"
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
@@ -120,30 +159,11 @@ export const InputTab: React.FC<InputTabProps> = ({
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const newIsEfb = true; // explicitly making it true when clicked
-                  if (!formData.is_efb) {
-                    setFormData({
-                      ...formData,
-                      is_efb: true,
-                      is_baja: false,
-                      is_pruning: false,
-                      is_hujan: false,
-                      kpg: "",
-                      muda: "0",
-                      reject: "0.00",
-                      sample: "0",
-                      no_seal: "",
-                      rm_mt: "",
-                    });
-                  }
-                }}
-                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 overflow-hidden ${
+              <div
+                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 ${
                   formData.is_efb
                     ? "bg-purple-500 shadow-inner"
-                    : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 shadow-inner"
+                    : "bg-slate-200 dark:bg-slate-700 shadow-inner"
                 }`}
               >
                 <div
@@ -155,11 +175,29 @@ export const InputTab: React.FC<InputTabProps> = ({
                     }`}
                   />
                 </div>
-              </button>
+              </div>
             </div>
 
             {/* RECORD BAJA Toggle */}
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+            <div
+              onClick={() => {
+                if (!formData.is_baja) {
+                  setFormData({
+                    ...formData,
+                    is_baja: true,
+                    is_efb: false,
+                    is_pruning: false,
+                    is_hujan: false,
+                    is_meracun: false,
+                  });
+                }
+              }}
+              className={`flex items-center justify-between p-4 rounded-2xl border shadow-sm cursor-pointer select-none transition-all duration-200 active:scale-[0.98] ${
+                formData.is_baja
+                  ? "bg-slate-50/85 dark:bg-slate-800/90 border-slate-300 dark:border-slate-700"
+                  : "bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700"
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
@@ -179,23 +217,11 @@ export const InputTab: React.FC<InputTabProps> = ({
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!formData.is_baja) {
-                    setFormData({
-                      ...formData,
-                      is_baja: true,
-                      is_efb: false,
-                      is_pruning: false,
-                      is_hujan: false,
-                    });
-                  }
-                }}
-                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 overflow-hidden ${
+              <div
+                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 ${
                   formData.is_baja
                     ? "bg-emerald-500 shadow-inner"
-                    : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 shadow-inner"
+                    : "bg-slate-200 dark:bg-slate-700 shadow-inner"
                 }`}
               >
                 <div
@@ -207,11 +233,29 @@ export const InputTab: React.FC<InputTabProps> = ({
                     }`}
                   />
                 </div>
-              </button>
+              </div>
             </div>
 
             {/* PRUNING Toggle */}
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+            <div
+              onClick={() => {
+                if (!formData.is_pruning) {
+                  setFormData({
+                    ...formData,
+                    is_pruning: true,
+                    is_baja: false,
+                    is_efb: false,
+                    is_hujan: false,
+                    is_meracun: false,
+                  });
+                }
+              }}
+              className={`flex items-center justify-between p-4 rounded-2xl border shadow-sm cursor-pointer select-none transition-all duration-200 active:scale-[0.98] ${
+                formData.is_pruning
+                  ? "bg-slate-50/85 dark:bg-slate-800/90 border-slate-300 dark:border-slate-700"
+                  : "bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700"
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
@@ -231,23 +275,11 @@ export const InputTab: React.FC<InputTabProps> = ({
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!formData.is_pruning) {
-                    setFormData({
-                      ...formData,
-                      is_pruning: true,
-                      is_baja: false,
-                      is_efb: false,
-                      is_hujan: false,
-                    });
-                  }
-                }}
-                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 overflow-hidden ${
+              <div
+                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 ${
                   formData.is_pruning
                     ? "bg-amber-500 shadow-inner"
-                    : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 shadow-inner"
+                    : "bg-slate-200 dark:bg-slate-700 shadow-inner"
                 }`}
               >
                 <div
@@ -259,11 +291,29 @@ export const InputTab: React.FC<InputTabProps> = ({
                     }`}
                   />
                 </div>
-              </button>
+              </div>
             </div>
 
             {/* HUJAN Toggle */}
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+            <div
+              onClick={() => {
+                if (!formData.is_hujan) {
+                  setFormData({
+                    ...formData,
+                    is_hujan: true,
+                    is_pruning: false,
+                    is_baja: false,
+                    is_efb: false,
+                    is_meracun: false,
+                  });
+                }
+              }}
+              className={`flex items-center justify-between p-4 rounded-2xl border shadow-sm cursor-pointer select-none transition-all duration-200 active:scale-[0.98] ${
+                formData.is_hujan
+                  ? "bg-slate-50/85 dark:bg-slate-800/90 border-slate-300 dark:border-slate-700"
+                  : "bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700"
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
@@ -283,23 +333,11 @@ export const InputTab: React.FC<InputTabProps> = ({
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!formData.is_hujan) {
-                    setFormData({
-                      ...formData,
-                      is_hujan: true,
-                      is_pruning: false,
-                      is_baja: false,
-                      is_efb: false,
-                    });
-                  }
-                }}
-                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 overflow-hidden ${
+              <div
+                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 ${
                   formData.is_hujan
                     ? "bg-blue-500 shadow-inner"
-                    : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 shadow-inner"
+                    : "bg-slate-200 dark:bg-slate-700 shadow-inner"
                 }`}
               >
                 <div
@@ -311,7 +349,63 @@ export const InputTab: React.FC<InputTabProps> = ({
                     }`}
                   />
                 </div>
-              </button>
+              </div>
+            </div>
+
+            {/* RECORD MERACUN Toggle */}
+            <div
+              onClick={() => {
+                if (!formData.is_meracun) {
+                  setFormData({
+                    ...formData,
+                    is_meracun: true,
+                    is_baja: false,
+                    is_efb: false,
+                    is_pruning: false,
+                    is_hujan: false,
+                  });
+                }
+              }}
+              className={`flex items-center justify-between p-4 rounded-2xl border shadow-sm cursor-pointer select-none transition-all duration-200 active:scale-[0.98] ${
+                formData.is_meracun
+                  ? "bg-slate-50/85 dark:bg-slate-800/90 border-slate-300 dark:border-slate-700"
+                  : "bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                    formData.is_meracun
+                      ? "bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+                      : "bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300"
+                  }`}
+                >
+                  <Leaf size={20} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase">
+                    Rekod Meracun
+                  </p>
+                  <p className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                    Kawasan Meracun (Weeding)
+                  </p>
+                </div>
+              </div>
+              <div
+                className={`w-[48px] h-[26px] p-1 rounded-full relative transition-all duration-300 ${
+                  formData.is_meracun
+                    ? "bg-emerald-600 shadow-inner"
+                    : "bg-slate-200 dark:bg-slate-700 shadow-inner"
+                }`}
+              >
+                <div className="w-full h-full rounded-full transition-transform duration-300 relative">
+                  <div
+                    className={`absolute top-1/2 -translate-y-1/2 w-[20px] h-[20px] bg-white rounded-full shadow-md transition-transform duration-300 ${
+                      formData.is_meracun ? "translate-x-[20px]" : "translate-x-0"
+                    }`}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -335,6 +429,12 @@ export const InputTab: React.FC<InputTabProps> = ({
             <PruningInput
               onSuccess={() => {
                 setFormData({ ...formData, is_pruning: false });
+              }}
+            />
+          ) : formData.is_meracun ? (
+            <MerumputInput
+              onSuccess={() => {
+                setFormData({ ...formData, is_meracun: false });
               }}
             />
           ) : (
@@ -541,9 +641,9 @@ export const InputTab: React.FC<InputTabProps> = ({
                   <>
                     <button
                       type="button"
-                      onClick={() => setFormData({
-                        no_resit: "", no_akaun_terima: "", no_lori: "", no_seal: "", no_nota_hantaran: "", kpg: "", blok: "", tan: "", muda: "", reject: "0.00", sample: "0", rm_mt: "", tarikh: "", masa_masuk: "", is_efb: false
-                      })}
+                    onClick={() => setFormData({
+                      no_resit: "", no_akaun_terima: "", no_lori: "", no_seal: "", no_nota_hantaran: "", kpg: "", blok: "", tan: "", muda: "", reject: "0.00", sample: "0", rm_mt: "", tarikh: "", masa_masuk: "", is_efb: false, is_baja: false, is_pruning: false, is_hujan: false, is_meracun: false
+                    })}
                       className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-black py-4 rounded-2xl flex justify-center items-center gap-2 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-slate-300"
                     >
                       <RefreshCw size={16} /> Reset
