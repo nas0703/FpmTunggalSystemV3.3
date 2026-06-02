@@ -6244,7 +6244,7 @@ PERATURAN TEKNIKAL:
                                                   <ComposedChart
                                                     data={chartData}
                                                     margin={{
-                                                      top: 35,
+                                                      top: 55,
                                                       right: 10,
                                                       left: -25,
                                                       bottom: 0,
@@ -6516,37 +6516,35 @@ PERATURAN TEKNIKAL:
                                                                 ? "efb_tan"
                                                                 : "kpg_match_count"
                                                         }
-                                                        position="top"
-                                                        offset={4}
-                                                        formatter={(
-                                                          val: number,
-                                                        ) => {
-                                                          if (val <= 0)
-                                                            return "";
+                                                        content={(props: any) => {
+                                                          const { x, y, width, value } = props;
+                                                          if (value === undefined || value === null || value <= 0) return null;
                                                           let text =
-                                                            chartMetric ===
-                                                            "yield"
-                                                              ? val.toFixed(1)
-                                                              : chartMetric ===
-                                                                  "efb"
-                                                                ? val.toFixed(1)
-                                                                : val.toString();
-                                                          if (
-                                                            val === maxValue &&
-                                                            val > 0
-                                                          )
-                                                            return `▲ ${text}`;
-                                                          if (
-                                                            val === minValue &&
-                                                            val > 0
-                                                          )
-                                                            return `▼ ${text}`;
-                                                          return text;
-                                                        }}
-                                                        style={{
-                                                          fontSize: "6px",
-                                                          fontWeight: "900",
-                                                          fill: CHART_COLORS.gray,
+                                                            chartMetric === "yield"
+                                                              ? value.toFixed(1)
+                                                              : chartMetric === "efb"
+                                                                ? value.toFixed(1)
+                                                                : value.toString();
+                                                          if (value === maxValue && value > 0) {
+                                                            text = `▲ ${text}`;
+                                                          } else if (value === minValue && value > 0) {
+                                                            text = `▼ ${text}`;
+                                                          }
+                                                          return (
+                                                            <text
+                                                              x={x + width / 2}
+                                                              y={y - 6}
+                                                              fill={isDarkMode ? "#cbd5e1" : "#475569"}
+                                                              fontSize="7px"
+                                                              fontWeight="900"
+                                                              fontFamily="monospace"
+                                                              textAnchor="start"
+                                                              transform={`rotate(-90, ${x + width / 2}, ${y - 6})`}
+                                                              dominantBaseline="middle"
+                                                            >
+                                                              {text}
+                                                            </text>
+                                                          );
                                                         }}
                                                       />
                                                     </Bar>
@@ -7750,7 +7748,7 @@ PERATURAN TEKNIKAL:
                       return (
                         <ComposedChart
                           data={chartData}
-                          margin={{ top: 40, right: 20, left: 0, bottom: 20 }}
+                          margin={{ top: 65, right: 20, left: 0, bottom: 20 }}
                         >
                           <CartesianGrid
                             strokeDasharray="3 3"
@@ -7995,26 +7993,35 @@ PERATURAN TEKNIKAL:
                                       ? "efb_tan"
                                       : "kpg_match_count"
                               }
-                              position="top"
-                              offset={15}
-                              formatter={(val: number) => {
-                                if (val <= 0) return "";
+                              content={(props: any) => {
+                                const { x, y, width, value } = props;
+                                if (value === undefined || value === null || value <= 0) return null;
                                 let text =
                                   chartMetric === "yield"
-                                    ? val.toFixed(2)
+                                    ? value.toFixed(2)
                                     : chartMetric === "efb"
-                                      ? val.toFixed(1)
-                                      : val.toString();
-                                if (val === maxValue && val > 0)
-                                  return `▲ MAX ${text}`;
-                                if (val === minValue && val > 0)
-                                  return `▼ MIN ${text}`;
-                                return text;
-                              }}
-                              style={{
-                                fontSize: "10px",
-                                fontWeight: "900",
-                                fill: isDarkMode ? "#f8fafc" : "#0f172a",
+                                      ? value.toFixed(1)
+                                      : value.toString();
+                                if (value === maxValue && value > 0) {
+                                  text = `▲ MAX ${text}`;
+                                } else if (value === minValue && value > 0) {
+                                  text = `▼ MIN ${text}`;
+                                }
+                                return (
+                                  <text
+                                    x={x + width / 2}
+                                    y={y - 8}
+                                    fill={isDarkMode ? "#f8fafc" : "#0f172a"}
+                                    fontSize="10px"
+                                    fontWeight="900"
+                                    fontFamily="monospace"
+                                    textAnchor="start"
+                                    transform={`rotate(-90, ${x + width / 2}, ${y - 8})`}
+                                    dominantBaseline="middle"
+                                  >
+                                    {text}
+                                  </text>
+                                );
                               }}
                             />
                           </Bar>

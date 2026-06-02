@@ -273,82 +273,82 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                 <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
                     <tr className="bg-emerald-50/70 dark:bg-emerald-950/20 text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
-                      <th className="px-3 py-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap">Tarikh</th>
-                      <th className="px-3 py-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap">Resit / Nota</th>
-                      <th className="px-3 py-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap">Lori / Seal</th>
+                      <th className="px-3 py-1.5 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap opacity-90">Tarikh</th>
+                      <th className="px-3 py-1.5 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap opacity-90">Resit / Nota</th>
+                      <th className="px-3 py-1.5 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap opacity-90">Lori / Seal</th>
                       {!isEfb && (
-                        <th className="px-3 py-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">Muda</th>
+                        <th className="px-3 py-1.5 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center opacity-90">Muda</th>
                       )}
-                      <th className="px-3 py-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">Blok</th>
+                      <th className="px-3 py-1.5 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center opacity-90">Blok</th>
                       {!isEfb && (
-                        <th className="px-3 py-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">KPG</th>
+                        <th className="px-3 py-1.5 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center opacity-90">KPG</th>
                       )}
-                      <th className="px-3 py-3 border-b border-emerald-100 dark:border-emerald-800 text-right whitespace-nowrap">Tan</th>
+                      <th className="px-3 py-1.5 border-b border-emerald-100 dark:border-emerald-800 text-right whitespace-nowrap opacity-90">Tan</th>
                       {!isEfb && (
-                        <th className="px-3 py-3 border-b border-emerald-100 dark:border-emerald-800 text-right whitespace-nowrap font-bold">CAPAI (RM)</th>
+                        <th className="px-3 py-1.5 border-b border-emerald-100 dark:border-emerald-800 text-right whitespace-nowrap font-bold opacity-90">CAPAI (RM)</th>
                       )}
-                      <th className="px-3 py-3 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center">Tindakan</th>
+                      <th className="px-3 py-1.5 border-b border-emerald-100 dark:border-emerald-800 whitespace-nowrap text-center opacity-90">Tindakan</th>
                     </tr>
                   </thead>
                   <tbody>
                     {displayedData.map((row, i) => (
                       <tr 
                         key={row.no_resit || i} 
-                        className="border-b border-slate-100 dark:border-slate-800/50 text-xs text-slate-700 dark:text-slate-300 hover:bg-emerald-50/20 dark:hover:bg-emerald-950/10 transition-colors"
+                        className="border-b border-slate-100 dark:border-slate-800/50 text-[11px] text-slate-700 dark:text-slate-300 hover:bg-emerald-50/10 dark:hover:bg-emerald-950/5 transition-colors"
                       >
-                        <td className="px-3 py-3.5 font-bold">
+                        <td className="px-3 py-1.5 font-bold">
                           {formatTarikhMalay(row.tarikh)}
                         </td>
-                        <td className="px-3 py-3.5 font-mono tracking-tighter whitespace-nowrap">
-                          <div className="font-black text-emerald-900 dark:text-white uppercase truncate max-w-[120px]">
+                        <td className="px-3 py-1.5 font-mono tracking-tighter whitespace-nowrap">
+                          <div className="font-bold text-emerald-900 dark:text-white uppercase truncate max-w-[120px]">
                             {row.no_resit}
                           </div>
-                          <div className="text-[9px] text-slate-400 dark:text-slate-500 flex flex-col mt-0.5">
+                          <div className="text-[9px] text-slate-400 dark:text-slate-500 flex flex-col mt-0.5 leading-none">
                             {row.no_nota_hantaran && row.no_nota_hantaran !== row.no_resit && (
                               <span className="truncate max-w-[120px]">
                                 Nota: {row.no_nota_hantaran}
                               </span>
                             )}
-                            {row.no_akaun_terima && (
-                              <span className="text-emerald-600 dark:text-emerald-400 font-black truncate max-w-[120px]">
+                            {row.no_akaun_terima && row.no_akaun_terima !== row.no_resit && (
+                              <span className="text-emerald-600 dark:text-emerald-400 font-bold truncate max-w-[120px]">
                                 Akaun: {row.no_akaun_terima}
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="px-3 py-3.5 uppercase whitespace-nowrap">
-                          <div className="font-black truncate max-w-[100px]">{row.no_lori}</div>
-                          <div className="text-[9px] text-slate-400 dark:text-slate-500 truncate max-w-[100px]">{row.no_seal || "-"}</div>
+                        <td className="px-3 py-1.5 uppercase whitespace-nowrap">
+                          <div className="font-bold truncate max-w-[100px]">{row.no_lori}</div>
+                          <div className="text-[9px] text-slate-400 dark:text-slate-500 truncate max-w-[100px] leading-none">{row.no_seal || "-"}</div>
                         </td>
                         {!isEfb && (
-                          <td className="px-3 py-3.5 font-black text-rose-500 text-center whitespace-nowrap">{row.muda}</td>
+                          <td className="px-3 py-1.5 font-bold text-rose-500 text-center whitespace-nowrap">{row.muda}</td>
                         )}
-                        <td className="px-3 py-3.5 whitespace-nowrap text-center">
+                        <td className="px-3 py-1.5 whitespace-nowrap text-center animate-none">
                           <div className="flex flex-col items-center">
-                            <span className="font-black text-emerald-700 dark:text-emerald-400">
+                            <span className="font-bold text-emerald-700 dark:text-emerald-400">
                               B{row.blok}
                             </span>
                             {row.peringkat === "EFB" && (
-                              <span className="text-[8px] bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded-md font-black mt-1 w-fit">
+                              <span className="text-[7px] bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-1 py-0.5 rounded font-black mt-0.5 w-fit leading-none">
                                 EFB
                               </span>
                             )}
                           </div>
                         </td>
                         {!isEfb && (
-                          <td className={`px-3 py-3.5 font-black text-center whitespace-nowrap ${
+                          <td className={`px-3 py-1.5 font-bold text-center whitespace-nowrap ${
                             parseFloat(row.kpg || "0") >= 21 
-                              ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg" 
+                              ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/10 rounded-md" 
                               : "text-slate-400 dark:text-slate-500"
                           }`}>
                             {row.kpg || "-"}
                           </td>
                         )}
-                        <td className="px-3 py-3.5 text-right font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50/20 dark:bg-emerald-900/10 rounded-lg whitespace-nowrap">
+                        <td className="px-3 py-1.5 text-right font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50/10 dark:bg-emerald-900/5 rounded-md whitespace-nowrap">
                           {row.tan.toFixed(2)}
                         </td>
                         {!isEfb && (
-                          <td className="px-3 py-3.5 text-right font-black text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
+                          <td className="px-3 py-1.5 text-right font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
                             {row.hasil_rm > 0
                               ? row.hasil_rm.toLocaleString("ms-MY", {
                                   minimumFractionDigits: 2,
@@ -356,22 +356,22 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                               : "-"}
                           </td>
                         )}
-                        <td className="px-3 py-3.5 text-center whitespace-nowrap">
+                        <td className="px-3 py-1.5 text-center whitespace-nowrap">
                           {(authRole === "staff" || authRole === "fc") && (
-                            <div className="flex items-center justify-center gap-1">
+                            <div className="flex items-center justify-center gap-0.5">
                               <button
                                 onClick={() => onEditRecord(row)}
-                                className="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-full transition-colors"
+                                className="p-1 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/10 rounded-full transition-colors"
                                 title="Kemaskini Rekod"
                               >
-                                <Edit2 size={14} />
+                                <Edit2 size={12} />
                               </button>
                               <button
                                 onClick={() => setRecordToDelete(row.no_resit)}
-                                className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors"
+                                className="p-1 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 rounded-full transition-colors"
                                 title="Padam Rekod"
                               >
-                                <Trash2 size={14} />
+                                <Trash2 size={12} />
                               </button>
                             </div>
                           )}

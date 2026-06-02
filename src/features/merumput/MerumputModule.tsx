@@ -418,7 +418,7 @@ export const MerumputModule: React.FC<MerumputModuleProps> = ({ isDarkMode, onSh
           <Leaf size={22} className="fill-emerald-500/10" />
         </div>
         <div>
-          <h3 className="text-[9px] font-black tracking-widest text-slate-400 dark:text-slate-505 uppercase leading-none font-mono">Perekodan & Pemantauan</h3>
+          <h3 className="text-[9px] font-black tracking-widest text-slate-400 dark:text-slate-505 uppercase leading-none font-mono">Rekod & Pemantauan</h3>
           <h2 className="text-lg font-black text-slate-800 dark:text-white uppercase leading-none tracking-wide mt-1.5 font-display flex items-center gap-2">
             MODUL MERUMPUT
           </h2>
