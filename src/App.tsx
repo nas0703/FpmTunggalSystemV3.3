@@ -822,6 +822,18 @@ export default function App() {
             }
           }
 
+          // Defensive auto-correction: If the record was created in 2026, but the parsed tarikh has a different year (e.g. 2024, 2023, 2025 due to OCR or input typos),
+          // auto-align the year to 2026 to ensure calculations and trends are accurate, while preserving the month and day.
+          if (item.created_at && normalizedDate) {
+            const createdYear = new Date(item.created_at).getUTCFullYear().toString();
+            if (createdYear === "2026") {
+              const dateParts = normalizedDate.split("-");
+              if (dateParts[0] !== "2026") {
+                normalizedDate = `2026-${dateParts[1]}-${dateParts[2]}`;
+              }
+            }
+          }
+
           const rawKpg = String(item.kpg || "")
             .trim()
             .replace(",", ".");
