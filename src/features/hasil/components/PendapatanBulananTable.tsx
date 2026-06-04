@@ -350,7 +350,7 @@ export const PendapatanBulananTable: React.FC<PendapatanBulananTableProps> = ({
             ref={tableRef}
             className="flex-shrink-0 transition-transform origin-top select-auto"
             style={{ 
-                transform: `scale(${zoom / 100})`, 
+                transform: `scale(${isCapturing ? 0.85 : zoom / 100})`, 
                 width: 'max-content'
             }}
         >
@@ -389,65 +389,65 @@ export const PendapatanBulananTable: React.FC<PendapatanBulananTableProps> = ({
                         {pkt1Rows.map((row: any, idx: number) => (
                             <tr key={row.blok} className="hover:bg-slate-50 transition-colors">
                                 {idx === 0 && (
-                                    <td className="border border-[#e2e8f0] border-r-black border-l-black p-1 text-center font-bold align-middle" rowSpan={pkt1Rows.length}>
+                                    <td title="Peringkat (PKT): 001" className="border border-[#e2e8f0] border-r-black border-l-black p-1 text-center font-bold align-middle" rowSpan={pkt1Rows.length}>
                                         001<br/>(14)
                                     </td>
                                 )}
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{parseInt(row.blok)}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.luas.toFixed(2)}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.peneroka}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tan.toFixed(2)}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tHek.toFixed(2)}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tPen.toFixed(2)}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.price.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.purataSependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                                <td title={`Blok: ${parseInt(row.blok)}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{parseInt(row.blok)}</td>
+                                <td title={`Luas Kawasan (Hek): ${row.luas.toFixed(2)}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.luas.toFixed(2)}</td>
+                                <td title={`Jumlah Peneroka: ${row.peneroka}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.peneroka}</td>
+                                <td title={`Pencapaian Hasil - M/Tan: ${row.tan.toFixed(2)}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tan.toFixed(2)}</td>
+                                <td title={`Pencapaian Hasil - T / Hek: ${row.tHek.toFixed(2)}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tHek.toFixed(2)}</td>
+                                <td title={`Pencapaian Hasil - T / Pen: ${row.tPen.toFixed(2)}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tPen.toFixed(2)}</td>
+                                <td title={`Jumlah Nilai Jualan (RM): RM ${row.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                                <td title={`Purata Harga / Tan (RM): RM ${row.price.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.price.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                                <td title={`Purata Pendapatan Kasar Sepeneroka: RM ${row.purataSependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.purataSependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
                             </tr>
                         ))}
                         {/* PKT 1 TOTAL */}
                         <tr className="bg-[#FFE599] border-black font-bold">
-                            <td className="border border-black p-1 text-center">001</td>
-                            <td className="border border-black p-1 text-center">1-17</td>
-                            <td className="border border-black p-1 text-center">{sumPkt1.luas.toFixed(2)}</td>
-                            <td className="border border-black p-1 text-center">{sumPkt1.peneroka}</td>
-                            <td className="border border-black p-1 text-center">{sumPkt1.tan.toFixed(2)}</td>
-                            <td className="border border-black p-1 text-center">{pkt1THek.toFixed(2)}</td>
-                            <td className="border border-black p-1 text-center">{pkt1TPen.toFixed(2)}</td>
-                            <td className="border border-black p-1 text-right">{sumPkt1.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
-                            <td className="border border-black p-1 text-right">{pkt1AvgPrice.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
-                            <td className="border border-black p-1 text-right">{pkt1Sependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                            <td title="Peringkat (PKT): 001" className="border border-black p-1 text-center font-bold">001</td>
+                            <td title="Total Blok: 1-17" className="border border-black p-1 text-center">1-17</td>
+                            <td title={`Jumlah Luas Kawasan (Hek): ${sumPkt1.luas.toFixed(2)}`} className="border border-black p-1 text-center">{sumPkt1.luas.toFixed(2)}</td>
+                            <td title={`Jumlah Peneroka: ${sumPkt1.peneroka}`} className="border border-black p-1 text-center">{sumPkt1.peneroka}</td>
+                            <td title={`Pencapaian Hasil - M/Tan: ${sumPkt1.tan.toFixed(2)}`} className="border border-black p-1 text-center">{sumPkt1.tan.toFixed(2)}</td>
+                            <td title={`Pencapaian Hasil - T / Hek: ${pkt1THek.toFixed(2)}`} className="border border-black p-1 text-center">{pkt1THek.toFixed(2)}</td>
+                            <td title={`Pencapaian Hasil - T / Pen: ${pkt1TPen.toFixed(2)}`} className="border border-black p-1 text-center">{pkt1TPen.toFixed(2)}</td>
+                            <td title={`Jumlah Nilai Jualan (RM): RM ${sumPkt1.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-black p-1 text-right">{sumPkt1.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                            <td title={`Purata Harga / Tan (RM): RM ${pkt1AvgPrice.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-black p-1 text-right">{pkt1AvgPrice.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                            <td title={`Purata Pendapatan Kasar Sepeneroka: RM ${pkt1Sependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-black p-1 text-right">{pkt1Sependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
                         </tr>
 
                         {pkt2Rows.map((row: any, idx: number) => (
                             <tr key={row.blok} className="hover:bg-slate-50 transition-colors">
                                 {idx === 0 && (
-                                    <td className="border border-[#e2e8f0] border-r-black border-l-black p-1 text-center font-bold align-middle" rowSpan={pkt2Rows.length}>
+                                    <td title="Peringkat (PKT): 002" className="border border-[#e2e8f0] border-r-black border-l-black p-1 text-center font-bold align-middle" rowSpan={pkt2Rows.length}>
                                         002<br/>(8)
                                     </td>
                                 )}
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{parseInt(row.blok)}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.luas.toFixed(2)}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.peneroka}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tan.toFixed(2)}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tHek.toFixed(2)}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tPen.toFixed(2)}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.price.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
-                                <td className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.purataSependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                                <td title={`Blok: ${parseInt(row.blok)}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{parseInt(row.blok)}</td>
+                                <td title={`Luas Kawasan (Hek): ${row.luas.toFixed(2)}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.luas.toFixed(2)}</td>
+                                <td title={`Jumlah Peneroka: ${row.peneroka}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.peneroka}</td>
+                                <td title={`Pencapaian Hasil - M/Tan: ${row.tan.toFixed(2)}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tan.toFixed(2)}</td>
+                                <td title={`Pencapaian Hasil - T / Hek: ${row.tHek.toFixed(2)}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tHek.toFixed(2)}</td>
+                                <td title={`Pencapaian Hasil - T / Pen: ${row.tPen.toFixed(2)}`} className="border border-[#e2e8f0] border-x-black p-1 text-center">{row.tPen.toFixed(2)}</td>
+                                <td title={`Jumlah Nilai Jualan (RM): RM ${row.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                                <td title={`Purata Harga / Tan (RM): RM ${row.price.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.price.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                                <td title={`Purata Pendapatan Kasar Sepeneroka: RM ${row.purataSependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-[#e2e8f0] border-x-black p-1 text-right">{row.purataSependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
                             </tr>
                         ))}
                         {/* PKT 2 TOTAL */}
                         <tr className="bg-[#FFE599] border-black font-bold">
-                            <td className="border border-black p-1 text-center">002</td>
-                            <td className="border border-black p-1 text-center">18-22</td>
-                            <td className="border border-black p-1 text-center">{sumPkt2.luas.toFixed(2)}</td>
-                            <td className="border border-black p-1 text-center">{sumPkt2.peneroka}</td>
-                            <td className="border border-black p-1 text-center">{sumPkt2.tan.toFixed(2)}</td>
-                            <td className="border border-black p-1 text-center">{pkt2THek.toFixed(2)}</td>
-                            <td className="border border-black p-1 text-center">{pkt2TPen.toFixed(2)}</td>
-                            <td className="border border-black p-1 text-right">{sumPkt2.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
-                            <td className="border border-black p-1 text-right">{pkt2AvgPrice.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
-                            <td className="border border-black p-1 text-right">{pkt2Sependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                            <td title="Peringkat (PKT): 002" className="border border-black p-1 text-center font-bold">002</td>
+                            <td title="Total Blok: 18-22" className="border border-black p-1 text-center">18-22</td>
+                            <td title={`Jumlah Luas Kawasan (Hek): ${sumPkt2.luas.toFixed(2)}`} className="border border-black p-1 text-center">{sumPkt2.luas.toFixed(2)}</td>
+                            <td title={`Jumlah Peneroka: ${sumPkt2.peneroka}`} className="border border-black p-1 text-center">{sumPkt2.peneroka}</td>
+                            <td title={`Pencapaian Hasil - M/Tan: ${sumPkt2.tan.toFixed(2)}`} className="border border-black p-1 text-center">{sumPkt2.tan.toFixed(2)}</td>
+                            <td title={`Pencapaian Hasil - T / Hek: ${pkt2THek.toFixed(2)}`} className="border border-black p-1 text-center">{pkt2THek.toFixed(2)}</td>
+                            <td title={`Pencapaian Hasil - T / Pen: ${pkt2TPen.toFixed(2)}`} className="border border-black p-1 text-center">{pkt2TPen.toFixed(2)}</td>
+                            <td title={`Jumlah Nilai Jualan (RM): RM ${sumPkt2.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-black p-1 text-right">{sumPkt2.totalSales.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                            <td title={`Purata Harga / Tan (RM): RM ${pkt2AvgPrice.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-black p-1 text-right">{pkt2AvgPrice.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
+                            <td title={`Purata Pendapatan Kasar Sepeneroka: RM ${pkt2Sependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}`} className="border border-black p-1 text-right">{pkt2Sependapatan.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits:2})}</td>
                         </tr>
                     </tbody>
                 </table>

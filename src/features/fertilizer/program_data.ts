@@ -22,5 +22,5 @@ export const FERTILIZER_PROGRAM_2026 = [
   { blok: "20", luas: 68.620, dirian: 145, pokok: 9980, pus1: 599, pus2: 399, pus3: 399, pus4: 499 },
   { blok: "21", luas: 24.270, dirian: 144, pokok: 3503, pus1: 210, pus2: 140, pus3: 140, pus4: 175 },
   { blok: "22", luas: 65.290, dirian: 146, pokok: 9531, pus1: 572, pus2: 381, pus3: 381, pus4: 477 },
-  { blok: "88", luas: 98.510, dirian: 136, pokok: 13397, pus1: 736, pus2: 535, pus3: 535, pus4: 535 }
+  { blok: "88", luas: 98.510, dirian: 136, pokok: 13397, pus1: 673, pus2: 470, pus3: 470, pus4: 522 }
 ];
