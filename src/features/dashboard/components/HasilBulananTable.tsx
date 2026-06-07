@@ -272,40 +272,38 @@ export const HasilBulananTable = ({
     const yoyColor =
       yoyVal >= 0
         ? isGrandTotal
-          ? "text-emerald-200 dark:text-emerald-800"
-          : "text-emerald-600"
+          ? "text-emerald-200 dark:text-emerald-200"
+          : "text-emerald-600 dark:text-emerald-700"
         : isGrandTotal
-          ? "text-rose-300 dark:text-rose-800"
-          : "text-rose-600";
+          ? "text-rose-300 dark:text-rose-220"
+          : "text-rose-600 dark:text-rose-600";
     const targetColor = isGrandTotal
-      ? "text-emerald-200 dark:text-emerald-800"
-      : "text-emerald-600 dark:text-emerald-400/70";
+      ? "text-emerald-200 dark:text-emerald-200"
+      : "text-emerald-600 dark:text-emerald-700";
     const capaiColor = isGrandTotal
-      ? "text-rose-300 dark:text-rose-800"
-      : isDarkMode
-        ? "text-rose-400"
-        : "text-rose-600";
+      ? "text-rose-300 dark:text-rose-200"
+      : "text-rose-600 dark:text-rose-600";
     const tPenColor = isGrandTotal
-      ? "text-emerald-200 dark:text-emerald-800"
-      : "dark:text-emerald-100";
+      ? "text-emerald-200 dark:text-emerald-200"
+      : "text-emerald-900 dark:text-emerald-950";
 
     let rowClass =
-      "bg-white dark:bg-[#072d1f] text-emerald-900 dark:text-emerald-100 border-b border-emerald-100 dark:border-emerald-900/50";
+      "bg-white dark:bg-white text-slate-900 dark:text-slate-900 border-b border-emerald-100 dark:border-emerald-200/60";
     let monthRankTextColor = "";
     let ytdRankTextColor = "";
 
     if (isGrandTotal) {
       rowClass =
-        "bg-emerald-800 text-white dark:bg-emerald-400 dark:text-emerald-950 font-black shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-20 relative";
+        "bg-emerald-800 text-white dark:bg-emerald-800 dark:text-white font-black shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-20 relative";
     } else if (isSubtotal) {
       rowClass =
-        "bg-emerald-50 dark:bg-emerald-900/60 font-bold text-emerald-900 dark:text-emerald-100 border-b-2 border-emerald-200 dark:border-emerald-800";
+        "bg-emerald-50 dark:bg-emerald-100/90 font-bold text-emerald-900 dark:text-emerald-950 border-b-2 border-emerald-200 dark:border-emerald-300";
     } else if (data.blok !== "LF" && (sortBy === "month" || sortBy === "ytd")) {
       const calculateRankTextColor = (pct: number) => {
-        if (pct >= 100) return "text-emerald-600 dark:text-emerald-400";
-        if (pct >= 90) return "text-teal-600 dark:text-teal-400";
-        if (pct >= 70) return "text-amber-500 dark:text-amber-400";
-        return "text-rose-600 dark:text-rose-400";
+        if (pct >= 100) return "text-emerald-600 dark:text-emerald-700";
+        if (pct >= 90) return "text-teal-600 dark:text-teal-700";
+        if (pct >= 70) return "text-amber-500 dark:text-amber-600";
+        return "text-rose-600 dark:text-rose-600";
       };
 
       if (sortBy === "month") {
@@ -324,33 +322,39 @@ export const HasilBulananTable = ({
     return (
       <tr
         key={data.blok}
-        className={`${rowClass} transition-colors cursor-pointer ${!isGrandTotal && !isSubtotal ? "hover:bg-emerald-50 dark:hover:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
+        className={`${rowClass} transition-colors cursor-pointer ${!isGrandTotal && !isSubtotal ? "hover:bg-emerald-50 dark:hover:bg-emerald-50/50" : ""}`}
       >
-        <td
-          style={zoomStyles}
-          title={`Peringkat (PKT): ${data.pkt}`}
-          className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center uppercase"
-        >
-          {data.pkt}
-        </td>
-        <td
-          style={zoomStyles}
-          title={`Tahun Tuai: ${data.tahunTuai}`}
-          className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center uppercase"
-        >
-          {data.tahunTuai}
-        </td>
-        <td
-          style={zoomStyles}
-          title={`Kadar Sasaran Tahunan (TAR/MT): ${data.targetTahun}`}
-          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${targetColor}`}
-        >
-          {data.targetTahun}
-        </td>
+        {!isCapturing && !isDownloadingPdf && (
+          <td
+            style={zoomStyles}
+            title={`Peringkat (PKT): ${data.pkt}`}
+            className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center uppercase"
+          >
+            {data.pkt}
+          </td>
+        )}
+        {!isCapturing && !isDownloadingPdf && (
+          <td
+            style={zoomStyles}
+            title={`Tahun Tuai: ${data.tahunTuai}`}
+            className="border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center uppercase"
+          >
+            {data.tahunTuai}
+          </td>
+        )}
+        {!isCapturing && !isDownloadingPdf && (
+          <td
+            style={zoomStyles}
+            title={`Kadar Sasaran Tahunan (TAR/MT): ${data.targetTahun}`}
+            className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${targetColor}`}
+          >
+            {data.targetTahun}
+          </td>
+        )}
         <td
           style={zoomStyles}
           title={`Blok: ${data.blok}`}
-          className={`sticky left-0 border-r-2 border-emerald-400 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 text-center font-black shadow-[2px_0_5px_rgba(0,0,0,0.1)] z-10 ${rowClass}`}
+          className={`sticky left-0 border-r-2 border-emerald-400 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 group-hover:bg-emerald-50 dark:text-slate-900 text-center font-black shadow-[2px_0_5px_rgba(0,0,0,0.1)] z-10 ${rowClass}`}
         >
           {data.blok}
         </td>
@@ -364,7 +368,7 @@ export const HasilBulananTable = ({
         <td
           style={zoomStyles}
           title={`Jumlah Peneroka: ${data.peneroka > 0 ? data.peneroka : "-"}`}
-          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-bold dark:text-emerald-100 ${isGrandTotal ? "text-emerald-200 dark:text-emerald-800" : ""}`}
+          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-bold ${isGrandTotal ? "text-emerald-200 dark:text-emerald-200" : "text-slate-900 dark:text-slate-900"}`}
         >
           {data.peneroka > 0 ? data.peneroka : "-"}
         </td>
@@ -380,14 +384,14 @@ export const HasilBulananTable = ({
         <td
           style={zoomStyles}
           title={`Anggaran Hasil Bulan Ini (BULAN INI - ANGGARAN M/T): ${data.anggaranMonth.mt.toFixed(2)}`}
-          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
+          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-100/30" : ""}`}
         >
           {data.anggaranMonth.mt.toFixed(2)}
         </td>
         <td
           style={zoomStyles}
           title={`Anggaran Kadar Bulan Ini (BULAN INI - ANGGARAN T/HEK): ${data.anggaranMonth.tHek.toFixed(2)}`}
-          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
+          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-100/30" : ""}`}
         >
           {data.anggaranMonth.tHek.toFixed(2)}
         </td>
@@ -436,14 +440,14 @@ export const HasilBulananTable = ({
         <td
           style={zoomStyles}
           title={`Sasar Hasil Hingga Bulan Ini (HINGGA BULAN INI - ANGGARAN M/T): ${data.anggaranYtd.mt.toFixed(2)}`}
-          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
+          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-right pr-2 ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-100/30" : ""}`}
         >
           {data.anggaranYtd.mt.toFixed(2)}
         </td>
         <td
           style={zoomStyles}
           title={`Sasar Kadar Hingga Bulan Ini (HINGGA BULAN INI - ANGGARAN T/HEK): ${data.anggaranYtd.tHek.toFixed(2)}`}
-          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-900/90 dark:bg-emerald-900/20" : ""}`}
+          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center ${!isGrandTotal && !isSubtotal ? "bg-emerald-50/30 dark:bg-emerald-100/30" : ""}`}
         >
           {data.anggaranYtd.tHek.toFixed(2)}
         </td>
@@ -467,19 +471,21 @@ export const HasilBulananTable = ({
         <td
           style={zoomStyles}
           title={`Peratus Pencapaian Hingga Bulan Ini (HINGGA BULAN INI - % CAPAI): ${data.pctCapaiYtd.toFixed(2)}%`}
-          className={`border-r border-emerald-200 dark:border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-center font-black`}
+          className={`border-r border-emerald-200 dark:border-b border-r border-[#065f46]/30 dark:border-emerald-800/40 text-center font-black ${isCapturing || isDownloadingPdf ? "" : "border-r"}`}
         >
           <span className={ytdRankTextColor}>
             {data.pctCapaiYtd.toFixed(2)}
           </span>
         </td>
-        <td
-          style={zoomStyles}
-          title={`Pertumbuhan Setahun ke Setahun (YOY): ${yoyVal.toFixed(1)}%`}
-          className={`text-center font-black ${yoyColor}`}
-        >
-          {yoyVal.toFixed(1)}%
-        </td>
+        {!isCapturing && !isDownloadingPdf && (
+          <td
+            style={zoomStyles}
+            title={`Pertumbuhan Setahun ke Setahun (YOY): ${yoyVal.toFixed(1)}%`}
+            className={`text-center font-black ${yoyColor}`}
+          >
+            {yoyVal.toFixed(1)}%
+          </td>
+        )}
       </tr>
     );
   };
@@ -625,7 +631,7 @@ export const HasilBulananTable = ({
 
       ws.mergeCells("A2:S2");
       const title2 = ws.getCell("A2");
-      title2.value = "LAPORAN HASIL BULANAN MENGIKUT BLOK ${dbYear}";
+      title2.value = `LAPORAN HASIL BULANAN MENGIKUT BLOK ${dbYear}`;
       title2.font = { bold: true, size: 12 };
       title2.alignment = { horizontal: "center" };
 
@@ -882,7 +888,7 @@ export const HasilBulananTable = ({
             <h3
               className={`font-bold dark:text-emerald-100 mt-1 uppercase tracking-wide text-center w-full ${isCapturing ? "text-[28px] sm:text-[30px] md:text-[32px] mb-1.5" : "text-[14px] sm:text-[17px] md:text-[22px]"}`}
             >
-              LAPORAN HASIL BULANAN MENGIKUT BLOK ${dbYear}
+              LAPORAN HASIL BULANAN MENGIKUT BLOK {dbYear}
             </h3>
             <p
               className={`font-bold text-slate-400 uppercase tracking-tighter mt-1.5 text-center w-full ${isCapturing ? "text-[18px] sm:text-[21px] md:text-[24px]" : "text-[13px] sm:text-[14px] md:text-[17px]"}`}
@@ -1117,7 +1123,7 @@ export const HasilBulananTable = ({
                   FELDA PLANTATION MANAGEMENT SDN BHD
                 </h2>
                 <h3 className="font-bold dark:text-emerald-100 mt-1 uppercase tracking-wide text-center w-full text-[16px]">
-                  LAPORAN HASIL BULANAN MENGIKUT BLOK ${dbYear}
+                  LAPORAN HASIL BULANAN MENGIKUT BLOK {dbYear}
                 </h3>
                 <p className="font-bold text-slate-400 uppercase tracking-tighter mt-1 text-center w-full text-[12px]">
                   BULAN {currentMonthName} SEHINGGA : {dateStr}
@@ -1126,7 +1132,7 @@ export const HasilBulananTable = ({
             )}
             <table
               ref={tableRef}
-              className="w-full border-collapse bg-white dark:bg-emerald-950"
+              className="w-full border-collapse bg-white dark:bg-white"
               style={{
                 minWidth:
                   isCapturing || isDownloadingPdf
@@ -1136,42 +1142,48 @@ export const HasilBulananTable = ({
             >
               <thead className="sticky top-0 bg-emerald-900 text-[9.5px] uppercase font-black tracking-wider text-white z-30 shadow-md border-b-2 border-emerald-700">
                 <tr>
-                  <th
-                    rowSpan={3}
-                    style={{
-                      fontSize: `${Math.max(
-                        9.5,
-                        12.5 * ((effectiveZoom / 100) * effectiveScale),
-                      )}px`,
-                    }}
-                    className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-1.5 px-0.5 w-[3%] bg-emerald-900/90 dark:bg-emerald-900 text-center"
-                  >
-                    PKT
-                  </th>
-                  <th
-                    rowSpan={3}
-                    style={{
-                      fontSize: `${Math.max(
-                        9.5,
-                        12.5 * ((effectiveZoom / 100) * effectiveScale),
-                      )}px`,
-                    }}
-                    className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-1.5 px-0.5 w-[4.5%] bg-emerald-900/90 dark:bg-emerald-900 text-center"
-                  >
-                    THN TUAI
-                  </th>
-                  <th
-                    rowSpan={3}
-                    style={{
-                      fontSize: `${Math.max(
-                        9.5,
-                        12.5 * ((effectiveZoom / 100) * effectiveScale),
-                      )}px`,
-                    }}
-                    className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-1.5 px-0.5 w-[4%] bg-emerald-900/90 dark:bg-emerald-900 text-center"
-                  >
-                    TAR/MT
-                  </th>
+                  {!isCapturing && !isDownloadingPdf && (
+                    <th
+                      rowSpan={3}
+                      style={{
+                        fontSize: `${Math.max(
+                          9.5,
+                          12.5 * ((effectiveZoom / 100) * effectiveScale),
+                        )}px`,
+                      }}
+                      className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-1.5 px-0.5 w-[3%] bg-emerald-900/90 dark:bg-emerald-900 text-center"
+                    >
+                      PKT
+                    </th>
+                  )}
+                  {!isCapturing && !isDownloadingPdf && (
+                    <th
+                      rowSpan={3}
+                      style={{
+                        fontSize: `${Math.max(
+                          9.5,
+                          12.5 * ((effectiveZoom / 100) * effectiveScale),
+                        )}px`,
+                      }}
+                      className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-1.5 px-0.5 w-[4.5%] bg-emerald-900/90 dark:bg-emerald-900 text-center"
+                    >
+                      THN TUAI
+                    </th>
+                  )}
+                  {!isCapturing && !isDownloadingPdf && (
+                    <th
+                      rowSpan={3}
+                      style={{
+                        fontSize: `${Math.max(
+                          9.5,
+                          12.5 * ((effectiveZoom / 100) * effectiveScale),
+                        )}px`,
+                      }}
+                      className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 py-1.5 px-0.5 w-[4%] bg-emerald-900/90 dark:bg-emerald-900 text-center"
+                    >
+                      TAR/MT
+                    </th>
+                  )}
                   <th
                     rowSpan={3}
                     style={{
@@ -1180,7 +1192,7 @@ export const HasilBulananTable = ({
                         13.5 * ((effectiveZoom / 100) * effectiveScale),
                       )}px`,
                     }}
-                    className="sticky left-0 border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-1.5 px-0.5 w-[3.5%] bg-emerald-900/95 dark:bg-emerald-955/95 z-40 shadow-md text-center"
+                    className="sticky left-0 border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-white py-1.5 px-0.5 w-[3.5%] bg-emerald-900 z-40 shadow-md text-center"
                   >
                     BLOK
                   </th>
@@ -1233,7 +1245,7 @@ export const HasilBulananTable = ({
                     BULAN INI
                   </th>
                   <th
-                    colSpan={6}
+                    colSpan={isCapturing || isDownloadingPdf ? 5 : 6}
                     style={{
                       fontSize: `${Math.max(
                         10.5,
@@ -1286,12 +1298,14 @@ export const HasilBulananTable = ({
                   >
                     % CAPAI
                   </th>
-                  <th
-                    rowSpan={2}
-                    className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-50 py-1 px-0.5 w-[4.5%] font-semibold bg-emerald-800/80 text-center"
-                  >
-                    YOY
-                  </th>
+                  {!isCapturing && !isDownloadingPdf && (
+                    <th
+                      rowSpan={2}
+                      className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-50 py-1 px-0.5 w-[4.5%] font-semibold bg-emerald-800/80 text-center"
+                    >
+                      YOY
+                    </th>
+                  )}
                 </tr>
                 <tr
                   style={{
@@ -1302,39 +1316,39 @@ export const HasilBulananTable = ({
                     {currentMonthName} 2025 <br />
                     T/HEK
                   </th>
-                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-1 px-0.5 min-w-[50px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
+                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-100 py-1 px-0.5 min-w-[50px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
                     M/T
                   </th>
-                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-1 px-0.5 min-w-[45px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
+                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-100 py-1 px-0.5 min-w-[45px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
                     T/HEK
                   </th>
-                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-1 px-0.5 min-w-[50px] w-[5%] bg-emerald-800 dark:bg-emerald-800 text-center">
+                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-100 py-1 px-0.5 min-w-[50px] w-[5%] bg-emerald-800 dark:bg-emerald-800 text-center">
                     H.I M/T
                   </th>
-                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-1 px-0.5 min-w-[55px] w-[5.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
+                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-100 py-1 px-0.5 min-w-[55px] w-[5.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
                     H.H.I M/T
                   </th>
-                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-1 px-0.5 min-w-[45px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
+                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-100 py-1 px-0.5 min-w-[45px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
                     T/HEK
                   </th>
-                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-1 px-0.5 min-w-[45px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
+                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-100 py-1 px-0.5 min-w-[45px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
                     T/PEN
                   </th>
-                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-1 px-0.5 min-w-[50px] w-[5%] bg-emerald-800 dark:bg-emerald-800 text-center">
+                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-100 py-1 px-0.5 min-w-[50px] w-[5%] bg-emerald-800 dark:bg-emerald-800 text-center">
                     M/T
                   </th>
-                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-1 px-0.5 min-w-[45px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
+                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-100 py-1 px-0.5 min-w-[45px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
                     T/HEK
                   </th>
-                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-1 px-0.5 min-w-[55px] w-[5.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
+                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-100 py-1 px-0.5 min-w-[55px] w-[5.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
                     M/T
                   </th>
-                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 dark:text-emerald-100 py-1 px-0.5 min-w-[45px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
+                  <th className="border-b border-r border-emerald-700/50 dark:border-emerald-800/40 text-emerald-100 py-1 px-0.5 min-w-[45px] w-[4.5%] bg-emerald-800 dark:bg-emerald-800 text-center">
                     T/HEK
                   </th>
                 </tr>
               </thead>
-              <tbody className="text-[10px] text-slate-800 dark:text-emerald-100">
+              <tbody className="text-[10px] text-slate-800 dark:text-slate-900">
                 {sortedPkt1.map((row) => renderRow(row))}
                 {renderRow(pkt1Total, true)}
                 {sortedPkt2.map((row) => renderRow(row))}
