@@ -537,13 +537,35 @@ export const MerumputModule: React.FC<MerumputModuleProps> = ({ isDarkMode, onSh
                 ) : (
                   [...data]
                     .filter(x => x.hek_siap > 0)
-                    .sort((a, b) => b.hek_siap - a.hek_siap)
+                    .sort((a, b) => {
+                      const dateA = new Date(a.created_at || a.updated_at || a.tarikh_mula || 0).getTime();
+                      const dateB = new Date(b.created_at || b.updated_at || b.tarikh_mula || 0).getTime();
+                      if (dateB !== dateA) return dateB - dateA;
+                      return b.hek_siap - a.hek_siap;
+                    })
                     .slice(0, 10)
                     .map((item, i) => (
                       <div key={i} className="p-3 bg-slate-50 dark:bg-slate-850/40 rounded-2xl border border-slate-100/50 dark:border-slate-800/40 flex items-center justify-between gap-2">
                         <div className="text-left">
                           <p className="text-xs font-black text-slate-800 dark:text-white">Blok {item.blok} ({item.luas.toFixed(2)} HA)</p>
                           <p className="text-[8px] text-zinc-400 uppercase font-black tracking-wider mt-0.5">Pusingan {item.pusingan || 1} • {item.jenis || 'BULATAN & LORONG'}</p>
+                          <p className="text-[7.5px] text-emerald-600 dark:text-emerald-400 uppercase font-black tracking-wider mt-1.5 flex items-center gap-1 bg-emerald-50/50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-md w-fit">
+                            <Clock size={8} />
+                            Kemasukan: {(() => {
+                              const dateStr = item.created_at || item.updated_at || item.tarikh_mula;
+                              if (!dateStr) return "-";
+                              try {
+                                const d = new Date(dateStr);
+                                if (isNaN(d.getTime())) return dateStr;
+                                const day = String(d.getDate()).padStart(2, '0');
+                                const month = String(d.getMonth() + 1).padStart(2, '0');
+                                const year = d.getFullYear();
+                                return `${day}/${month}/${year}`;
+                              } catch (e) {
+                                return dateStr;
+                              }
+                            })()}
+                          </p>
                         </div>
                         <div className="text-right">
                           <div className="text-xs font-black text-emerald-500 font-mono">

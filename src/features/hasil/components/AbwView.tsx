@@ -105,15 +105,48 @@ export const AbwView: React.FC = () => {
   const [newFeldaAbwRecord, setNewFeldaAbwRecord] = useState<any>({ month: "" });
 
 
-  // Persist history values
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  // Load from API on mount
   useEffect(() => {
+    const fetchAbwData = async () => {
+      try {
+        const res = await fetch("/api/hasil/abw");
+        const json = await res.json();
+        
+        if (json.abwHistory && Object.keys(json.abwHistory).length > 0) {
+           setAbwHistory(json.abwHistory);
+        }
+        if (json.feldaAbwHistory && Object.keys(json.feldaAbwHistory).length > 0) {
+           setFeldaAbwHistory(json.feldaAbwHistory);
+        }
+      } catch (err) {
+        console.error("Failed to fetch ABW history from cloud. Using local state.", err);
+      } finally {
+        setIsDataLoaded(true);
+      }
+    };
+    fetchAbwData();
+  }, []);
+
+  // Persist history values to DB and localStorage
+  useEffect(() => {
+    if (!isDataLoaded) return;
     localStorage.setItem("fpm_abw_history", JSON.stringify(abwHistory));
-  }, [abwHistory]);
+    
+    // Auto-sync to cloud
+    fetch("/api/hasil/abw", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ abwHistory, feldaAbwHistory })
+    }).catch(e => console.error("Sync abw fail:", e));
+  }, [abwHistory, feldaAbwHistory, isDataLoaded]);
 
   // Persist Felda lots history
   useEffect(() => {
+    if (!isDataLoaded) return;
     localStorage.setItem("fpm_felda_abw_history_v3", JSON.stringify(feldaAbwHistory));
-  }, [feldaAbwHistory]);
+  }, [feldaAbwHistory, isDataLoaded]);
 
   // Dynamic lots containing weight for the selected activeFeldaMonth
   const activeFeldaLots = useMemo(() => {
