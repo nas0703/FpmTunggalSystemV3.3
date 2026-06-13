@@ -17,12 +17,15 @@ import { getPusInfo } from '../helpers';
 
 export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) => {
   const [entries, setEntries] = useState<any[]>([]);
+  const [inventory, setInventory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPus, setFilterPus] = useState<number | 'all'>('all');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleteRecordType, setDeleteRecordType] = useState<'ENTRY' | 'TRANSACTION' | null>(null);
+  const [editEntry, setEditEntry] = useState<any | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetchEntries();
@@ -44,6 +47,10 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
         inventoryRes.ok ? inventoryRes.json() : []
       ]);
 
+      if (Array.isArray(invData)) {
+        setInventory(invData);
+      }
+
       const unifiedData: any[] = [];
 
       if (Array.isArray(entriesData)) {
@@ -60,7 +67,8 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
             note: e.note,
             searchString: `${e.blok_code} ${e.fertilizer_type} pus ${e.pus}`.toLowerCase(),
             sortDate: new Date(e.entry_date).getTime(),
-            pusFilter: e.pus
+            pusFilter: e.pus,
+            originalEntry: e
           });
         });
       }
@@ -142,6 +150,39 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
     }
   };
 
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editEntry) return;
+    setIsEditing(true);
+
+    try {
+      const payload = {
+        ...editEntry,
+        total_beg_completed: parseFloat(editEntry.total_beg_completed),
+        workers_count: parseInt(editEntry.workers_count) || 0
+      };
+
+      const res = await fetch(`/api/fertilizer/entries/${editEntry.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+
+      if (res.ok) {
+        setEditEntry(null);
+        fetchEntries(); // Refresh list to get updated inventory transactions appropriately as edit might change stock
+      } else {
+        alert(`Gagal kemaskini: ${result.error || 'Ralat tidak diketahui'}`);
+      }
+    } catch (err: any) {
+      console.error('Failed to update', err);
+      alert(`Ralat rangkaian: ${err.message}`);
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
   const filteredEntries = entries.filter(e => {
     const matchesSearch = e.searchString.includes(searchTerm.toLowerCase());
     const matchesPus = filterPus === 'all' || e.pusFilter === filterPus || e.pusFilter === null;
@@ -208,17 +249,32 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
             
             <div className="flex items-center gap-1">
               { (authRole === 'fc' || authRole === 'afc' || authRole === 'fs' || authRole === 'admin') && (
-                <button 
-                  onClickCapture={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleDeleteClick(e as any, entry.id, entry.recordType);
-                  }}
-                  className="relative z-[100] p-4 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 active:scale-90 rounded-2xl transition-all border border-transparent hover:border-rose-100 dark:hover:border-rose-900/40 min-w-[48px] min-h-[48px] flex items-center justify-center cursor-pointer pointer-events-auto"
-                  title="Padam Rekod"
-                >
-                  <Trash2 size={24} />
-                </button>
+                <>
+                  { entry.recordType === 'ENTRY' && (
+                    <button 
+                      onClickCapture={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setEditEntry(entry.originalEntry);
+                      }}
+                      className="relative z-[100] p-4 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 active:scale-90 rounded-2xl transition-all border border-transparent hover:border-emerald-100 dark:hover:border-emerald-900/40 min-w-[48px] min-h-[48px] flex items-center justify-center cursor-pointer pointer-events-auto"
+                      title="Kemaskini Rekod"
+                    >
+                      <Edit3 size={24} />
+                    </button>
+                  )}
+                  <button 
+                    onClickCapture={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeleteClick(e as any, entry.id, entry.recordType);
+                    }}
+                    className="relative z-[100] p-4 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 active:scale-90 rounded-2xl transition-all border border-transparent hover:border-rose-100 dark:hover:border-rose-900/40 min-w-[48px] min-h-[48px] flex items-center justify-center cursor-pointer pointer-events-auto"
+                    title="Padam Rekod"
+                  >
+                    <Trash2 size={24} />
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -276,6 +332,152 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
                   <span>Padam</span>
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Edit Entry Modal */}
+        {editEntry && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 pl-12 md:pl-20">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => !isEditing && setEditEntry(null)}
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 10 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-xl overflow-y-auto max-h-[90vh] py-6 px-6 border border-slate-100 dark:border-white/10"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">
+                  Kemaskini Rekod Baja
+                </h3>
+                <button 
+                  onClick={() => !isEditing && setEditEntry(null)}
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveEdit} className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                    Tarikh
+                  </label>
+                  <input
+                    type="date"
+                    value={editEntry.entry_date?.split('T')[0] || ''}
+                    onChange={e => setEditEntry({...editEntry, entry_date: e.target.value})}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                      Blok
+                    </label>
+                    <input
+                      type="number"
+                      value={editEntry.blok_code || ''}
+                      onChange={e => setEditEntry({...editEntry, blok_code: e.target.value})}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                      Pusingan
+                    </label>
+                    <select
+                      value={editEntry.pus || 1}
+                      onChange={e => setEditEntry({...editEntry, pus: Number(e.target.value)})}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500"
+                    >
+                      <option value={1}>PUS 1</option>
+                      <option value={2}>PUS 2</option>
+                      <option value={3}>PUS 3</option>
+                      <option value={4}>PUS 4</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                    Jenis Baja
+                  </label>
+                  <select
+                    value={editEntry.fertilizer_type || ''}
+                    onChange={e => setEditEntry({...editEntry, fertilizer_type: e.target.value})}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500"
+                    required
+                  >
+                    <option value="">Pilih Baja</option>
+                    {inventory && inventory.map((inv: any) => (
+                      <option key={inv.id} value={inv.name}>{inv.name}</option>
+                    ))}
+                    {inventory && !inventory.some((i: any) => i.name === editEntry.fertilizer_type) && editEntry.fertilizer_type && (
+                       <option value={editEntry.fertilizer_type}>{editEntry.fertilizer_type} (Tidak Aktif)</option>
+                    )}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                      Jumlah Beg
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editEntry.total_beg_completed || 0}
+                      onChange={e => setEditEntry({...editEntry, total_beg_completed: e.target.value})}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                      Pekerja (Opsional)
+                    </label>
+                    <input
+                      type="number"
+                      value={editEntry.workers_count || ''}
+                      onChange={e => setEditEntry({...editEntry, workers_count: e.target.value})}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                    Nota (Opsional)
+                  </label>
+                  <textarea
+                    value={editEntry.note || ''}
+                    onChange={e => setEditEntry({...editEntry, note: e.target.value})}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 h-20"
+                    placeholder="Catatan tambahan..."
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isEditing}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-widest py-4 rounded-xl transition-all disabled:opacity-50 flex justify-center items-center gap-2 mt-4 shadow-lg shadow-emerald-500/20"
+                >
+                  {isEditing ? <Loader2 size={14} className="animate-spin" /> : <Edit3 size={14} />}
+                  <span>Simpan Perubahan</span>
+                </button>
+              </form>
             </motion.div>
           </div>
         )}
