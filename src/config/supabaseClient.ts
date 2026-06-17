@@ -11,11 +11,15 @@ const getEnvVars = () => {
   }
 
   // 1. Next.js App Router / Vercel (Pilihan Utama)
-  if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    return {
-      url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    };
+  if (typeof process !== 'undefined' && process.env) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || (process.env as any).SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || (process.env as any).SUPABASE_ANON_KEY;
+    if (url) {
+      return {
+        url,
+        key: key || ''
+      };
+    }
   }
   
   // 2. Vite / Local (Fallback)

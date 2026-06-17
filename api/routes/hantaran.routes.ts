@@ -187,34 +187,17 @@ router.get("/hantaran", async (req, res) => {
 
     const supabase = getSupabase();
     if (supabase) {
-      let allRecords: any[] = [];
-      let start = 0;
-      const step = 1000;
-      let hasMore = true;
+      const { data: records, error } = await supabase
+        .from('hantaran_hasil')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      while (hasMore) {
-        const { data: records, error } = await supabase
-          .from('hantaran_hasil')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .range(start, start + step - 1);
-
-        if (error) {
-          console.error("Supabase Fetch Error:", error);
-          return res.status(500).json({ error: "Gagal mengambil data dari pangkalan data." });
-        }
-
-        if (records && records.length > 0) {
-          allRecords = allRecords.concat(records);
-          start += step;
-          if (records.length < step) {
-             hasMore = false;
-          }
-        } else {
-          hasMore = false;
-        }
+      if (error) {
+        console.error("Supabase Fetch Error:", error);
+        return res.status(500).json({ error: "Gagal mengambil data dari pangkalan data." });
       }
 
+      const allRecords = records || [];
       console.log(`Fetched ${allRecords.length} records from hantaran_hasil and storing in cache`);
       hantaranCache = allRecords;
       res.json(allRecords);
@@ -480,8 +463,17 @@ router.delete("/hantaran/:no_resit", async (req, res) => {
 });
 
 router.get("/config-check", (req, res) => {
+  const isSupabaseConfigured = !!(
+    process.env.VITE_SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_URL
+  ) && !!(
+    process.env.VITE_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY
+  );
   res.json({
-    supabase: !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+    supabase: isSupabaseConfigured,
     googleSheets: false,
     env: process.env.NODE_ENV || 'development'
   });
