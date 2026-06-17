@@ -1,14 +1,31 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
+
+function getUUID(): string {
+  if (typeof crypto !== 'undefined') {
+    if (typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    if (typeof crypto.randomBytes === 'function') {
+      return crypto.randomBytes(16).toString('hex');
+    }
+  }
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
 
 let DATA_DIR = path.join(process.cwd(), 'data');
 
-if (process.env.VERCEL) {
+if (process.env.VERCEL || process.env.NOW_REGION) {
   DATA_DIR = '/tmp'; // Use /tmp for serverless environments
 }
 
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+} catch (err) {
+  console.warn("Could not create local data directory, running in-memory or readonly fallback:", err);
 }
 
 let HANTARAN_FILE = path.join(DATA_DIR, 'hantaran.json');
@@ -52,12 +69,12 @@ export function getInitialSeedData() {
     const luas = blok === "LF" ? 173.1 : 20.0;
     
     // PUS 1
-    seed.push({ id: crypto.randomUUID(), blok, luas, pusingan: 1, jenis: "BULATAN & LORONG", tarikh_mula: "2026-05-01", tarikh_siap: null, hek_siap: 0, workers_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
-    seed.push({ id: crypto.randomUUID(), blok, luas, pusingan: 1, jenis: "L. ANGIN / GAJAH / SEMPADAN", tarikh_mula: "2026-05-01", tarikh_siap: null, hek_siap: 0, workers_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+    seed.push({ id: getUUID(), blok, luas, pusingan: 1, jenis: "BULATAN & LORONG", tarikh_mula: "2026-05-01", tarikh_siap: null, hek_siap: 0, workers_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+    seed.push({ id: getUUID(), blok, luas, pusingan: 1, jenis: "L. ANGIN / GAJAH / SEMPADAN", tarikh_mula: "2026-05-01", tarikh_siap: null, hek_siap: 0, workers_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
 
     // PUS 2
-    seed.push({ id: crypto.randomUUID(), blok, luas, pusingan: 2, jenis: "BULATAN & LORONG", tarikh_mula: "2026-08-01", tarikh_siap: null, hek_siap: 0, workers_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
-    seed.push({ id: crypto.randomUUID(), blok, luas, pusingan: 2, jenis: "L. ANGIN / GAJAH / SEMPADAN", tarikh_mula: "2026-08-01", tarikh_siap: null, hek_siap: 0, workers_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+    seed.push({ id: getUUID(), blok, luas, pusingan: 2, jenis: "BULATAN & LORONG", tarikh_mula: "2026-08-01", tarikh_siap: null, hek_siap: 0, workers_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+    seed.push({ id: getUUID(), blok, luas, pusingan: 2, jenis: "L. ANGIN / GAJAH / SEMPADAN", tarikh_mula: "2026-08-01", tarikh_siap: null, hek_siap: 0, workers_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
   });
   return seed;
 }
@@ -114,8 +131,8 @@ export function getLocalMerumputInventory() {
     }
   }
   const defaultInv = [
-    { id: crypto.randomUUID(), name: "GLYPHOSATE 41%", quantity: 0, unit: "LITER", type: "RACUN" },
-    { id: crypto.randomUUID(), name: "METSULFURON", quantity: 0, unit: "KG", type: "RACUN" }
+    { id: getUUID(), name: "GLYPHOSATE 41%", quantity: 0, unit: "LITER", type: "RACUN" },
+    { id: getUUID(), name: "METSULFURON", quantity: 0, unit: "KG", type: "RACUN" }
   ];
   saveLocalMerumputInventory(defaultInv);
   return defaultInv;

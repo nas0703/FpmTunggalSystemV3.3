@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 
+  (typeof window !== 'undefined' && (window as any).__SUPABASE_URL__) ||
   (typeof process !== 'undefined' ? process.env.VITE_SUPABASE_URL : undefined) ||
 // @ts-ignore
   import.meta.env.VITE_SUPABASE_URL || 
@@ -13,6 +14,7 @@ const supabaseUrl =
   '';
 
 const supabaseAnonKey = 
+  (typeof window !== 'undefined' && (window as any).__SUPABASE_ANON_KEY__) ||
   (typeof process !== 'undefined' ? process.env.VITE_SUPABASE_ANON_KEY : undefined) ||
 // @ts-ignore
   import.meta.env.VITE_SUPABASE_ANON_KEY || 

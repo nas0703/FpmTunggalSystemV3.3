@@ -33,6 +33,14 @@ apiRouter.use("/pruning", pruningRoutes);
 apiRouter.use("/", merumputRoutes);
 apiRouter.use("/", hasilRoutes);
 
+apiRouter.get("/supabase-config.js", (req, res) => {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "";
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
+  
+  res.setHeader('Content-Type', 'application/javascript');
+  res.send(`window.__SUPABASE_URL__ = ${JSON.stringify(supabaseUrl)}; window.__SUPABASE_ANON_KEY__ = ${JSON.stringify(supabaseAnonKey)};`);
+});
+
 apiRouter.get("/debug-db", async (req, res) => {
   try {
     const supabase = getSupabase();
