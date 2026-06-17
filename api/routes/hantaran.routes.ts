@@ -267,7 +267,7 @@ router.get("/annual-yield", async (req, res) => {
         .order('year', { ascending: true });
 
       if (error) {
-        if (error.code === '42P01' || error.message?.includes('schema cache')) return res.json([]);
+        if (isMissingTableError(error)) return res.json([]);
         throw error;
       }
       res.json(data);
@@ -290,7 +290,7 @@ router.get("/block-annual-yields", async (req, res) => {
         .order('year', { ascending: true });
 
       if (error) {
-        if (error.code === '42P01' || error.message?.includes('schema cache')) return res.json([]);
+        if (isMissingTableError(error)) return res.json([]);
         throw error;
       }
       res.json(data);
@@ -484,11 +484,19 @@ router.delete("/hantaran/:no_resit", async (req, res) => {
 });
 
 router.get("/config-check", (req, res) => {
-  res.json({
-    supabase: !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-    googleSheets: false,
-    env: process.env.NODE_ENV || 'development'
-  });
+  try {
+    res.json({
+      supabase: !!getSupabase(),
+      googleSheets: false,
+      env: process.env.NODE_ENV || 'development'
+    });
+  } catch (err) {
+    res.json({
+      supabase: false,
+      googleSheets: false,
+      env: process.env.NODE_ENV || 'development'
+    });
+  }
 });
 
 router.post("/export/pptx", async (req, res) => {

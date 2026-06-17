@@ -15,7 +15,10 @@ router.get("/fertilizer/master", async (req, res) => {
       .select('*')
       .order('blok_code', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      if (isMissingTableError(error)) return res.json([]);
+      throw error;
+    }
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -49,7 +52,10 @@ router.get("/fertilizer/entries", async (req, res) => {
       .select('*')
       .order('entry_date', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      if (isMissingTableError(error)) return res.json([]);
+      throw error;
+    }
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -299,7 +305,10 @@ router.get("/fertilizer/inventory", async (req, res) => {
       .select('*')
       .order('name', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      if (isMissingTableError(error)) return res.json([]);
+      throw error;
+    }
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -348,7 +357,10 @@ router.get("/fertilizer/inventory/transactions", async (req, res) => {
       .order('created_at', { ascending: false })
       .limit(100);
 
-    if (error) throw error;
+    if (error) {
+      if (isMissingTableError(error)) return res.json([]);
+      throw error;
+    }
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
