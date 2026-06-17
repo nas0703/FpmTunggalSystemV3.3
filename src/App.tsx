@@ -13,6 +13,7 @@ import {
 } from "motion/react";
 import { parseReceipt } from "./utils/ocrParser";
 import { supabase } from "./services/supabaseClient";
+import { diagnoseSupabaseConnection } from "./services/supabaseDiagnostics";
 import { HISTORICAL_BLOCK_YIELDS } from "./utils/historicalYieldData";
 import {
   ScanLine,
@@ -210,6 +211,7 @@ export default function App() {
         const { data, error } = await supabase.from('hujan_rekod').select('*');
         if (error) {
            console.log("No hujan_rekod table found or error fetching:", error.message);
+           await diagnoseSupabaseConnection();
            return;
         }
         
@@ -256,6 +258,7 @@ export default function App() {
         }
       } catch (err) {
         console.error("Error connecting to supabase for hujan:", err);
+        await diagnoseSupabaseConnection();
       }
     };
 
