@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import crypto from 'crypto';
 
 let DATA_DIR = path.join(process.cwd(), 'data');
 
@@ -8,20 +7,8 @@ if (process.env.VERCEL) {
   DATA_DIR = '/tmp'; // Use /tmp for serverless environments
 }
 
-try {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-} catch (e) {
-  console.warn("Failed to create/access DATA_DIR: " + DATA_DIR + ", falling back to /tmp", e);
-  DATA_DIR = '/tmp';
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-  } catch (err) {
-    console.error("Critical: Failed to access/create /tmp directory:", err);
-  }
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
 let HANTARAN_FILE = path.join(DATA_DIR, 'hantaran.json');

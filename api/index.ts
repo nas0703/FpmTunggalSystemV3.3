@@ -56,9 +56,9 @@ app.use('/api', apiRouter);
 // Additionally, allow base path for standard Express deployment / tests
 app.use('/', apiRouter);
 
-// Catch-all scoped strictly to /api routes to prevent intercepting frontend
-app.use('/api/*', (req, res) => {
-  res.status(404).json({ error: 'API Route not found: ' + req.originalUrl, path: req.path });
+// Catch-all to prevent timeouts
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Route not found: ' + req.url, path: req.path });
 });
 
 export default app;

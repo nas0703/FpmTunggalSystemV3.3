@@ -14,7 +14,7 @@ router.get("/hasil/abw", async (req, res) => {
     const { data, error } = await supabase.from('hasil_abw_history').select('*');
     
     if (error) {
-      if (isMissingTableError(error)) {
+      if (error.code === '42P01') {
          // Table does not exist yet! This is a soft fallback to empty data
          return res.json({ abwHistory: {}, feldaAbwHistory: {} });
       }

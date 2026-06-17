@@ -159,61 +159,53 @@ export const MerumputModule: React.FC<MerumputModuleProps> = ({ isDarkMode, onSh
     });
   });
 
-  // Helper for API calls with automatic retry on temporary failures
-  const safeFetch = async (url: string, options?: RequestInit, retries = 3): Promise<any> => {
-    try {
-      const res = await fetch(url, options);
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.message || `Ralat pelayan (${res.status})`);
-      }
-      return await res.json();
-    } catch (e: any) {
-      if (retries > 0 && (e.name === 'TypeError' || e.message?.toLowerCase().includes('fetch'))) {
-        console.warn(`Fetch failed for ${url}, retrying... (${retries} left)`, e);
-        await new Promise((r) => setTimeout(r, 1000));
-        return safeFetch(url, options, retries - 1);
-      }
-      throw e;
-    }
-  };
-
   const fetchWeedingData = async () => {
     try {
       setLoading(true);
-      const [progData, chemData, txData] = await Promise.all([
-        safeFetch('/api/merumput/progress'),
-        safeFetch('/api/merumput/inventory'),
-        safeFetch('/api/merumput/inventory/transactions').catch(() => [])
+      const [progRes, chemRes, txRes] = await Promise.all([
+        fetch('/api/merumput/progress'),
+        fetch('/api/merumput/inventory'),
+        fetch('/api/merumput/inventory/transactions').catch(() => null)
       ]);
  
-      setChemicals(chemData || []);
-      setTransactions(txData || []);
+      if (progRes.ok && chemRes.ok) {
+        let progData = await progRes.json();
+        const chemData = await chemRes.json();
+        
+        setChemicals(chemData);
+        if (txRes && txRes.ok) {
+          const txData = await txRes.json();
+          setTransactions(txData);
+        }
  
-      if (progData && progData.length > 0) {
-        // Robust entry check: If dataset is incomplete, or uses invalid types
-        const hasInvalidTypes = progData.some((p: any) => p.jenis !== 'BULATAN & LORONG' && p.jenis !== 'DADA (R&S)');
+        if (progData && progData.length > 0) {
+          // Robust entry check: If dataset is incomplete, or uses invalid types
+          const hasInvalidTypes = progData.some((p: any) => p.jenis !== 'BULATAN & LORONG' && p.jenis !== 'DADA (R&S)');
 
-        if (progData.length < 92 || hasInvalidTypes) {
-          await safeFetch('/api/merumput/progress/batch', {
+          if (progData.length < 92 || hasInvalidTypes) {
+            await fetch('/api/merumput/progress/batch', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ data: SEED_DATA })
+            });
+            const freshRes = await fetch('/api/merumput/progress');
+            if (freshRes.ok) {
+              progData = await freshRes.json();
+            }
+          }
+          setData(progData);
+        } else {
+          // Empty DB: Seed fully initial entries
+          await fetch('/api/merumput/progress/batch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ data: SEED_DATA })
           });
-          const freshData = await safeFetch('/api/merumput/progress');
-          setData(freshData);
-        } else {
-          setData(progData);
+          const freshRes = await fetch('/api/merumput/progress');
+          if (freshRes.ok) {
+            setData(await freshRes.json());
+          }
         }
-      } else {
-        // Empty DB: Seed fully initial entries
-        await safeFetch('/api/merumput/progress/batch', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: SEED_DATA })
-        });
-        const freshData = await safeFetch('/api/merumput/progress');
-        setData(freshData);
       }
     } catch (e) {
       console.error("Gagal mendapatkan data merumput:", e);
@@ -335,7 +327,7 @@ export const MerumputModule: React.FC<MerumputModuleProps> = ({ isDarkMode, onSh
       });
 
       if (newRecords.length > 0) {
-        await safeFetch('/api/merumput/progress/batch', {
+        await fetch('/api/merumput/progress/batch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ data: newRecords })
@@ -365,14 +357,18 @@ export const MerumputModule: React.FC<MerumputModuleProps> = ({ isDarkMode, onSh
         tarikh_mula: new Date().toISOString().split('T')[0]
       }));
 
-      await safeFetch('/api/merumput/progress/batch', {
+      const res = await fetch('/api/merumput/progress/batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: resetSeed })
       });
 
-      onShowToast('success', 'Berjaya mengeset semula data kemajuan merumput estet.');
-      fetchWeedingData();
+      if (res.ok) {
+        onShowToast('success', 'Berjaya mengeset semula data kemajuan merumput estet.');
+        fetchWeedingData();
+      } else {
+        throw new Error('Gagal mengeset semula data.');
+      }
     } catch (e: any) {
       onShowToast('error', e.message);
     } finally {
@@ -391,15 +387,20 @@ export const MerumputModule: React.FC<MerumputModuleProps> = ({ isDarkMode, onSh
         tarikh_siap: (selectedRecord.hek_siap || 0) >= (selectedRecord.luas || 0) ? selectedRecord.tarikh_mula : undefined
       };
 
-      await safeFetch('/api/merumput/progress', {
+      const res = await fetch('/api/merumput/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
-      onShowToast('success', `Rekod Blok ${selectedRecord.blok} berjaya dikemas kini.`);
-      setShowEditModal(false);
-      fetchWeedingData();
+      if (res.ok) {
+        onShowToast('success', `Rekod Blok ${selectedRecord.blok} berjaya dikemas kini.`);
+        setShowEditModal(false);
+        fetchWeedingData();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Gagal menyimpan rekod');
+      }
     } catch (error: any) {
       onShowToast('error', error.message);
     } finally {

@@ -201,10 +201,6 @@ router.get("/hantaran", async (req, res) => {
 
         if (error) {
           console.error("Supabase Fetch Error:", error);
-          if (isMissingTableError(error)) {
-            console.log("hantaran_hasil table is missing, returning empty array as fallback");
-            return res.json([]);
-          }
           return res.status(500).json({ error: "Gagal mengambil data dari pangkalan data." });
         }
 
@@ -267,7 +263,7 @@ router.get("/annual-yield", async (req, res) => {
         .order('year', { ascending: true });
 
       if (error) {
-        if (isMissingTableError(error)) return res.json([]);
+        if (error.code === '42P01' || error.message?.includes('schema cache')) return res.json([]);
         throw error;
       }
       res.json(data);
@@ -290,7 +286,7 @@ router.get("/block-annual-yields", async (req, res) => {
         .order('year', { ascending: true });
 
       if (error) {
-        if (isMissingTableError(error)) return res.json([]);
+        if (error.code === '42P01' || error.message?.includes('schema cache')) return res.json([]);
         throw error;
       }
       res.json(data);
@@ -484,19 +480,11 @@ router.delete("/hantaran/:no_resit", async (req, res) => {
 });
 
 router.get("/config-check", (req, res) => {
-  try {
-    res.json({
-      supabase: !!getSupabase(),
-      googleSheets: false,
-      env: process.env.NODE_ENV || 'development'
-    });
-  } catch (err) {
-    res.json({
-      supabase: false,
-      googleSheets: false,
-      env: process.env.NODE_ENV || 'development'
-    });
-  }
+  res.json({
+    supabase: !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+    googleSheets: false,
+    env: process.env.NODE_ENV || 'development'
+  });
 });
 
 router.post("/export/pptx", async (req, res) => {
