@@ -39,16 +39,9 @@ CREATE TABLE IF NOT EXISTS fertilizer_daily_entries (
   UNIQUE(entry_date, blok_code, pus)
 );
 
--- 3. Enable RLS
-ALTER TABLE fertilizer_master_schedule ENABLE ROW LEVEL SECURITY;
-ALTER TABLE fertilizer_daily_entries ENABLE ROW LEVEL SECURITY;
-
--- 4. Create Policies (Allow all for development)
-DROP POLICY IF EXISTS "Enable all access for master" ON fertilizer_master_schedule;
-CREATE POLICY "Enable all access for master" ON fertilizer_master_schedule FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Enable all access for entries" ON fertilizer_daily_entries;
-CREATE POLICY "Enable all access for entries" ON fertilizer_daily_entries FOR ALL USING (true) WITH CHECK (true);
+-- 3. Disable RLS
+ALTER TABLE fertilizer_master_schedule DISABLE ROW LEVEL SECURITY;
+ALTER TABLE fertilizer_daily_entries DISABLE ROW LEVEL SECURITY;
 
 -- 5. Helpful Indexes
 CREATE INDEX idx_entries_date ON fertilizer_daily_entries(entry_date);
@@ -69,12 +62,8 @@ CREATE TABLE IF NOT EXISTS hantaran_pruning (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable RLS
-ALTER TABLE hantaran_pruning ENABLE ROW LEVEL SECURITY;
-
--- Create Policies
-DROP POLICY IF EXISTS "Enable all access for pruning" ON hantaran_pruning;
-CREATE POLICY "Enable all access for pruning" ON hantaran_pruning FOR ALL USING (true) WITH CHECK (true);
+-- Disable RLS
+ALTER TABLE hantaran_pruning DISABLE ROW LEVEL SECURITY;
 
 -- 6. Monthly Targets Table
 CREATE TABLE IF NOT EXISTS monthly_targets (
@@ -87,9 +76,7 @@ CREATE TABLE IF NOT EXISTS monthly_targets (
   UNIQUE(year, category)
 );
 
-ALTER TABLE monthly_targets ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Enable all access for monthly_targets" ON monthly_targets;
-CREATE POLICY "Enable all access for monthly_targets" ON monthly_targets FOR ALL USING (true) WITH CHECK (true);
+ALTER TABLE monthly_targets DISABLE ROW LEVEL SECURITY;
 
 -- Insert seed data for 2026
 INSERT INTO monthly_targets (year, category, targets)
@@ -121,16 +108,9 @@ CREATE TABLE IF NOT EXISTS fertilizer_inventory_transactions (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable RLS
-ALTER TABLE fertilizer_inventory ENABLE ROW LEVEL SECURITY;
-ALTER TABLE fertilizer_inventory_transactions ENABLE ROW LEVEL SECURITY;
-
--- Create Policies
-DROP POLICY IF EXISTS "Enable all access for inventory" ON fertilizer_inventory;
-CREATE POLICY "Enable all access for inventory" ON fertilizer_inventory FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Enable all access for inventory_transactions" ON fertilizer_inventory_transactions;
-CREATE POLICY "Enable all access for inventory_transactions" ON fertilizer_inventory_transactions FOR ALL USING (true) WITH CHECK (true);
+-- Disable RLS
+ALTER TABLE fertilizer_inventory DISABLE ROW LEVEL SECURITY;
+ALTER TABLE fertilizer_inventory_transactions DISABLE ROW LEVEL SECURITY;
 
 -- Seed Initial Inventory Items
 INSERT INTO fertilizer_inventory (name, quantity, min_threshold, unit)
@@ -185,20 +165,10 @@ CREATE TABLE IF NOT EXISTS merumput_progress (
   CONSTRAINT merumput_progress_key UNIQUE (blok, pusingan, jenis)
 );
 
--- Enable RLS for merumput
-ALTER TABLE merumput_inventory ENABLE ROW LEVEL SECURITY;
-ALTER TABLE merumput_inventory_transactions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE merumput_progress ENABLE ROW LEVEL SECURITY;
-
--- Create Policies for merumput
-DROP POLICY IF EXISTS "Enable all access for merumput_inventory" ON merumput_inventory;
-CREATE POLICY "Enable all access for merumput_inventory" ON merumput_inventory FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Enable all access for merumput_inventory_transactions" ON merumput_inventory_transactions;
-CREATE POLICY "Enable all access for merumput_inventory_transactions" ON merumput_inventory_transactions FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Enable all access for merumput_progress" ON merumput_progress;
-CREATE POLICY "Enable all access for merumput_progress" ON merumput_progress FOR ALL USING (true) WITH CHECK (true);
+-- Disable RLS for merumput
+ALTER TABLE merumput_inventory DISABLE ROW LEVEL SECURITY;
+ALTER TABLE merumput_inventory_transactions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE merumput_progress DISABLE ROW LEVEL SECURITY;
 
 -- Seed Initial Merumput Inventory Items (Common Weedicide/Herbicides in Estate)
 INSERT INTO merumput_inventory (name, quantity, min_threshold, unit)
