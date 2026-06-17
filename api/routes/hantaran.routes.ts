@@ -201,6 +201,10 @@ router.get("/hantaran", async (req, res) => {
 
         if (error) {
           console.error("Supabase Fetch Error:", error);
+          if (isMissingTableError(error)) {
+            console.log("hantaran_hasil table is missing, returning empty array as fallback");
+            return res.json([]);
+          }
           return res.status(500).json({ error: "Gagal mengambil data dari pangkalan data." });
         }
 
