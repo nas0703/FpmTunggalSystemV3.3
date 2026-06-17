@@ -1,17 +1,13 @@
 import fs from 'fs';
 import path from 'path';
-import crypto from 'crypto';
 
 function getUUID(): string {
-  if (typeof crypto !== 'undefined') {
-    if (typeof crypto.randomUUID === 'function') {
-      return crypto.randomUUID();
-    }
-    if (typeof crypto.randomBytes === 'function') {
-      return crypto.randomBytes(16).toString('hex');
-    }
-  }
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  // Pure JavaScript UUID v4 generator (no crypto dependency to prevent Vercel crashes)
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
 
 let DATA_DIR = path.join(process.cwd(), 'data');
