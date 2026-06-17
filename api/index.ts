@@ -57,8 +57,12 @@ app.use('/api', apiRouter);
 app.use('/', apiRouter);
 
 // Catch-all to prevent timeouts
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found: ' + req.url, path: req.path });
+app.use('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.baseUrl.startsWith('/api')) {
+    res.status(404).json({ error: 'Route not found: ' + req.url, path: req.path });
+  } else {
+    next();
+  }
 });
 
 export default app;
