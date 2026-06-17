@@ -1,5 +1,5 @@
 import express from 'express';
-import { getSupabase, isMissingTableError } from '../db';
+import { getSupabase, isMissingTableError } from '../db.js';
 
 const router = express.Router();
 

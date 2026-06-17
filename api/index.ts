@@ -1,13 +1,13 @@
 import express from "express";
 import dotenv from 'dotenv';
 import path from 'path';
-import { getSupabase, isMissingTableError } from './db';
+import { getSupabase, isMissingTableError } from './db.js';
 
-import pruningRoutes from './routes/pruning.routes';
-import merumputRoutes from './routes/merumput.routes';
-import hasilRoutes from './routes/hasil.routes';
-import fertilizerRoutes from './routes/fertilizer.routes';
-import hantaranRoutes from './routes/hantaran.routes';
+import pruningRoutes from './routes/pruning.routes.js';
+import merumputRoutes from './routes/merumput.routes.js';
+import hasilRoutes from './routes/hasil.routes.js';
+import fertilizerRoutes from './routes/fertilizer.routes.js';
+import hantaranRoutes from './routes/hantaran.routes.js';
 
 console.log("Loading API routes from api/index.ts...");
 

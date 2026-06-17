@@ -1,6 +1,6 @@
 import express from 'express';
-import { getSupabase, isMissingTableError } from '../db';
-import { getLocalHantaran, saveLocalHantaran } from '../local';
+import { getSupabase, isMissingTableError } from '../db.js';
+import { getLocalHantaran, saveLocalHantaran } from '../local.js';
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 import express from 'express';
-import { getSupabase, isMissingTableError } from '../db';
-import { getLocalMerumputProgress, saveLocalMerumputProgress, getLocalMerumputInventory, saveLocalMerumputInventory, getLocalMerumputTransactions, saveLocalMerumputTransactions } from '../local';
+import { getSupabase, isMissingTableError } from '../db.js';
+import { getLocalMerumputProgress, saveLocalMerumputProgress, getLocalMerumputInventory, saveLocalMerumputInventory, getLocalMerumputTransactions, saveLocalMerumputTransactions } from '../local.js';
 
 const router = express.Router();
 
