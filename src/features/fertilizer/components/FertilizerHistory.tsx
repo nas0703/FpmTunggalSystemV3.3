@@ -20,6 +20,7 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
   const [inventory, setInventory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterDate, setFilterDate] = useState('');
   const [filterPus, setFilterPus] = useState<number | 'all'>('all');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleteRecordType, setDeleteRecordType] = useState<'ENTRY' | 'TRANSACTION' | null>(null);
@@ -186,7 +187,17 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
   const filteredEntries = entries.filter(e => {
     const matchesSearch = e.searchString.includes(searchTerm.toLowerCase());
     const matchesPus = filterPus === 'all' || e.pusFilter === filterPus || e.pusFilter === null;
-    return matchesSearch && matchesPus;
+    
+    // date comes from 'date: new Date(e.entry_date).toLocaleDateString('en-GB')' which is dd/mm/yyyy
+    let matchesDate = true;
+    if (filterDate) {
+      // Convert standard 'YYYY-MM-DD' input value to 'DD/MM/YYYY' for comparison
+      const [y, m, d] = filterDate.split('-');
+      const formattedFilterDate = `${d}/${m}/${y}`;
+      matchesDate = e.date === formattedFilterDate;
+    }
+
+    return matchesSearch && matchesPus && matchesDate;
   });
 
   if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-purple-500" /></div>;
@@ -206,6 +217,12 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
           />
         </div>
         <div className="flex gap-2">
+           <input 
+             type="date"
+             value={filterDate}
+             onChange={e => setFilterDate(e.target.value)}
+             className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-2 text-[10px] font-bold text-slate-800 dark:text-white"
+           />
            <select 
              value={filterPus}
              onChange={e => setFilterPus(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
@@ -248,7 +265,7 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
             </div>
             
             <div className="flex items-center gap-1">
-              { (authRole === 'fc' || authRole === 'afc' || authRole === 'fs' || authRole === 'admin') && (
+              { (authRole === 'fc' || authRole === 'afc' || authRole === 'fs' || authRole === 'admin' || authRole === 'staff') && (
                 <>
                   { entry.recordType === 'ENTRY' && (
                     <button 
