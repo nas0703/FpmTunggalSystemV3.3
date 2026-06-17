@@ -187,18 +187,37 @@ router.get("/hantaran", async (req, res) => {
 
     const supabase = getSupabase();
     if (supabase) {
-      const { data: records, error } = await supabase
-        .from('hantaran_hasil')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let allRecords: any[] = [];
+      let start = 0;
+      const limit = 1000;
+      let hasMore = true;
 
-      if (error) {
-        console.error("Supabase Fetch Error:", error);
-        return res.status(500).json({ error: "Gagal mengambil data dari pangkalan data." });
+      while (hasMore) {
+        console.log(`Fetching from Supabase range: ${start} to ${start + limit - 1}...`);
+        const { data: records, error } = await supabase
+          .from('hantaran_hasil')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .range(start, start + limit - 1);
+
+        if (error) {
+          console.error("Supabase Fetch Error:", error);
+          return res.status(500).json({ error: "Gagal mengambil data dari pangkalan data." });
+        }
+
+        if (records && records.length > 0) {
+          allRecords = allRecords.concat(records);
+          if (records.length < limit) {
+            hasMore = false;
+          } else {
+            start += limit;
+          }
+        } else {
+          hasMore = false;
+        }
       }
 
-      const allRecords = records || [];
-      console.log(`Fetched ${allRecords.length} records from hantaran_hasil and storing in cache`);
+      console.log(`Fetched ${allRecords.length} records from hantaran_hasil (paginated) and storing in cache`);
       hantaranCache = allRecords;
       res.json(allRecords);
     } else {
