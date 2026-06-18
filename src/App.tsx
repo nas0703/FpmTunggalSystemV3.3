@@ -1054,8 +1054,12 @@ export default function App() {
         }
         
         if (status === "CHANNEL_ERROR") {
-          console.error("❌ Supabase subscription error:", err);
-          // Don't show toast immediately to avoid spamming if it retries
+          const errMsg = err?.message || String(err || "");
+          if (errMsg.includes("socket closed") || errMsg.includes("1000")) {
+            console.log("ℹ️ Supabase real-time socket closed normally (1000). Connection handled.");
+          } else {
+            console.warn("⚠️ Supabase subscription warning/error:", errMsg);
+          }
         }
         
         if (status === "TIMED_OUT") {
