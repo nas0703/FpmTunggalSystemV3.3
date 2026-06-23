@@ -112,13 +112,17 @@ export const AbwView: React.FC = () => {
     const fetchAbwData = async () => {
       try {
         const res = await fetch("/api/hasil/abw");
-        const json = await res.json();
-        
-        if (json.abwHistory && Object.keys(json.abwHistory).length > 0) {
-           setAbwHistory(json.abwHistory);
-        }
-        if (json.feldaAbwHistory && Object.keys(json.feldaAbwHistory).length > 0) {
-           setFeldaAbwHistory(json.feldaAbwHistory);
+        const isJson = res.headers.get("content-type")?.includes("application/json");
+        if (res.ok && isJson) {
+          const json = await res.json();
+          if (json.abwHistory && Object.keys(json.abwHistory).length > 0) {
+             setAbwHistory(json.abwHistory);
+          }
+          if (json.feldaAbwHistory && Object.keys(json.feldaAbwHistory).length > 0) {
+             setFeldaAbwHistory(json.feldaAbwHistory);
+          }
+        } else {
+          console.warn(`ABW API returned non-JSON response or error (${res.status})`);
         }
       } catch (err) {
         console.error("Failed to fetch ABW history from cloud. Using local state.", err);

@@ -100,13 +100,17 @@ export const BbcView: React.FC = () => {
     const fetchBbcData = async () => {
       try {
         const res = await fetch("/api/hasil/bbc");
-        const json = await res.json();
-        
-        if (json.bbcHistory && Object.keys(json.bbcHistory).length > 0) {
-           setBbcHistory(json.bbcHistory);
-        }
-        if (json.feldaBbcHistory && Object.keys(json.feldaBbcHistory).length > 0) {
-           setFeldaBbcHistory(json.feldaBbcHistory);
+        const isJson = res.headers.get("content-type")?.includes("application/json");
+        if (res.ok && isJson) {
+          const json = await res.json();
+          if (json.bbcHistory && Object.keys(json.bbcHistory).length > 0) {
+             setBbcHistory(json.bbcHistory);
+          }
+          if (json.feldaBbcHistory && Object.keys(json.feldaBbcHistory).length > 0) {
+             setFeldaBbcHistory(json.feldaBbcHistory);
+          }
+        } else {
+          console.warn(`BBC API returned non-JSON response or error (${res.status})`);
         }
       } catch (err) {
         console.error("Failed to fetch BBC history from cloud. Using local state.", err);

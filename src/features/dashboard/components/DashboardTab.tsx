@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import {
-  LayoutDashboard, Loader2, Calendar, Target, TrendingUp, TrendingDown,
+  LayoutDashboard, Loader2, Calendar, Target, TrendingUp, TrendingDown, ClipboardCheck,
   FileSpreadsheet, BarChart3, Package, CloudRain, ShieldCheck, AlertCircle,
   AlertTriangle, Play, ChevronRight, Share, FileText, ArrowRight, ZoomIn, ChevronDown, CircleDollarSign, Share2, Plus, ScanLine, Trophy
 } from 'lucide-react';
@@ -19,6 +19,7 @@ import { AbwView } from '../../hasil/components/AbwView';
 import { BbcView } from '../../hasil/components/BbcView';
 import { LaporanHujanView } from '../../hasil/components/LaporanHujanView';
 import { LaporanView } from '../../hasil/components/LaporanView';
+import { LaporanBacklogView } from '../../hasil/components/LaporanBacklogView';
 import { HasilBulananTable } from './HasilBulananTable';
 import { ReportSummarySection } from './ReportSummarySection';
 import { FloatingInput } from '../../../components/ui/FloatingInput';
@@ -142,7 +143,8 @@ export const DashboardTab = (props: any) => {
                                 { id: 'analitik', label: 'Analitik', icon: BarChart3 },
                                 { id: 'abw', label: 'ABW', icon: TrendingUp },
                                 { id: 'bbc', label: 'BBC', icon: Package },
-                                { id: 'hujan', label: 'Laporan Hujan', icon: CloudRain }
+                                { id: 'hujan', label: 'Laporan Hujan', icon: CloudRain },
+                                { id: 'backlog', label: 'Laporan Backlog', icon: ClipboardCheck }
                               ].map((tab) => (
                                 <button
                                   key={tab.id}
@@ -168,6 +170,8 @@ export const DashboardTab = (props: any) => {
       {reportType === "hasil" && activeHasilTab === 'bbc' && <BbcView />}
 
       {reportType === "hasil" && activeHasilTab === 'hujan' && <LaporanHujanView data={hujanData} />}
+      
+      {reportType === "hasil" && activeHasilTab === 'backlog' && <LaporanBacklogView />}
       
                         {(reportType !== "hasil" || activeHasilTab === 'kpi') && (
                           <div className="relative pt-3">

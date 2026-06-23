@@ -14,7 +14,7 @@ router.get("/hasil/abw", async (req, res) => {
     const { data, error } = await supabase.from('hasil_abw_history').select('*');
     
     if (error) {
-      if (error.code === '42P01') {
+      if (isMissingTableError(error)) {
          // Table does not exist yet! This is a soft fallback to empty data
          return res.json({ abwHistory: {}, feldaAbwHistory: {} });
       }
@@ -46,13 +46,13 @@ router.post("/hasil/abw", async (req, res) => {
     if (abwHistory) {
       const { error: err1 } = await supabase.from('hasil_abw_history')
                                             .upsert({ category: 'abwHistory', data: abwHistory, updated_at: new Date().toISOString() }, { onConflict: 'category' });
-      if (err1 && err1.code !== '42P01') console.error("Error upserting abwHistory:", err1);
+      if (err1 && !isMissingTableError(err1)) console.error("Error upserting abwHistory:", err1);
     }
     
     if (feldaAbwHistory) {
       const { error: err2 } = await supabase.from('hasil_abw_history')
                                             .upsert({ category: 'feldaAbwHistory', data: feldaAbwHistory, updated_at: new Date().toISOString() }, { onConflict: 'category' });
-      if (err2 && err2.code !== '42P01') console.error("Error upserting feldaAbwHistory:", err2);
+      if (err2 && !isMissingTableError(err2)) console.error("Error upserting feldaAbwHistory:", err2);
     }
 
     res.json({ success: true });
@@ -73,7 +73,7 @@ router.get("/hasil/bbc", async (req, res) => {
     let { data, error } = await supabase.from('hasil_bbc_history').select('*');
 
     if (error) {
-      if (error.code === '42P01') {
+      if (isMissingTableError(error)) {
          // Table doesn't exist yet! Soft fallback to empty data
          return res.json({ bbcHistory: {}, feldaBbcHistory: {} });
       }
@@ -107,7 +107,7 @@ router.post("/hasil/bbc", async (req, res) => {
       let { error: err1 } = await supabase.from('hasil_bbc_history')
                                             .upsert({ category: 'bbcHistory', data: bbcHistory, updated_at: new Date().toISOString() }, { onConflict: 'category' });
       if (err1) {
-        if (err1.code === '42P01') {
+        if (isMissingTableError(err1)) {
           console.warn("hasil_bbc_history table does not exist. Run create_bbc_table.sql first.");
         } else {
           console.error("Error upserting bbcHistory to primary:", err1);
@@ -119,7 +119,7 @@ router.post("/hasil/bbc", async (req, res) => {
       let { error: err2 } = await supabase.from('hasil_bbc_history')
                                             .upsert({ category: 'feldaBbcHistory', data: feldaBbcHistory, updated_at: new Date().toISOString() }, { onConflict: 'category' });
       if (err2) {
-        if (err2.code === '42P01') {
+        if (isMissingTableError(err2)) {
           console.warn("hasil_bbc_history table does not exist. Run create_bbc_table.sql first.");
         } else {
           console.error("Error upserting feldaBbcHistory to primary:", err2);
@@ -130,6 +130,62 @@ router.post("/hasil/bbc", async (req, res) => {
     res.json({ success: true });
   } catch (err: any) {
     console.error("POST /api/hasil/bbc error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- HASIL BACKLOG HISTORY ENDPOINTS ---
+
+router.get("/hasil/backlog", async (req, res) => {
+  try {
+    const supabase = getSupabase();
+    if (!supabase) return res.status(500).json({ error: "Supabase not configured" });
+
+    let { data, error } = await supabase.from('hasil_backlog_history').select('*');
+
+    if (error) {
+      if (isMissingTableError(error)) {
+         return res.json({ backlogHistory: {} });
+      }
+      throw error;
+    }
+
+    const payload = { backlogHistory: {} };
+    if (data) {
+      data.forEach(row => {
+        if (row.category === 'backlogHistory') payload.backlogHistory = row.data;
+      });
+    }
+
+    res.json(payload);
+  } catch (err: any) {
+    console.error("GET /api/hasil/backlog error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/hasil/backlog", async (req, res) => {
+  try {
+    const supabase = getSupabase();
+    if (!supabase) return res.status(500).json({ error: "Supabase not configured" });
+
+    const { backlogHistory } = req.body;
+
+    if (backlogHistory) {
+      let { error: err1 } = await supabase.from('hasil_backlog_history')
+                                            .upsert({ category: 'backlogHistory', data: backlogHistory, updated_at: new Date().toISOString() }, { onConflict: 'category' });
+      if (err1) {
+        if (isMissingTableError(err1)) {
+          console.warn("hasil_backlog_history table does not exist. Run create_backlog_table.sql first.");
+        } else {
+          console.error("Error upserting backlogHistory to primary:", err1);
+        }
+      }
+    }
+
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error("POST /api/hasil/backlog error:", err);
     res.status(500).json({ error: err.message });
   }
 });
