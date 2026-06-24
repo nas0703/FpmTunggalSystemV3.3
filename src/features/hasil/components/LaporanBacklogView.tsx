@@ -110,14 +110,6 @@ export const LaporanBacklogView: React.FC = () => {
     custom_abw: 0
   });
 
-  // Intro feature guide state
-  const [showBacklogIntro, setShowBacklogIntro] = useState<boolean>(false);
-
-  const handleCloseIntro = () => {
-    localStorage.setItem("fpm_backlog_intro_dismissed_v2", "true");
-    setShowBacklogIntro(false);
-  };
-
   // Alert dismiss helper
   useEffect(() => {
     if (toastMessage) {
@@ -638,21 +630,12 @@ export const LaporanBacklogView: React.FC = () => {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-600 dark:text-green-400 rounded-xl border border-green-500/20 transition-all flex items-center gap-1.5 font-black text-[10px] uppercase tracking-wider inline-flex"
+            className="p-2 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] rounded-xl border border-[#25D366]/20 transition-all flex items-center gap-1.5 font-black text-[10px] uppercase tracking-wider inline-flex"
             title="Kongsi Ringkasan ke WhatsApp"
           >
-            <MessageCircle size={13} className="text-green-500" />
-            <span>Kongsi WhatsApp</span>
+            <MessageCircle size={14} />
+            <span className="hidden sm:inline">WhatsApp</span>
           </a>
-
-          <button
-            onClick={() => setShowBacklogIntro(true)}
-            className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20 transition-all flex items-center gap-1.5 font-black text-[10px] uppercase tracking-wider"
-            title="Info Ciri Baharu Backlog"
-          >
-            <Info size={13} />
-            <span>Info Ciri Baharu</span>
-          </button>
           
           {isSyncing && (
             <span className="px-2.5 py-1 text-[8px] font-black uppercase rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse">
@@ -1596,105 +1579,6 @@ export const LaporanBacklogView: React.FC = () => {
           </div>
         )}
 
-        {/* POPUP INFO CIRI BAHARU BACKLOG */}
-        {showBacklogIntro && (
-          <div key="backlog-intro-modal" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              transition={{ type: "spring", duration: 0.5 }}
-              className="bg-white dark:bg-slate-900 rounded-[28px] border border-slate-100 dark:border-slate-800 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col"
-            >
-              {/* Header Gradient */}
-              <div className="p-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent border-b border-slate-100 dark:border-slate-800 flex justify-between items-start gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl">
-                    <ClipboardCheck size={20} className="animate-pulse" />
-                  </div>
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-emerald-500 text-white">
-                      KEMAS KINI BAHARU
-                    </span>
-                    <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-wide mt-1">
-                      Ciri Baharu Laporan Backlog
-                    </h3>
-                  </div>
-                </div>
-                <button
-                  onClick={handleCloseIntro}
-                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              {/* Content Body */}
-              <div className="p-6 space-y-5 text-slate-600 dark:text-slate-300 max-h-[70vh] overflow-y-auto">
-                <p className="text-xs leading-relaxed font-semibold">
-                  Sistem kini dikemaskini dengan ciri baharu untuk membolehkan pengurusan dan pemantauan tandan backlog di ladang dengan lebih tepat dan selamat.
-                </p>
-
-                <div className="space-y-4">
-                  {/* Feature 1 */}
-                  <div className="flex gap-3 items-start p-3.5 bg-rose-500/5 rounded-2xl border border-rose-500/10">
-                    <div className="p-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg mt-0.5">
-                      <span className="font-bold text-xs">01</span>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-wide">
-                        1. Backlog - Tandan (Sebelum ini: BACKLOG (TBS))
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                        Data ini merujuk kepada <strong>bilangan tandan</strong> buah kelapa sawit yang masih tertinggal/belum diangkut di dalam kawasan blok. Klik mana-mana baris blok untuk mengemas kini bilangan tandan backlog dengan mudah.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Feature 2 */}
-                  <div className="flex gap-3 items-start p-3.5 bg-amber-500/5 rounded-2xl border border-amber-500/10">
-                    <div className="p-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg mt-0.5">
-                      <span className="font-bold text-xs">02</span>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-wide">
-                        2. Backlog - Tan (Sebelum ini: ANGGARAN TAN LDK)
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                        Sistem mengira <strong>anggaran berat backlog dalam Tan</strong> secara automatik berdasarkan purata berat tandan terkini (ABW) blok tersebut bagi tarikh laporan yang dipilih. Tiada pengiraan manual diperlukan lagi!
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Feature 3 */}
-                  <div className="flex gap-3 items-start p-3.5 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
-                    <div className="p-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg mt-0.5">
-                      <span className="font-bold text-xs">03</span>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-wide">
-                        3. Integrasi Cloud Supabase
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                        Semua perubahan data anda akan <strong>disimpan secara automatik</strong> dan disegerakkan dengan pangkalan data Supabase secara real-time. Data tidak akan hilang walaupun anda menukar peranti atau melayari dari pelayar lain.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Footer */}
-              <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex justify-end">
-                <button
-                  onClick={handleCloseIntro}
-                  className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] uppercase font-black px-6 py-3 rounded-xl transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5 active:scale-95"
-                >
-                  <Check size={14} /> Faham & Mula Guna
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
       </AnimatePresence>
     </div>
   );
