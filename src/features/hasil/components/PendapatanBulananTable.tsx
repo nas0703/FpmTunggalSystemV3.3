@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { MASTER_DATA } from "../../../utils/constants";
 import { Printer, Download, Share2, ZoomIn, ZoomOut, MoveHorizontal } from "lucide-react";
 import * as ExcelJS from "exceljs";

@@ -113,6 +113,7 @@ import { BottomNav } from "./layout/BottomNav";
 import { LoginScreen } from "./features/auth/components/LoginScreen";
 import { SettingsModal } from "./components/common/modals/SettingsModal";
 import { NewFeaturesModal } from "./components/common/modals/NewFeaturesModal";
+import { BacklogLoginModal } from "./components/common/modals/BacklogLoginModal";
 import { DeleteRecordModal } from "./components/common/modals/DeleteRecordModal";
 import { ExportModal } from "./components/common/modals/ExportModal";
 import { RCReportModal } from "./components/common/modals/RCReportModal";
@@ -283,6 +284,21 @@ export default function App() {
       setActiveTab(role === "staff" ? "scan" : "dashboard");
       setShowUserMenu(false);
 
+      // Paparkan pop up backlog selepas staff login app
+      const backlogSessionKey = "backlog_app_session_modal_v2_premium";
+      const backlogCountKey = "backlog_login_modal_count_v2_premium";
+      const hasBacklogShownThisSession = sessionStorage.getItem(backlogSessionKey) === "true";
+      if (!hasBacklogShownThisSession) {
+        const storedCount = localStorage.getItem(backlogCountKey);
+        const shownCount = storedCount ? parseInt(storedCount, 10) : 0;
+        if (shownCount < 7) {
+          setShowBacklogLoginModal(true);
+          localStorage.setItem(backlogCountKey, String(shownCount + 1));
+          sessionStorage.setItem(backlogSessionKey, "true");
+          return; // Mengelakkan overlay berganda, utamakan paparan backlog
+        }
+      }
+
       // Paparkan pop up pemberitahuan module baru merumput di default utama screen sebanyak 7 kali login
       const sessionKey = "merumput_app_session_modal_v34_premium";
       const countKey = "merumput_login_modal_count_v34_premium";
@@ -323,6 +339,7 @@ export default function App() {
 
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
+  const [showBacklogLoginModal, setShowBacklogLoginModal] = useState(false);
   const [historyFilterDate, setHistoryFilterDate] = useState<string>("");
 
   // Recent Updates / What's New Data
@@ -4390,6 +4407,11 @@ PERATURAN TEKNIKAL:
         isOpen={showNewFeaturesModal}
         onClose={() => setShowNewFeaturesModal(false)}
         recentUpdates={recentUpdates}
+      />
+
+      <BacklogLoginModal
+        isOpen={showBacklogLoginModal}
+        onClose={() => setShowBacklogLoginModal(false)}
       />
 
       <SettingsModal

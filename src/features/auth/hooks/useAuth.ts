@@ -51,6 +51,7 @@ export function useAuth({ onLoginSuccess, onLogout }: UseAuthProps) {
     setPin("");
     // Padam flag sesi modal semasa logout supaya login yang baru boleh paparkan pop up
     sessionStorage.removeItem("merumput_app_session_modal_v34_premium");
+    sessionStorage.removeItem("backlog_app_session_modal_v2_premium");
     onLogout();
   }, [onLogout]);
 

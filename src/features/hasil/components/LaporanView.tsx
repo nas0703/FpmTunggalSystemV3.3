@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { FileText, ChevronDown, ClipboardCheck, Share2 } from 'lucide-react';
 import { HasilBulananTable } from '../../dashboard/components/HasilBulananTable';
 import { PendapatanBulananTable } from './PendapatanBulananTable';

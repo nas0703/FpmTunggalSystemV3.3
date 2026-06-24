@@ -1,5 +1,5 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X, DownloadCloud, LayoutDashboard, Percent, Trophy, CloudUpload, Scissors, Camera } from "lucide-react";
 
 interface NewFeaturesModalProps {
