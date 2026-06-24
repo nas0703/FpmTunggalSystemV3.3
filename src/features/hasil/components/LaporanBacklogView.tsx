@@ -70,8 +70,13 @@ const BLOCKS_CONFIG: BlockConfig[] = [
 ];
 
 export const LaporanBacklogView: React.FC = () => {
-  // Select active date (default to 2026-06-22 as in user image, or current date if out of range)
-  const [selectedDate, setSelectedDate] = useState<string>('2026-06-22');
+  // Select active date (default to current date)
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    const localToday = new Date(today.getTime() - (offset * 60 * 1000));
+    return localToday.toISOString().split('T')[0];
+  });
   
   // Backlog state: keyed by date and blockId
   const [backlogHistory, setBacklogHistory] = useState<Record<string, Record<string, BacklogRecord>>>(() => {
