@@ -106,9 +106,7 @@ export const LaporanBacklogView: React.FC = () => {
   });
 
   // Intro feature guide state
-  const [showBacklogIntro, setShowBacklogIntro] = useState<boolean>(() => {
-    return localStorage.getItem("fpm_backlog_intro_dismissed_v2") !== "true";
-  });
+  const [showBacklogIntro, setShowBacklogIntro] = useState<boolean>(false);
 
   const handleCloseIntro = () => {
     localStorage.setItem("fpm_backlog_intro_dismissed_v2", "true");
