@@ -599,9 +599,6 @@ export const LaporanBacklogView: React.FC = () => {
             <h2 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-wide">
               Laporan Tandan Backlog
             </h2>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold">
-              Kementerian / Pengurusan Tandan Di Ladang
-            </p>
           </div>
         </div>
 

@@ -486,7 +486,7 @@ const BinKadTable: React.FC<{
     'NPK 12-12-17-2'
   ];
 
-  const pusinganRounds = ['1', '2', '3'];
+  const pusinganRounds = ['1', '2', '3', '4'];
 
   // Merge static data with live transactions
   const getMergedData = (): BinKadEntry[] => {
@@ -603,8 +603,8 @@ const BinKadTable: React.FC<{
                     {[
                       { pus: '1', baja: 'COMPACT FELDA 12' },
                       { pus: '2', baja: 'FELDA ORGANIC' },
-                      { pus: '3', baja: 'COMPACT FELDA 12' },
-                      { pus: '4', baja: 'FELDA ORGANIC' }
+                      { pus: '3', baja: 'FELDA ORGANIC' },
+                      { pus: '4', baja: 'COMPACT FELDA 12' }
                     ].map((opt, idx) => (
                       <button 
                         key={idx}
