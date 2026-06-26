@@ -783,10 +783,10 @@ export const LaporanBacklogView: React.FC = () => {
                     <td className="px-3 py-2.5 font-mono text-right border-r border-slate-100 dark:border-slate-800 font-black text-rose-700 dark:text-rose-400 bg-rose-500/[0.04]">
                       {rec.backlog_diladang > 0 ? angTan.toFixed(2) : "-"}
                     </td>
-                    <td className="px-3 py-2.5 text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap max-w-[150px] relative">
-                      <div className="flex justify-between items-center w-full">
-                        <span className="italic text-[9px]">{rec.catatan || "-"}</span>
-                        <Edit3 size={11} className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity ml-1 shrink-0" />
+                    <td className="px-3 py-2.5 text-slate-500 relative w-44 min-w-[150px] max-w-[176px] break-words whitespace-normal border-r border-slate-100 dark:border-slate-800">
+                      <div className="flex justify-between items-start gap-1 w-full">
+                        <span className="italic text-[9px] leading-tight block break-words whitespace-normal">{rec.catatan || "-"}</span>
+                        <Edit3 size={11} className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity ml-1 shrink-0 mt-0.5" />
                       </div>
                     </td>
                   </tr>
@@ -910,10 +910,10 @@ export const LaporanBacklogView: React.FC = () => {
                     <td className="px-3 py-2.5 font-mono text-right border-r border-slate-100 dark:border-slate-800 font-black text-rose-700 dark:text-rose-400 bg-rose-500/[0.04]">
                       {rec.backlog_diladang > 0 ? angTan.toFixed(2) : "-"}
                     </td>
-                    <td className="px-3 py-2.5 text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap max-w-[150px] relative">
-                      <div className="flex justify-between items-center w-full">
-                        <span className="italic text-[9px]">{rec.catatan || "-"}</span>
-                        <Edit3 size={11} className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity ml-1 shrink-0" />
+                    <td className="px-3 py-2.5 text-slate-500 relative w-44 min-w-[150px] max-w-[176px] break-words whitespace-normal border-r border-slate-100 dark:border-slate-800">
+                      <div className="flex justify-between items-start gap-1 w-full">
+                        <span className="italic text-[9px] leading-tight block break-words whitespace-normal">{rec.catatan || "-"}</span>
+                        <Edit3 size={11} className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity ml-1 shrink-0 mt-0.5" />
                       </div>
                     </td>
                   </tr>
@@ -1037,10 +1037,10 @@ export const LaporanBacklogView: React.FC = () => {
                     <td className="px-3 py-2.5 font-mono text-right border-r border-slate-100 dark:border-slate-800 font-black text-rose-700 dark:text-rose-400 bg-rose-500/[0.04]">
                       {rec.backlog_diladang > 0 ? angTan.toFixed(2) : "-"}
                     </td>
-                    <td className="px-3 py-2.5 text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap max-w-[150px] relative">
-                      <div className="flex justify-between items-center w-full">
-                        <span className="italic text-[9px]">{rec.catatan || "-"}</span>
-                        <Edit3 size={11} className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity ml-1 shrink-0" />
+                    <td className="px-3 py-2.5 text-slate-500 relative w-44 min-w-[150px] max-w-[176px] break-words whitespace-normal border-r border-slate-100 dark:border-slate-800">
+                      <div className="flex justify-between items-start gap-1 w-full">
+                        <span className="italic text-[9px] leading-tight block break-words whitespace-normal">{rec.catatan || "-"}</span>
+                        <Edit3 size={11} className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity ml-1 shrink-0 mt-0.5" />
                       </div>
                     </td>
                   </tr>
@@ -1200,10 +1200,10 @@ export const LaporanBacklogView: React.FC = () => {
                     <td className="px-3 py-2.5 font-mono text-right border-r border-slate-100 dark:border-slate-800 font-black text-rose-700 dark:text-rose-400 bg-rose-500/[0.04]">
                       {rec.backlog_diladang > 0 ? angTan.toFixed(2) : "-"}
                     </td>
-                    <td className="px-3 py-2.5 text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap max-w-[150px] relative">
-                      <div className="flex justify-between items-center w-full">
-                        <span className="italic text-[9px]">{rec.catatan || "-"}</span>
-                        <Edit3 size={11} className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity ml-1 shrink-0" />
+                    <td className="px-3 py-2.5 text-slate-500 relative w-44 min-w-[150px] max-w-[176px] break-words whitespace-normal border-r border-slate-100 dark:border-slate-800">
+                      <div className="flex justify-between items-start gap-1 w-full">
+                        <span className="italic text-[9px] leading-tight block break-words whitespace-normal">{rec.catatan || "-"}</span>
+                        <Edit3 size={11} className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity ml-1 shrink-0 mt-0.5" />
                       </div>
                     </td>
                   </tr>
@@ -1365,10 +1365,10 @@ export const LaporanBacklogView: React.FC = () => {
                     <td className="px-3 py-2.5 font-mono text-right border-r border-amber-500/10 font-black text-rose-700 dark:text-rose-400 bg-rose-500/[0.04]">
                       {rec.backlog_diladang > 0 ? angTan.toFixed(2) : "-"}
                     </td>
-                    <td className="px-3 py-2.5 text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap max-w-[150px] relative">
-                      <div className="flex justify-between items-center w-full">
-                        <span className="italic text-[9px]">{rec.catatan || "-"}</span>
-                        <Edit3 size={11} className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity ml-1 shrink-0" />
+                    <td className="px-3 py-2.5 text-slate-500 relative w-44 min-w-[150px] max-w-[176px] break-words whitespace-normal border-r border-amber-500/10">
+                      <div className="flex justify-between items-start gap-1 w-full">
+                        <span className="italic text-[9px] leading-tight block break-words whitespace-normal">{rec.catatan || "-"}</span>
+                        <Edit3 size={11} className="opacity-0 group-hover:opacity-100 text-slate-400 transition-opacity ml-1 shrink-0 mt-0.5" />
                       </div>
                     </td>
                   </tr>
