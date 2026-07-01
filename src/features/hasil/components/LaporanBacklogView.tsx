@@ -2,7 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   FileSpreadsheet, ClipboardCheck, Edit3, Calendar, Search, 
-  Trash2, Plus, Info, Check, X, AlertCircle, Share2, Printer, MessageCircle
+  Trash2, Plus, Info, Check, X, AlertCircle, Share2, Printer, MessageCircle,
+  Eye, ShieldCheck, Clock, CheckSquare
 } from 'lucide-react';
 import { MASTER_DATA, ABW_DATA, MONTHLY_TARGETS_2026 } from '../../../utils/constants';
 
@@ -20,6 +21,9 @@ interface BacklogRecord {
   custom_abw?: number;
   pus1_mula_default?: string;
   pus1_tamat_default?: string;
+  isCarriedFromLastMonth?: boolean;
+  carriedFromDate?: string;
+  originalBacklogCarried?: number;
 }
 
 interface BlockConfig {
@@ -169,6 +173,65 @@ export const LaporanBacklogView: React.FC = () => {
     } finally {
       setIsSyncing(false);
     }
+  };
+
+  // Get approval and seen status for current selected date
+  const approvalStatus = useMemo(() => {
+    const dayData = backlogHistory[selectedDate] || {};
+    return (dayData.approval as {
+      seenByFc?: boolean;
+      seenByFcAt?: string;
+      approvedByManager?: boolean;
+      approvedByManagerAt?: string;
+    }) || { seenByFc: false, approvedByManager: false };
+  }, [backlogHistory, selectedDate]);
+
+  const handleToggleSeenByFc = async () => {
+    const current = approvalStatus.seenByFc;
+    const updatedHistory = { ...backlogHistory };
+    if (!updatedHistory[selectedDate]) {
+      updatedHistory[selectedDate] = {};
+    }
+    
+    updatedHistory[selectedDate] = {
+      ...updatedHistory[selectedDate],
+      approval: {
+        ...(updatedHistory[selectedDate].approval as any || {}),
+        seenByFc: !current,
+        seenByFcAt: !current ? new Date().toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' }) + ' ' + new Date().toLocaleDateString('ms-MY') : undefined,
+      }
+    };
+    
+    setBacklogHistory(updatedHistory);
+    await saveAndSync(updatedHistory);
+    setToastMessage({
+      type: 'success',
+      text: !current ? 'Laporan telah ditandakan DISEMAK OLEH ASST. FIELD CONTROLLER.' : 'Tanda DISEMAK OLEH ASST. FIELD CONTROLLER telah dibatalkan.'
+    });
+  };
+
+  const handleToggleApproved = async () => {
+    const current = approvalStatus.approvedByManager;
+    const updatedHistory = { ...backlogHistory };
+    if (!updatedHistory[selectedDate]) {
+      updatedHistory[selectedDate] = {};
+    }
+    
+    updatedHistory[selectedDate] = {
+      ...updatedHistory[selectedDate],
+      approval: {
+        ...(updatedHistory[selectedDate].approval as any || {}),
+        approvedByManager: !current,
+        approvedByManagerAt: !current ? new Date().toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' }) + ' ' + new Date().toLocaleDateString('ms-MY') : undefined,
+      }
+    };
+    
+    setBacklogHistory(updatedHistory);
+    await saveAndSync(updatedHistory);
+    setToastMessage({
+      type: 'success',
+      text: !current ? 'Laporan telah DISAHKAN OLEH FIELD CONTROLLER.' : 'Tanda DISAHKAN OLEH FIELD CONTROLLER telah dibatalkan.'
+    });
   };
 
   // Map Selected Date to ABW Month key ("Jan", "Feb", etc.)
@@ -328,6 +391,29 @@ export const LaporanBacklogView: React.FC = () => {
     const localToday = new Date(today.getTime() - (offset * 60 * 1000));
     const todayStr = localToday.toISOString().split('T')[0];
 
+    // Helper to clean record for a new month while carrying over essential continuous data
+    const cleanRecordForNewMonth = (priorRec: BacklogRecord, sourceDateStr: string, blockId: string): BacklogRecord => {
+      const b = BLOCKS_CONFIG.find(bc => bc.id === blockId)!;
+      return {
+        pus1_mula: "",
+        pus1_tamat: "",
+        pus1_mula_default: blockId === "1" ? "2026-06-02" : "",
+        pus1_tamat_default: "",
+        pus2_mula: "",
+        pus2_tamat: "",
+        hektar_siap: 0,
+        capai_tandan: 0,
+        backlog_diladang: priorRec.backlog_diladang || 0, // Carry forward previous month's ending backlog!
+        catatan: "", // Reset notes for a fresh month
+        bil_buruh: priorRec.bil_buruh !== undefined ? priorRec.bil_buruh : b.defaultBuruh,
+        tandan_harian: b.defaultTandanHarian, // will be recalculated dynamically below
+        custom_abw: priorRec.custom_abw || 0,
+        isCarriedFromLastMonth: true,
+        carriedFromDate: sourceDateStr,
+        originalBacklogCarried: priorRec.backlog_diladang || 0
+      };
+    };
+
     BLOCKS_CONFIG.forEach(b => {
       let rec: BacklogRecord;
 
@@ -342,7 +428,14 @@ export const LaporanBacklogView: React.FC = () => {
         for (let i = priorDates.length - 1; i >= 0; i--) {
           const priorDate = priorDates[i];
           if (backlogHistory[priorDate] && backlogHistory[priorDate][b.id]) {
-            rec = { ...backlogHistory[priorDate][b.id] };
+            const priorRec = backlogHistory[priorDate][b.id];
+            const isNewMonth = priorDate.substring(0, 7) !== selectedDate.substring(0, 7);
+
+            if (isNewMonth) {
+              rec = cleanRecordForNewMonth(priorRec, priorDate, b.id);
+            } else {
+              rec = { ...priorRec };
+            }
             foundPrior = true;
             break;
           }
@@ -352,7 +445,13 @@ export const LaporanBacklogView: React.FC = () => {
           // If no prior record was saved in database, and selectedDate is on/after 2026-06-22,
           // we use the 2026-06-22 mock dataset as our baseline prior/current!
           if (selectedDate >= '2026-06-22') {
-            rec = getMockRecordForBlock(b.id);
+            const mockRec = getMockRecordForBlock(b.id);
+            const isNewMonth = selectedDate.substring(0, 7) !== '2026-06';
+            if (isNewMonth) {
+              rec = cleanRecordForNewMonth(mockRec, '2026-06-30', b.id);
+            } else {
+              rec = mockRec;
+            }
           } else {
             // Default blank baseline
             rec = {
@@ -1380,6 +1479,83 @@ export const LaporanBacklogView: React.FC = () => {
         </div>
       </div>
 
+      {/* STATUS PENGESAHAN & KELULUSAN */}
+      <div className="bg-white dark:bg-slate-900 rounded-[20px] p-4 shadow-sm border border-slate-100 dark:border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        {/* Asst FC Verification Card */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-xl border border-slate-100/70 dark:border-slate-800/60">
+          <div className="flex items-start gap-2.5">
+            <div className={`p-2 rounded-lg shrink-0 ${approvalStatus.seenByFc ? 'bg-emerald-500/10 text-emerald-600' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>
+              <Eye size={16} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase text-slate-400 leading-none mb-1">Disemak oleh : Asst. Field Controller</p>
+              {approvalStatus.seenByFc ? (
+                <div className="space-y-0.5">
+                  <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    <Check size={12} className="stroke-[3]" /> Telah Disemak
+                  </span>
+                  <p className="text-[8px] font-medium text-slate-400 flex items-center gap-1">
+                    <Clock size={9} /> {approvalStatus.seenByFcAt}
+                  </p>
+                </div>
+              ) : (
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                  <AlertCircle size={12} /> Belum Disemak
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <button
+            onClick={handleToggleSeenByFc}
+            className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all self-start sm:self-center shrink-0 ${
+              approvalStatus.seenByFc
+                ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/50 dark:bg-rose-950/20 dark:hover:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/30'
+                : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/10'
+            }`}
+          >
+            {approvalStatus.seenByFc ? 'Batal Semak' : 'Sahkan Disemak'}
+          </button>
+        </div>
+
+        {/* FC Approval Card */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-slate-50/50 dark:bg-slate-950/40 rounded-xl border border-slate-100/70 dark:border-slate-800/60">
+          <div className="flex items-start gap-2.5">
+            <div className={`p-2 rounded-lg shrink-0 ${approvalStatus.approvedByManager ? 'bg-indigo-500/10 text-indigo-600' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>
+              <ShieldCheck size={16} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase text-slate-400 leading-none mb-1">Disahkan oleh : Field Controller</p>
+              {approvalStatus.approvedByManager ? (
+                <div className="space-y-0.5">
+                  <span className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                    <CheckSquare size={12} className="stroke-[3]" /> Telah Disahkan
+                  </span>
+                  <p className="text-[8px] font-medium text-slate-400 flex items-center gap-1">
+                    <Clock size={9} /> {approvalStatus.approvedByManagerAt}
+                  </p>
+                </div>
+              ) : (
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                  <AlertCircle size={12} /> Belum Disahkan
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <button
+            onClick={handleToggleApproved}
+            className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all self-start sm:self-center shrink-0 ${
+              approvalStatus.approvedByManager
+                ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/50 dark:bg-rose-950/20 dark:hover:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/30'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/10'
+            }`}
+          >
+            {approvalStatus.approvedByManager ? 'Batal Sah' : 'Sahkan'}
+          </button>
+        </div>
+      </div>
+
       {/* EDITING DRAWER / MODAL POPUP */}
       <AnimatePresence>
         {editingBlock && (
@@ -1414,6 +1590,21 @@ export const LaporanBacklogView: React.FC = () => {
 
               <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
                 
+                {activeDateRecords[editingBlock.id]?.isCarriedFromLastMonth && (
+                  <div className="p-3 bg-emerald-500/5 dark:bg-emerald-500/5 rounded-2xl border border-emerald-500/10 dark:border-emerald-500/10 flex items-start gap-2.5">
+                    <Info size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <div className="text-[9px] text-emerald-800 dark:text-emerald-300 font-medium leading-relaxed">
+                      <span className="font-extrabold uppercase block text-emerald-900 dark:text-emerald-200 mb-0.5">Bawaan Bulan Lepas</span>
+                      Sistem membawa masuk baki data secara automatik dari bulan lepas ({formatTarikhDmy(activeDateRecords[editingBlock.id].carriedFromDate || '')}):
+                      <ul className="list-disc list-inside mt-1 space-y-0.5 text-slate-600 dark:text-slate-400 font-semibold">
+                        <li>Bawaan Backlog: <span className="text-emerald-700 dark:text-emerald-300 font-bold">{activeDateRecords[editingBlock.id].originalBacklogCarried} Tandan</span></li>
+                        <li>Bil. Buruh: <span className="font-bold">{activeDateRecords[editingBlock.id].bil_buruh}</span></li>
+                      </ul>
+                      <span className="block mt-1 text-slate-500 dark:text-slate-400 italic">Sila kemaskini maklumat di bawah mengikut rekod hari ini jika terdapat perubahan.</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* DATES GRID */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
