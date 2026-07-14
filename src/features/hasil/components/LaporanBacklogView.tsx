@@ -1056,8 +1056,11 @@ export const LaporanBacklogView: React.FC = () => {
                     <td className="px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400">
                       {rec.capai_tandan > 0 ? rec.capai_tandan : "-"}
                     </td>
-                    <td className={`px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 font-bold ${pctCapai >= 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                    <td className={`px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 font-bold ${pctCapai >= 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600'}`}>
                       {rec.capai_tandan > 0 ? `${pctCapai.toFixed(2)}%` : "-"}
+                    </td>
+                    <td className="px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01]">
+                      {stats.blockMonthlyToDateCapai[block.id] > 0 ? stats.blockMonthlyToDateCapai[block.id] : "-"}
                     </td>
                     
                     <td className="px-3 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 font-black text-rose-600 bg-rose-500/[0.02]">
@@ -1186,8 +1189,11 @@ export const LaporanBacklogView: React.FC = () => {
                     <td className="px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400">
                       {rec.capai_tandan > 0 ? rec.capai_tandan : "-"}
                     </td>
-                    <td className={`px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 font-bold ${pctCapai >= 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                    <td className={`px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 font-bold ${pctCapai >= 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600'}`}>
                       {rec.capai_tandan > 0 ? `${pctCapai.toFixed(2)}%` : "-"}
+                    </td>
+                    <td className="px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01]">
+                      {stats.blockMonthlyToDateCapai[block.id] > 0 ? stats.blockMonthlyToDateCapai[block.id] : "-"}
                     </td>
                     
                     <td className="px-3 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 font-black text-rose-600 bg-rose-500/[0.02]">
@@ -1357,6 +1363,9 @@ export const LaporanBacklogView: React.FC = () => {
                     </td>
                     <td className={`px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 font-bold ${pctCapai >= 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {rec.capai_tandan > 0 ? `${pctCapai.toFixed(2)}%` : "-"}
+                    </td>
+                    <td className="px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01]">
+                      {stats.blockMonthlyToDateCapai[block.id] > 0 ? stats.blockMonthlyToDateCapai[block.id] : "-"}
                     </td>
                     
                     <td className="px-3 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 font-black text-rose-600 bg-rose-500/[0.02]">
