@@ -163,13 +163,21 @@ export const LaporanBacklogView: React.FC = () => {
     localStorage.setItem("fpm_backlog_history_v1", JSON.stringify(updatedHistory));
     setIsSyncing(true);
     try {
-      await fetch("/api/hasil/backlog", {
+      const res = await fetch("/api/hasil/backlog", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ backlogHistory: updatedHistory })
       });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Server returned error ${res.status}: ${errText}`);
+      }
     } catch (e) {
       console.error("Sync backlog fail:", e);
+      setToastMessage({
+        type: 'error',
+        text: 'Gagal menyimpan ke Cloud Supabase. Sila semak sambungan internet atau hubungi admin.'
+      });
     } finally {
       setIsSyncing(false);
     }
