@@ -572,6 +572,39 @@ export const LaporanBacklogView: React.FC = () => {
 
   // Grouped Calculations for Rendering summaries (exactly as in Excel screenshot!)
   const stats = useMemo(() => {
+    // Pre-calculate monthly to-date sum of capai_tandan for each block
+    const blockMonthlyToDateCapai: Record<string, number> = {};
+    const parts = selectedDate.split("-");
+    if (parts.length === 3) {
+      const year = parts[0];
+      const month = parts[1];
+      const maxDay = parseInt(parts[2], 10);
+      
+      BLOCKS_CONFIG.forEach(b => {
+        let sum = 0;
+        for (let day = 1; day <= maxDay; day++) {
+          const dateStr = `${year}-${month}-${String(day).padStart(2, '0')}`;
+          if (dateStr === selectedDate) {
+            // For selectedDate, we MUST use activeDateRecords (which has latest edited changes in active session)
+            const rec = activeDateRecords[b.id];
+            if (rec) {
+              sum += rec.capai_tandan || 0;
+            }
+          } else {
+            const histRec = backlogHistory[dateStr]?.[b.id];
+            if (histRec) {
+              sum += histRec.capai_tandan || 0;
+            }
+          }
+        }
+        blockMonthlyToDateCapai[b.id] = sum;
+      });
+    } else {
+      BLOCKS_CONFIG.forEach(b => {
+        blockMonthlyToDateCapai[b.id] = 0;
+      });
+    }
+
     const defaultGroupStats = () => ({
       buruh: 0,
       hektar: 0,
@@ -579,7 +612,8 @@ export const LaporanBacklogView: React.FC = () => {
       tandanHarian: 0,
       capaiTandan: 0,
       backlog: 0,
-      anggaranTan: 0
+      anggaranTan: 0,
+      monthlyToDateCapai: 0
     });
 
     const groups: Record<string, ReturnType<typeof defaultGroupStats>> = {
@@ -601,6 +635,7 @@ export const LaporanBacklogView: React.FC = () => {
       const backlog = rec.backlog_diladang || 0;
       const abwVal = rec.abw;
       const angTan = (backlog * abwVal) / 1000;
+      const monthlyToDateCapaiVal = blockMonthlyToDateCapai[b.id] || 0;
 
       g.buruh += buruh;
       g.hektar += b.defaultHektar;
@@ -609,6 +644,7 @@ export const LaporanBacklogView: React.FC = () => {
       g.capaiTandan += capai;
       g.backlog += backlog;
       g.anggaranTan += angTan;
+      g.monthlyToDateCapai += monthlyToDateCapaiVal;
     });
 
     // PKT 001 = ADIB + ARIL + KIROMIN
@@ -622,6 +658,7 @@ export const LaporanBacklogView: React.FC = () => {
       pkt1.capaiTandan += g.capaiTandan;
       pkt1.backlog += g.backlog;
       pkt1.anggaranTan += g.anggaranTan;
+      pkt1.monthlyToDateCapai += g.monthlyToDateCapai;
     });
 
     // PKT 002 = wan
@@ -637,15 +674,17 @@ export const LaporanBacklogView: React.FC = () => {
       grand.capaiTandan += p.capaiTandan;
       grand.backlog += p.backlog;
       grand.anggaranTan += p.anggaranTan;
+      grand.monthlyToDateCapai += p.monthlyToDateCapai;
     });
 
     return {
       groups,
       pkt1,
       pkt2,
-      grand
+      grand,
+      blockMonthlyToDateCapai
     };
-  }, [activeDateRecords]);
+  }, [activeDateRecords, backlogHistory, selectedDate]);
 
   // Utility to parse standard dates to dd.mm.yyyy layout as per image
   const formatTarikhDmy = (dateStr: string) => {
@@ -782,6 +821,10 @@ export const LaporanBacklogView: React.FC = () => {
                 </th>
                 <th rowSpan={2} className="px-2 py-3.5 border-r border-slate-100 dark:border-slate-800 text-center w-16">CAPAI TANDAN</th>
                 <th rowSpan={2} className="px-2 py-3.5 border-r border-slate-100 dark:border-slate-800 text-center w-16">% CAPAI</th>
+                <th rowSpan={2} className="px-2 py-3.5 border-r border-slate-100 dark:border-slate-800 text-center w-24 bg-emerald-500/5 dark:bg-emerald-500/5 font-black text-emerald-700 dark:text-emerald-400">
+                  TANDAN BULANAN
+                  <span className="block text-[8px] text-slate-400 font-bold">(M-TD)</span>
+                </th>
                 <th rowSpan={2} className="px-3 py-3.5 border-r border-slate-100 dark:border-slate-800 text-center w-24 bg-rose-500/5 dark:bg-rose-500/5 font-black text-rose-700 dark:text-rose-400 text-xs">Backlog - Tandan</th>
                 <th rowSpan={2} className="px-3 py-3.5 border-r border-slate-100 dark:border-slate-800 text-right w-24 bg-rose-500/10 dark:bg-rose-500/10 font-black text-rose-800 dark:text-rose-300 text-xs">Backlog - Tan</th>
                 <th rowSpan={2} className="px-4 py-3.5 w-44">CATATAN / TINDAKAN</th>
@@ -874,6 +917,9 @@ export const LaporanBacklogView: React.FC = () => {
                     <td className={`px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 font-bold ${pctCapai >= 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600'}`}>
                       {rec.capai_tandan > 0 ? `${pctCapai.toFixed(2)}%` : "-"}
                     </td>
+                    <td className="px-2 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01]">
+                      {stats.blockMonthlyToDateCapai[block.id] > 0 ? stats.blockMonthlyToDateCapai[block.id] : "-"}
+                    </td>
                     
                     {/* Backlog items */}
                     <td className="px-3 py-2.5 font-mono text-center border-r border-slate-100 dark:border-slate-800 font-black text-rose-600 bg-rose-500/[0.02]">
@@ -918,6 +964,9 @@ export const LaporanBacklogView: React.FC = () => {
                 </td>
                 <td className="px-2 py-2 text-center font-mono font-black border-r border-amber-500/10 text-slate-700 dark:text-slate-300">
                   {stats.groups.ADIB.capaiTandan > 0 ? `${((stats.groups.ADIB.capaiTandan / stats.groups.ADIB.tandanHarian) * 100).toFixed(2)}%` : "-"}
+                </td>
+                <td className="px-2 py-2 text-center font-mono font-black border-r border-amber-500/10 text-emerald-800 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/5">
+                  {stats.groups.ADIB.monthlyToDateCapai > 0 ? stats.groups.ADIB.monthlyToDateCapai : "-"}
                 </td>
                 <td className="px-3 py-2 text-center font-mono font-black border-r border-amber-500/20 text-rose-600 bg-rose-500/[0.04]">
                   {stats.groups.ADIB.backlog > 0 ? stats.groups.ADIB.backlog : "-"}
@@ -1046,6 +1095,9 @@ export const LaporanBacklogView: React.FC = () => {
                 <td className="px-2 py-2 text-center font-mono font-black border-r border-amber-500/10 text-slate-700 dark:text-slate-300">
                   {stats.groups.ARIL.capaiTandan > 0 ? `${((stats.groups.ARIL.capaiTandan / stats.groups.ARIL.tandanHarian) * 100).toFixed(2)}%` : "-"}
                 </td>
+                <td className="px-2 py-2 text-center font-mono font-black border-r border-amber-500/10 text-emerald-800 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/5">
+                  {stats.groups.ARIL.monthlyToDateCapai > 0 ? stats.groups.ARIL.monthlyToDateCapai : "-"}
+                </td>
                 <td className="px-3 py-2 text-center font-mono font-black border-r border-amber-500/20 text-rose-600 bg-rose-500/[0.04]">
                   {stats.groups.ARIL.backlog > 0 ? stats.groups.ARIL.backlog : "-"}
                 </td>
@@ -1173,6 +1225,9 @@ export const LaporanBacklogView: React.FC = () => {
                 <td className="px-2 py-2 text-center font-mono font-black border-r border-amber-500/10 text-slate-700 dark:text-slate-300">
                   {stats.groups.KIROMIN.capaiTandan > 0 ? `${((stats.groups.KIROMIN.capaiTandan / stats.groups.KIROMIN.tandanHarian) * 100).toFixed(2)}%` : "-"}
                 </td>
+                <td className="px-2 py-2 text-center font-mono font-black border-r border-amber-500/10 text-emerald-800 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/5">
+                  {stats.groups.KIROMIN.monthlyToDateCapai > 0 ? stats.groups.KIROMIN.monthlyToDateCapai : "-"}
+                </td>
                 <td className="px-3 py-2 text-center font-mono font-black border-r border-amber-500/20 text-rose-600 bg-rose-500/[0.04]">
                   {stats.groups.KIROMIN.backlog > 0 ? stats.groups.KIROMIN.backlog : "-"}
                 </td>
@@ -1208,6 +1263,9 @@ export const LaporanBacklogView: React.FC = () => {
                 </td>
                 <td className="px-2 py-3 text-center font-mono border-r border-emerald-500">
                   {stats.pkt1.capaiTandan > 0 ? `${((stats.pkt1.capaiTandan / stats.pkt1.tandanHarian) * 100).toFixed(2)}%` : "-"}
+                </td>
+                <td className="px-2 py-3 text-center font-mono border-r border-emerald-500 text-emerald-200 bg-emerald-700/20">
+                  {stats.pkt1.monthlyToDateCapai > 0 ? stats.pkt1.monthlyToDateCapai : "-"}
                 </td>
                 <td className="px-3 py-3 text-center font-mono border-r border-emerald-500 bg-rose-600/25">
                   {stats.pkt1.backlog > 0 ? stats.pkt1.backlog : "-"}
@@ -1336,6 +1394,9 @@ export const LaporanBacklogView: React.FC = () => {
                 <td className="px-2 py-2 text-center font-mono font-black border-r border-amber-500/10 text-slate-700 dark:text-slate-300">
                   {stats.groups.wan.capaiTandan > 0 ? `${((stats.groups.wan.capaiTandan / stats.groups.wan.tandanHarian) * 100).toFixed(2)}%` : "-"}
                 </td>
+                <td className="px-2 py-2 text-center font-mono font-black border-r border-amber-500/10 text-emerald-800 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/5">
+                  {stats.groups.wan.monthlyToDateCapai > 0 ? stats.groups.wan.monthlyToDateCapai : "-"}
+                </td>
                 <td className="px-3 py-2 text-center font-mono font-black border-r border-amber-500/20 text-rose-600 bg-rose-500/[0.04]">
                   {stats.groups.wan.backlog > 0 ? stats.groups.wan.backlog : "-"}
                 </td>
@@ -1371,6 +1432,9 @@ export const LaporanBacklogView: React.FC = () => {
                 </td>
                 <td className="px-2 py-3 text-center font-mono border-r border-emerald-500">
                   {stats.grand.capaiTandan > 0 ? `${((stats.grand.capaiTandan / stats.grand.tandanHarian) * 100).toFixed(2)}%` : "-"}
+                </td>
+                <td className="px-2 py-3 text-center font-mono border-r border-emerald-500 text-emerald-200 bg-emerald-700/20">
+                  {stats.grand.monthlyToDateCapai > 0 ? stats.grand.monthlyToDateCapai : "-"}
                 </td>
                 <td className="px-3 py-3 text-center font-mono border-r border-emerald-500 bg-rose-600/25">
                   {stats.grand.backlog > 0 ? stats.grand.backlog : "-"}
@@ -1456,6 +1520,9 @@ export const LaporanBacklogView: React.FC = () => {
                     </td>
                     <td className={`px-2 py-2.5 font-mono text-center border-r border-amber-500/10 font-bold ${pctCapai >= 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {rec.capai_tandan > 0 ? `${pctCapai.toFixed(2)}%` : "-"}
+                    </td>
+                    <td className="px-2 py-2.5 font-mono text-center border-r border-amber-500/10 font-bold bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01]">
+                      {stats.blockMonthlyToDateCapai[block.id] > 0 ? stats.blockMonthlyToDateCapai[block.id] : "-"}
                     </td>
                     
                     <td className="px-3 py-2.5 font-mono text-center border-r border-amber-500/10 font-black text-rose-600 bg-rose-500/[0.02]">

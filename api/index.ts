@@ -15,8 +15,9 @@ dotenv.config();
 
 const app = express();
 
-// Add JSON middleware for standalone Vercel execution
-app.use(express.json());
+// Add JSON middleware for standalone Vercel execution with larger limit
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const apiRouter = express.Router();
 
