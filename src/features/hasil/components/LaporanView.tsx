@@ -154,6 +154,7 @@ export const LaporanView: React.FC<LaporanViewProps> = ({
           <HasilBulananTable
             analytics={analytics}
             dashboardDate={dashboardDate}
+            setDashboardDate={setDashboardDate}
             isDarkMode={isDarkMode}
             onScreenshot={captureTableScreenshot}
             isCapturing={isCapturing}

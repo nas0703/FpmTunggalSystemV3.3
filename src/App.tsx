@@ -3451,7 +3451,33 @@ PERATURAN TEKNIKAL:
   }, [rawData, historicalEfbTransactions]);
 
   const analytics = useMemo(() => {
-    const todayStr = dashboardDate;
+    let todayStr = dashboardDate;
+
+    const [selYear, selMonth, selDay] = dashboardDate.split("-");
+    const sYear = parseInt(selYear);
+    const sMonth = parseInt(selMonth);
+    const sDay = parseInt(selDay);
+
+    const nowReal = new Date();
+    const myTime = new Date(nowReal.getTime() + 8 * 60 * 60 * 1000);
+    const rYear = myTime.getUTCFullYear();
+    const rMonth = myTime.getUTCMonth() + 1; // 1-indexed
+    const rDay = myTime.getUTCDate();
+
+    if (sYear < rYear || (sYear === rYear && sMonth < rMonth)) {
+      // Past month: always show up to the last day of that month
+      const lastDay = new Date(sYear, sMonth, 0).getDate();
+      todayStr = `${selYear}-${selMonth}-${String(lastDay).padStart(2, "0")}`;
+    } else if (sYear === rYear && sMonth === rMonth) {
+      // Current month: if 1st (month-picker value), auto-align to today's date
+      if (sDay === 1) {
+        todayStr = `${selYear}-${selMonth}-${String(rDay).padStart(2, "0")}`;
+      }
+    } else {
+      // Future month: show up to the last day of that month
+      const lastDay = new Date(sYear, sMonth, 0).getDate();
+      todayStr = `${selYear}-${selMonth}-${String(lastDay).padStart(2, "0")}`;
+    }
 
     const currentMonth = todayStr.slice(0, 7);
     const currentYear = todayStr.slice(0, 4);
@@ -3864,7 +3890,7 @@ PERATURAN TEKNIKAL:
     };
 
     const isThisYear = (item: Transaction) => {
-      if (item.tarikh) return item.tarikh.startsWith(currentYear);
+      if (item.tarikh) return item.tarikh.startsWith(currentYear) && item.tarikh <= todayStr;
       // Fallback to created_at only for 2026 onwards
       if (currentYear < "2026") return false;
       if (!item.created_at) return false;
@@ -3873,7 +3899,7 @@ PERATURAN TEKNIKAL:
       )
         .toISOString()
         .split("T")[0];
-      return createdDate.startsWith(currentYear);
+      return createdDate.startsWith(currentYear) && createdDate <= todayStr;
     };
 
     const dataToday = combinedData.filter(isToday);
@@ -4194,7 +4220,7 @@ PERATURAN TEKNIKAL:
       dailyPriceStats,
       dailyPriceTrend,
     };
-  }, [rawData, reportType, rankingPeriod]);
+  }, [rawData, reportType, rankingPeriod, dashboardDate]);
 
   // Calculate annual data for the history chart - Refined with better filtering and safety
   // Moved after analytics to resolve ReferenceError

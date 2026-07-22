@@ -57,6 +57,7 @@ import { AnimatePresence, motion } from "motion/react";
 export const HasilBulananTable = ({
   analytics,
   dashboardDate = new Date().toISOString().split("T")[0],
+  setDashboardDate,
   isDarkMode,
   onScreenshot,
   isCapturing,
@@ -67,6 +68,7 @@ export const HasilBulananTable = ({
 }: {
   analytics: any;
   dashboardDate?: string;
+  setDashboardDate?: (val: string) => void;
   isDarkMode: boolean;
   onScreenshot?: () => void;
   isCapturing?: boolean;
@@ -143,8 +145,36 @@ export const HasilBulananTable = ({
     return null;
 
   // Use dashboardDate to accurately align with the subset of data being viewed
-  const dashboardFallback =
+  const dashboardFallbackRaw =
     dashboardDate || new Date().toISOString().split("T")[0];
+
+  const [selYear, selMonth, selDay] = dashboardFallbackRaw.split("-");
+  const sYear = parseInt(selYear);
+  const sMonth = parseInt(selMonth);
+  const sDay = parseInt(selDay);
+
+  const nowReal = new Date();
+  const myTime = new Date(nowReal.getTime() + 8 * 60 * 60 * 1000);
+  const rYear = myTime.getUTCFullYear();
+  const rMonth = myTime.getUTCMonth() + 1; // 1-indexed
+  const rDay = myTime.getUTCDate();
+
+  let dashboardFallback = dashboardFallbackRaw;
+  if (sYear < rYear || (sYear === rYear && sMonth < rMonth)) {
+    // Past month: always show up to the last day of that month
+    const lastDay = new Date(sYear, sMonth, 0).getDate();
+    dashboardFallback = `${selYear}-${selMonth}-${String(lastDay).padStart(2, "0")}`;
+  } else if (sYear === rYear && sMonth === rMonth) {
+    // Current month: if 1st, auto-align to today
+    if (sDay === 1) {
+      dashboardFallback = `${selYear}-${selMonth}-${String(rDay).padStart(2, "0")}`;
+    }
+  } else {
+    // Future month: show up to the last day of that month
+    const lastDay = new Date(sYear, sMonth, 0).getDate();
+    dashboardFallback = `${selYear}-${selMonth}-${String(lastDay).padStart(2, "0")}`;
+  }
+
   const [dbYear, dbMonth, dbDay] = dashboardFallback.split("-");
   const now = new Date(
     parseInt(dbYear),
@@ -1053,6 +1083,25 @@ export const HasilBulananTable = ({
               <ZoomIn size={16} />
             </button>
           </div>
+
+          {setDashboardDate && (
+            <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 py-2 px-2.5 md:p-1.5 rounded-xl border border-emerald-200 dark:border-emerald-700 shadow-sm">
+              <span className="text-[10px] md:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest pl-1 leading-none">
+                Bulan:
+              </span>
+              <input
+                type="month"
+                value={`${dbYear}-${dbMonth}`}
+                onChange={(e) => {
+                  const val = e.target.value; // YYYY-MM
+                  if (val) {
+                    setDashboardDate(`${val}-01`);
+                  }
+                }}
+                className="bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 text-[10px] md:text-xs font-bold text-emerald-800 dark:text-emerald-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all cursor-pointer"
+              />
+            </div>
+          )}
         </div>
       </div>
 
