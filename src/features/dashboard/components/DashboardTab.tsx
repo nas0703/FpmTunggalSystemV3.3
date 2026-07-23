@@ -2254,7 +2254,7 @@ export const DashboardTab = (props: any) => {
                                   <div className="flex items-center gap-2 px-1 pb-2 pt-1 mb-1 relative z-10">
                                     <div className="w-7 shrink-0 text-center">
                                       <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                        {showRanking ? "#" : "Blok"}
+                                        NO.
                                       </span>
                                     </div>
                                     <div
@@ -2262,7 +2262,7 @@ export const DashboardTab = (props: any) => {
                                     >
                                       <div className="col-span-1 text-left">
                                         <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">
-                                          {showRanking ? "Blok" : "Lot"}
+                                          BLOK
                                         </span>
                                       </div>
                                       <div className="text-center">
@@ -2508,9 +2508,7 @@ export const DashboardTab = (props: any) => {
                                                   damping: 25,
                                                 }}
                                               >
-                                                {showRanking
-                                                  ? index + 1
-                                                  : s.blok}
+                                                {index + 1}
                                               </motion.span>
                                             </AnimatePresence>
                                           </motion.div>
