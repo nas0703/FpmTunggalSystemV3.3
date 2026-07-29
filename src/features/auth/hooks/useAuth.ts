@@ -1,17 +1,20 @@
 import { useState, useCallback } from "react";
 
 const STAFF_PIN = "123456"; // Kerani input
-const FC_PIN = "888888"; // Field Conductor
-const AFC_PIN = "777777"; // Assistant Field Conductor
+const PF_PIN = "888888"; // Pengurus Felda
+const FC_PIN = "654321"; // Field Controller
+const AFC_PIN = "777777"; // Assistant Field Controller
 const FS_PIN = "555555"; // Field Supervisor
 
+export type AuthRole = "staff" | "pf" | "fc" | "afc" | "fs";
+
 interface UseAuthProps {
-  onLoginSuccess: (role: "staff" | "fc" | "afc" | "fs") => void;
+  onLoginSuccess: (role: AuthRole) => void;
   onLogout: () => void;
 }
 
 export function useAuth({ onLoginSuccess, onLogout }: UseAuthProps) {
-  const [authRole, setAuthRole] = useState<"staff" | "fc" | "afc" | "fs" | null>(null);
+  const [authRole, setAuthRole] = useState<AuthRole | null>(null);
   const [pin, setPin] = useState("");
   const [loginError, setLoginError] = useState(false);
 
@@ -26,6 +29,9 @@ export function useAuth({ onLoginSuccess, onLogout }: UseAuthProps) {
           if (newPin === STAFF_PIN) {
             setAuthRole("staff");
             onLoginSuccess("staff");
+          } else if (newPin === PF_PIN) {
+            setAuthRole("pf");
+            onLoginSuccess("pf");
           } else if (newPin === FC_PIN) {
             setAuthRole("fc");
             onLoginSuccess("fc");

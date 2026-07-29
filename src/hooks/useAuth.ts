@@ -1,7 +1,9 @@
 import { useState, useCallback } from 'react';
 
+export type AuthRole = "staff" | "pf" | "fc" | "afc" | "fs";
+
 export function useAuth() {
-  const [authRole, setAuthRole] = useState<"staff" | "fc" | "afc" | "fs" | null>(null);
+  const [authRole, setAuthRole] = useState<AuthRole | null>(null);
   const [pin, setPin] = useState("");
   const [loginError, setLoginError] = useState(false);
 
@@ -11,9 +13,10 @@ export function useAuth() {
       setPin(newPin);
       if (newPin.length === 6) {
         if (newPin === "123456") setAuthRole("staff");
+        else if (newPin === "888888") setAuthRole("pf");
         else if (newPin === "654321") setAuthRole("fc");
-        else if (newPin === "111111") setAuthRole("afc");
-        else if (newPin === "999999") setAuthRole("fs");
+        else if (newPin === "777777") setAuthRole("afc");
+        else if (newPin === "555555") setAuthRole("fs");
         else {
           setLoginError(true);
           setTimeout(() => {

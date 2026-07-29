@@ -265,7 +265,7 @@ export const FertilizerHistory: React.FC<{ authRole: string }> = ({ authRole }) 
             </div>
             
             <div className="flex items-center gap-1">
-              { (authRole === 'fc' || authRole === 'afc' || authRole === 'fs' || authRole === 'admin' || authRole === 'staff') && (
+              { (authRole === 'pf' || authRole === 'fc' || authRole === 'afc' || authRole === 'fs' || authRole === 'admin' || authRole === 'staff') && (
                 <>
                   { entry.recordType === 'ENTRY' && (
                     <button 

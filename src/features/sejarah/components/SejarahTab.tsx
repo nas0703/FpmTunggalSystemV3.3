@@ -10,7 +10,7 @@ interface SejarahTabProps {
   setShowExportModal: (show: boolean) => void;
   setRecordToDelete: (no_resit: string | null) => void;
   onEditRecord: (record: Transaction) => void;
-  authRole: "staff" | "fc" | "afc" | "fs" | null;
+  authRole: "staff" | "pf" | "fc" | "afc" | "fs" | null;
 }
 
 // Timezone safe and local-format date formatter (Avoids day shift errors for client offsets)
@@ -357,7 +357,7 @@ export const SejarahTab: React.FC<SejarahTabProps> = ({
                           </td>
                         )}
                         <td className="px-3 py-1.5 text-center whitespace-nowrap">
-                          {(authRole === "staff" || authRole === "fc") && (
+                          {(authRole === "staff" || authRole === "fc" || authRole === "pf") && (
                             <div className="flex items-center justify-center gap-0.5">
                               <button
                                 onClick={() => onEditRecord(row)}

@@ -90,23 +90,27 @@ export const Header: React.FC<HeaderProps> = ({
               aria-label="User Menu"
             >
               <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-inner ring-2 ring-white/10 group-hover:ring-emerald-400 transition-all">
-                {authRole === "fc"
-                  ? "FC"
-                  : authRole === "afc"
-                    ? "AFC"
-                    : authRole === "fs"
-                      ? "FS"
-                      : "O"}
+                {authRole === "pf"
+                  ? "PF"
+                  : authRole === "fc"
+                    ? "FC"
+                    : authRole === "afc"
+                      ? "AFC"
+                      : authRole === "fs"
+                        ? "FS"
+                        : "O"}
               </div>
               <div className="hidden sm:flex flex-col items-start mr-1">
                 <span className="text-[10px] font-black text-white uppercase leading-none">
-                  {authRole === "fc"
-                    ? "Field Controller (FC)"
-                    : authRole === "afc"
-                      ? "Asst. Field Controller (AFC)"
-                      : authRole === "fs"
-                        ? "Field Supervisor (FS)"
-                        : "Operator"}
+                  {authRole === "pf"
+                    ? "Pengurus Felda (PF)"
+                    : authRole === "fc"
+                      ? "Field Controller (FC)"
+                      : authRole === "afc"
+                        ? "Asst. Field Controller (AFC)"
+                        : authRole === "fs"
+                          ? "Field Supervisor (FS)"
+                          : "Operator"}
                 </span>
                 <span className="text-[8px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5">
                   Online
@@ -131,26 +135,30 @@ export const Header: React.FC<HeaderProps> = ({
                   <div className="p-4 border-b border-white/10 bg-white/5">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-black shadow-lg ring-2 ring-emerald-500/20">
-                        {authRole === "fc"
-                          ? "FC"
-                          : authRole === "afc"
-                            ? "AFC"
-                            : authRole === "fs"
-                              ? "FS"
-                              : "O"}
+                        {authRole === "pf"
+                          ? "PF"
+                          : authRole === "fc"
+                            ? "FC"
+                            : authRole === "afc"
+                              ? "AFC"
+                              : authRole === "fs"
+                                ? "FS"
+                                : "O"}
                       </div>
                       <div className="overflow-hidden">
                         <p className="text-[11px] font-black text-white uppercase truncate">
-                          {authRole === "fc"
-                            ? "Field Controller (FC)"
-                            : authRole === "afc"
-                              ? "Asst. Field Controller (AFC)"
-                              : authRole === "fs"
-                                ? "Field Supervisor (FS)"
-                                : "Operator"}
+                          {authRole === "pf"
+                            ? "Pengurus Felda (PF)"
+                            : authRole === "fc"
+                              ? "Field Controller (FC)"
+                              : authRole === "afc"
+                                ? "Asst. Field Controller (AFC)"
+                                : authRole === "fs"
+                                  ? "Field Supervisor (FS)"
+                                  : "Operator"}
                         </p>
                         <p className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">
-                          {authRole === "fc" || authRole === "afc"
+                          {authRole === "pf" || authRole === "fc" || authRole === "afc"
                             ? "Akses Penuh"
                             : "Akses Terhad"}
                         </p>
@@ -285,7 +293,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Toggle Laporan (Dashboard) */}
-      {(authRole === "fc" || authRole === "afc" || authRole === "fs") &&
+      {(authRole === "pf" || authRole === "fc" || authRole === "afc" || authRole === "fs") &&
         activeTab === "dashboard" && (
           <div className="mt-2.5 animate-in fade-in slide-in-from-top-2 duration-500">
             {/* Level 1: Jenis Laporan (Pill Style) - Scrollable */}

@@ -52,7 +52,8 @@ export const DashboardTab = (props: any) => {
     <>
 {/* TAB 2: DASHBOARD (Merged Summary + Analytics) */}
             {activeTab === "dashboard" &&
-              (authRole === "fc" ||
+              (authRole === "pf" ||
+                authRole === "fc" ||
                 authRole === "afc" ||
                 authRole === "fs") && (
                 <div
