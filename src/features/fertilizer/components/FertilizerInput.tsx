@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { getPusInfo, calculateProductivity, calculateProgress } from '../helpers';
 import { DailyEntrySchema } from '../types';
+import { queueMutation } from '../../../services/offlineQueue';
 
 export const FertilizerInput: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -41,7 +42,6 @@ export const FertilizerInput: React.FC = () => {
       const res = await fetch('/api/fertilizer/inventory');
       const data = await res.json();
       setInventory(Array.isArray(data) ? data : []);
-      // Initialize with first inventory item if empty
       if (Array.isArray(data) && data.length > 0 && !formData.fertilizer_type) {
         setFormData(prev => ({ ...prev, fertilizer_type: data[0].name }));
       }
@@ -74,7 +74,6 @@ export const FertilizerInput: React.FC = () => {
   const selectedBlokMaster = (masterData || []).find(b => b.blok_code === formData.blok_code);
   const targetBeg = selectedBlokMaster ? selectedBlokMaster[`pus${formData.pus}_beg`] : 0;
   
-  // Calculate cumulative actual for this block and PUS
   const cumulativeActual = (existingEntries || [])
     .filter(e => e.blok_code === formData.blok_code && e.pus === formData.pus)
     .reduce((acc, curr) => acc + curr.total_beg_completed, 0);
@@ -83,13 +82,22 @@ export const FertilizerInput: React.FC = () => {
   const currentProgress = calculateProgress(cumulativeActual, targetBeg);
   const currentProductivity = calculateProductivity(formData.total_beg_completed, formData.workers_count);
 
+  const resetAfterSave = () => {
+    setFormData({
+      ...formData,
+      blok_code: '',
+      workers_count: 0,
+      total_beg_completed: 0,
+      note: ''
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     setMessage(null);
 
     try {
-      // Validate with Zod
       DailyEntrySchema.parse(formData);
 
       const payload = {
@@ -99,28 +107,43 @@ export const FertilizerInput: React.FC = () => {
         target_beg_for_selected_pus: targetBeg
       };
 
-      const res = await fetch('/api/fertilizer/entries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      // Offline-first write policy: once validated, a field transaction must
+      // be preserved locally if the network is unavailable or drops mid-write.
+      if (!navigator.onLine) {
+        await queueMutation({ endpoint: '/api/fertilizer/entries', method: 'POST', body: payload });
+        setMessage({ type: 'success', text: 'Rekod disimpan pada peranti. Akan disegerakkan apabila talian pulih.' });
+        resetAfterSave();
+        return;
+      }
 
-      const result = await res.json();
-
-      if (res.ok) {
-        setMessage({ type: 'success', text: 'Rekod harian berjaya disimpan.' });
-        setFormData({
-          ...formData,
-          blok_code: '',
-          workers_count: 0,
-          total_beg_completed: 0,
-          note: ''
+      try {
+        const res = await fetch('/api/fertilizer/entries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-        fetchEntries();
-      } else if (res.status === 409) {
-        setMessage({ type: 'error', text: result.error });
-      } else {
-        throw new Error(result.error || 'Gagal menyimpan rekod');
+
+        const result = await res.json();
+
+        if (res.ok) {
+          setMessage({ type: 'success', text: 'Rekod harian berjaya disimpan.' });
+          resetAfterSave();
+          fetchEntries();
+        } else if (res.status === 409) {
+          setMessage({ type: 'error', text: result.error });
+        } else {
+          throw new Error(result.error || 'Gagal menyimpan rekod');
+        }
+      } catch (error) {
+        // Only network/transport failures are moved to the outbox. Validation
+        // and business-rule HTTP errors must remain visible to the user.
+        if (error instanceof TypeError || !navigator.onLine) {
+          await queueMutation({ endpoint: '/api/fertilizer/entries', method: 'POST', body: payload });
+          setMessage({ type: 'success', text: 'Sambungan terputus. Rekod disimpan pada peranti dan menunggu sync.' });
+          resetAfterSave();
+        } else {
+          throw error;
+        }
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'Ralat semasa menyimpan data' });
@@ -140,24 +163,13 @@ export const FertilizerInput: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5 text-left">
             <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-widest">Tarikh</label>
-            <input 
-              type="date" 
-              value={formData.entry_date}
-              onChange={e => setFormData({...formData, entry_date: e.target.value})}
-              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500/20"
-            />
+            <input type="date" value={formData.entry_date} onChange={e => setFormData({...formData, entry_date: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500/20" />
           </div>
           <div className="space-y-1.5 text-left">
             <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-widest">Blok</label>
-            <select
-              value={formData.blok_code}
-              onChange={e => setFormData({...formData, blok_code: e.target.value})}
-              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500/20"
-            >
+            <select value={formData.blok_code} onChange={e => setFormData({...formData, blok_code: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500/20">
               <option value="">Pilih Blok</option>
-              {(masterData || []).map(b => (
-                <option key={b.blok_code} value={b.blok_code}>Blok {b.blok_code}</option>
-              ))}
+              {(masterData || []).map(b => <option key={b.blok_code} value={b.blok_code}>Blok {b.blok_code}</option>)}
             </select>
           </div>
         </div>
@@ -165,43 +177,15 @@ export const FertilizerInput: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5 text-left">
             <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-widest">PUS</label>
-            <select
-              value={formData.pus}
-              onChange={e => {
-                const newPus = parseInt(e.target.value) as any;
-                const info = getPusInfo(newPus);
-                setFormData({
-                  ...formData, 
-                  pus: newPus,
-                  fertilizer_type: info.fertilizer // Default to PUS config fertilizer
-                });
-              }}
-              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500/20"
-            >
-              <option value={1}>PUS 1</option>
-              <option value={2}>PUS 2</option>
-              <option value={3}>PUS 3</option>
-              <option value={4}>PUS 4</option>
+            <select value={formData.pus} onChange={e => { const newPus = parseInt(e.target.value) as any; const info = getPusInfo(newPus); setFormData({...formData, pus: newPus, fertilizer_type: info.fertilizer}); }} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500/20">
+              <option value={1}>PUS 1</option><option value={2}>PUS 2</option><option value={3}>PUS 3</option><option value={4}>PUS 4</option>
             </select>
           </div>
-           <div className="space-y-1.5 text-left">
+          <div className="space-y-1.5 text-left">
             <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-widest">Jenis Baja / Produk</label>
-            <select
-              value={formData.fertilizer_type}
-              onChange={e => setFormData({...formData, fertilizer_type: e.target.value})}
-              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500/20"
-            >
+            <select value={formData.fertilizer_type} onChange={e => setFormData({...formData, fertilizer_type: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500/20">
               <option value="">Pilih Baja</option>
-              {inventory.length > 0 ? (
-                inventory.map(item => (
-                  <option key={item.id} value={item.name}>{item.name}</option>
-                ))
-              ) : (
-                <>
-                  <option value="COMPACT FELDA 12">COMPACT FELDA 12</option>
-                  <option value="FELDA Organic">FELDA Organic</option>
-                </>
-              )}
+              {inventory.length > 0 ? inventory.map(item => <option key={item.id} value={item.name}>{item.name}</option>) : <><option value="COMPACT FELDA 12">COMPACT FELDA 12</option><option value="FELDA Organic">FELDA Organic</option></>}
             </select>
           </div>
         </div>
@@ -209,35 +193,17 @@ export const FertilizerInput: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5 text-left">
             <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-widest">Bil. Pekerja</label>
-            <input 
-              type="number" 
-              value={formData.workers_count || ''}
-              onChange={e => setFormData({...formData, workers_count: parseInt(e.target.value) || 0})}
-              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white"
-              placeholder="0"
-            />
+            <input type="number" value={formData.workers_count || ''} onChange={e => setFormData({...formData, workers_count: parseInt(e.target.value) || 0})} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white" placeholder="0" />
           </div>
           <div className="space-y-1.5 text-left">
             <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-widest">Beg Siap</label>
-            <input 
-              type="number" 
-              step="0.01"
-              value={formData.total_beg_completed || ''}
-              onChange={e => setFormData({...formData, total_beg_completed: parseFloat(e.target.value) || 0})}
-              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white"
-              placeholder="0.00"
-            />
+            <input type="number" step="0.01" value={formData.total_beg_completed || ''} onChange={e => setFormData({...formData, total_beg_completed: parseFloat(e.target.value) || 0})} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white" placeholder="0.00" />
           </div>
         </div>
 
         <div className="space-y-1.5 text-left">
           <label className="text-[9px] font-black text-slate-400 uppercase ml-2 tracking-widest">Nota Tambahan</label>
-          <textarea 
-            value={formData.note}
-            onChange={e => setFormData({...formData, note: e.target.value})}
-            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white min-h-[80px]"
-            placeholder="Komen kerja (pilihan)..."
-          />
+          <textarea value={formData.note} onChange={e => setFormData({...formData, note: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-black text-slate-800 dark:text-white min-h-[80px]" placeholder="Komen kerja (pilihan)..." />
         </div>
 
         {message && (
@@ -247,33 +213,16 @@ export const FertilizerInput: React.FC = () => {
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={isProcessing}
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black py-5 rounded-3xl shadow-xl shadow-purple-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50"
-        >
+        <button type="submit" disabled={isProcessing} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black py-5 rounded-3xl shadow-xl shadow-purple-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50">
           {isProcessing ? <Loader2 className="animate-spin" size={20} /> : <Plus size={20} />}
           {isProcessing ? 'MEMPROSES...' : 'SIMPAN REKOD BAJA'}
         </button>
 
-        {/* Realtime Summary Card */}
         <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-4">
-          <div className="space-y-0.5">
-            <p className="text-[8px] font-black text-slate-400 uppercase">Target Blok + PUS</p>
-            <p className="text-sm font-black text-slate-800 dark:text-white">{targetBeg} <span className="text-[10px] text-slate-500">BEG</span></p>
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-[8px] font-black text-slate-400 uppercase">Baki Kerja</p>
-            <p className="text-sm font-black text-rose-500">{remainingBeg} <span className="text-[10px] text-rose-300">BEG</span></p>
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-[8px] font-black text-slate-400 uppercase">Produktiviti</p>
-            <p className="text-sm font-black text-emerald-500">{currentProductivity} <span className="text-[10px] text-emerald-300">BEG/PEK</span></p>
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-[8px] font-black text-slate-400 uppercase">Progress Keseluruhan</p>
-            <p className="text-sm font-black text-purple-500">{currentProgress}%</p>
-          </div>
+          <div className="space-y-0.5"><p className="text-[8px] font-black text-slate-400 uppercase">Target Blok + PUS</p><p className="text-sm font-black text-slate-800 dark:text-white">{targetBeg} <span className="text-[10px] text-slate-500">BEG</span></p></div>
+          <div className="space-y-0.5"><p className="text-[8px] font-black text-slate-400 uppercase">Baki Kerja</p><p className="text-sm font-black text-rose-500">{remainingBeg} <span className="text-[10px] text-rose-300">BEG</span></p></div>
+          <div className="space-y-0.5"><p className="text-[8px] font-black text-slate-400 uppercase">Produktiviti</p><p className="text-sm font-black text-emerald-500">{currentProductivity} <span className="text-[10px] text-emerald-300">BEG/PEK</span></p></div>
+          <div className="space-y-0.5"><p className="text-[8px] font-black text-slate-400 uppercase">Progress Keseluruhan</p><p className="text-sm font-black text-purple-500">{currentProgress}%</p></div>
         </div>
       </form>
     </div>
