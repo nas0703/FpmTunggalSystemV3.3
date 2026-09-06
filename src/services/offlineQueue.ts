@@ -64,9 +64,7 @@ async function syncOne(record: OutboxRecord): Promise<'synced' | 'retry' | 'fail
       body: record.body,
     });
 
-    if (response.ok || response.status === 409) {
-      // 409 is accepted here because the server may already have processed
-      // this idempotency key. The server must make that endpoint idempotent.
+    if (response.ok) {
       await deleteOutbox(record.id);
       emitSyncEvent({ type: 'synced', id: record.id });
       return 'synced';
